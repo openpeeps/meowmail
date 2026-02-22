@@ -1,6 +1,7 @@
 <p align="center">
   <img src="https://github.com/openpeeps/meowmail/blob/main/.github/meowmail.png" width="130px" height="130px"><br>
-  A high-performance SMTP server based on <a href="https://github.com/openpeeps/libevent-nim">LibEvent</a>. 👑 Written in Nim language
+  A high-performance SMTP server based on <a href="https://github.com/openpeeps/libevent-nim">LibEvent</a>.<br>
+  👑 Written in Nim language
 </p>
 
 <p align="center">
@@ -14,6 +15,7 @@
 
 ## 😍 Key Features
 - [x] High-performance SMTP server based on LibEvent
+- [ ] ...
 - [x] Written in Nim language
 
 ## Examples
