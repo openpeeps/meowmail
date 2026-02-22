@@ -33,7 +33,7 @@ jobs:
           sudo ldconfig
 
       - run: |
-          mkdir tests/certs
+          mkdir -p tests/certs
           cat > tests/certs/openssl-smtp.cnf <<'EOF' 
           [ req ]
           default_bits       = 2048
@@ -68,5 +68,5 @@ jobs:
             -extensions v3_req
 
       - run: nimble install -Y
-      - run: nim c -r src/${{ github.event.repository.name }}.nim
+      - run: nim c src/${{ github.event.repository.name }}.nim
       - run: nimble test
