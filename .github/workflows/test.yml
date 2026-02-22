@@ -33,7 +33,7 @@ jobs:
           sudo ldconfig
 
       - run: |
-          mkidr tests/certs
+          mkdir tests/certs
           cat > tests/certs/openssl-smtp.cnf <<'EOF' 
           [ req ]
           default_bits       = 2048
