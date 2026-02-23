@@ -1,6 +1,6 @@
 nimTitle	mxprovider	meowmail/mxprovider.html	module meowmail/mxprovider		0
-nim	MXHost	meowmail/mxprovider.html#MXHost	object MXHost		8
-nim	MXProviderConfig	meowmail/mxprovider.html#MXProviderConfig	object MXProviderConfig		15
-nim	initMXProviderConfig	meowmail/mxprovider.html#initMXProviderConfig,string,int,int,bool,int,bool	proc initMXProviderConfig(heloName: string; connectTimeoutMs: int = 7000;\n                     commandTimeoutMs: int = 10000;\n                     requireStartTls: bool = false;\n                     maxMxHostsPerDomain: int = 5; debug: bool = false): MXProviderConfig		33
-nim	resolveMxHosts	meowmail/mxprovider.html#resolveMxHosts,string,int	proc resolveMxHosts(domain: string; maxHosts = 5): seq[MXHost]		85
-nim	newMXProvider	meowmail/mxprovider.html#newMXProvider	proc newMXProvider(cfg = MXProviderConfig()): DeliveryProvider		436
+nim	MXHost	meowmail/mxprovider.html#MXHost	object MXHost		13
+nim	MXProviderConfig	meowmail/mxprovider.html#MXProviderConfig	object MXProviderConfig		20
+nim	initMXProviderConfig	meowmail/mxprovider.html#initMXProviderConfig,string,int,int,bool,int,bool	proc initMXProviderConfig(heloName: string; connectTimeoutMs: int = 7000;\n                     commandTimeoutMs: int = 10000;\n                     requireStartTls: bool = false;\n                     maxMxHostsPerDomain: int = 5; debug: bool = false): MXProviderConfig		38
+nim	resolveMxHosts	meowmail/mxprovider.html#resolveMxHosts,string,int	proc resolveMxHosts(domain: string; maxHosts = 5): seq[MXHost]		90
+nim	newMXProvider	meowmail/mxprovider.html#newMXProvider	proc newMXProvider(cfg = MXProviderConfig()): DeliveryProvider		441
