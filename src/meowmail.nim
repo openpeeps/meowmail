@@ -5,7 +5,7 @@
 #          https://github.com/openpeeps/meowmail
 
 from std/net import Port, `$`
-import ./meowmail/[smtpserver, smtpauth, imapserver, socksubmission]
+import ./meowmail/[smtpserver, smtpauth, imapserver]
 
 when isMainModule:
   # This is a simple example of how to start the MeowMail server with a
@@ -14,15 +14,13 @@ when isMainModule:
   
   let certs = some((absolutePath("tests/certs/smtp-cert.pem"), absolutePath("tests/certs/smtp-key.pem")))
   var smtpServerInstance = newSMTPServer(
-    port = Port(2525),
-    someTlsCerts = certs,
-    enable587 = false,
-    enable465 = false,
-    enableMxDelivery = true,
-    mxConfig = initMXProviderConfig(
-      heloName = "mail.yourdomain.tld",
-      requireStartTls = false,
-      debug = true
+    settings = SMTPSettings(
+      certifications: certs,
+      mxConfig: initMXProviderConfig(
+        heloName = "mail.yourdomain.tld",
+        requireStartTls = false,
+        debug = true
+      )
     )
   )
 
@@ -50,20 +48,8 @@ when isMainModule:
   # before starting the submission server
   sleep(100)
 
-  proc initSubmissionServer(args: (ptr SMTPServer, Port)) =
-    let (server, port) = args
-    echo "Starting submission socket server on port ", port
-    server[].startSubmissionSocketServer(port)
-
-  # create thread for submission socket server
-  createThread(thr[1], initSubmissionServer,
-                (addr(smtpServerInstance), Port(587)))
-
-  # give the submission server a moment to start up
-  sleep(100)
-
   # create thread for imap server
-  proc initImapServer(port: Port = Port(143)) =
+  proc initImapServer(port: Port) =
     echo "Starting IMAP server on port ", port
     let imapServerInstance = newIMAPServer(port)
     imapServerInstance.start()

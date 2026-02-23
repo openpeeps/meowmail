@@ -52,7 +52,6 @@ proc initMXProviderConfig*(
     commandTimeoutMs: commandTimeoutMs,
     requireStartTls: requireStartTls,
     maxMxHostsPerDomain: maxMxHostsPerDomain
-
   )
 
 proc extractRcptDomain(rcpt: string): string =

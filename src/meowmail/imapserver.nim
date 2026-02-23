@@ -77,15 +77,18 @@ proc checkAuth(server: SMTPServer, username,
     return decision == authOk
 
 proc imapWrite(bev: ptr bufferevent, s: string) =
-  # Write a string to the client, followed by CRLF. This is a helper for sending IMAP responses
+  # Write a string to the client, followed by CRLF. This is a
+  # helper for sending IMAP responses
   discard bufferevent_write(bev, s.cstring, s.len.csize_t)
 
 proc imapUntagged(bev: ptr bufferevent, s: string) =
-  # Send an untagged response to the client (starts with "*"). This is a helper for sending IMAP responses
+  # Send an untagged response to the client (starts with "*").
+  # This is a helper for sending IMAP responses
   imapWrite(bev, "* " & s & "\r\n")
 
 proc imapTagged(bev: ptr bufferevent, tag, status, text: string) =
-  # Send a tagged response to the client (starts with the command tag). This is a helper for sending IMAP responses
+  # Send a tagged response to the client (starts with the command tag).
+  # This is a helper for sending IMAP responses
   imapWrite(bev, tag & " " & status & " " & text & "\r\n")
 
 proc closeSession(bev: ptr bufferevent) =
