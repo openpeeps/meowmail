@@ -1,3 +1,8 @@
+# MeowMail - A high-performance SMTP based on LibEvent
+#
+# (c) 2026 George Lemon | MIT License
+#          Made by Humans from OpenPeeps
+#          https://github.com/openpeeps/meowmail
 import std/[strutils, sequtils, osproc, algorithm]
 from std/nativesockets import Domain
 
@@ -434,6 +439,12 @@ proc deliverToDomain(req: DeliveryRequest, domain: string,
   ddTempFail
 
 proc newMXProvider*(cfg = MXProviderConfig()): DeliveryProvider =
+  ## Creates a new MX delivery provider with the specified configuration. The returned
+  ## provider will attempt to deliver messages directly to recipient domains by resolving
+  ## their MX records and performing SMTP transactions.
+  ## 
+  ## This provider is suitable for production use
+  ## but can also be used for testing with local domains and custom MX records
   result = proc(req: DeliveryRequest): DeliveryDecision {.gcsafe.} =
     if req.rcptTo.len == 0:
       return ddPermFail

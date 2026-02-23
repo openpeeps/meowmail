@@ -6,8 +6,9 @@ when defined(macosx):
   --passL:"-lz"
   --passC:"-I /opt/local/include"
 elif defined(linux):
+  --passL:"-levent"
   # --passL:"/usr/lib/x86_64-linux-gnu/libevent_openssl.a"
-  --passL:"/usr/local/lib/libevent.a"
+  # --passL:"/usr/local/lib/libevent.a"
   # --passL:"/usr/lib/x86_64-linux-gnu/libssl.so"
   # --passL:"/usr/lib/x86_64-linux-gnu/libcrypto.so"
   # --passL:"-lz"
