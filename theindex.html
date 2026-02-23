@@ -25,7 +25,7 @@
   <div class="document" id="documentId">
     <div class="container">
       <h1 class="title">Index</h1>
-      Modules: <a href="index.html">meowmail</a>, <a href="meowmail/imapserver.html">meowmail/imapserver</a>, <a href="meowmail/mxprovider.html">meowmail/mxprovider</a>, <a href="meowmail/smtpauth.html">meowmail/smtpauth</a>, <a href="meowmail/smtpdelivery.html">meowmail/smtpdelivery</a>, <a href="meowmail/smtpserver.html">meowmail/smtpserver</a>, <a href="meowmail/socksubmission.html">meowmail/socksubmission</a>.<br/><p /><h2>API symbols</h2>
+      Modules: <a href="index.html">meowmail</a>, <a href="meowmail/imapserver.html">meowmail/imapserver</a>, <a href="meowmail/mxprovider.html">meowmail/mxprovider</a>, <a href="meowmail/smtpauth.html">meowmail/smtpauth</a>, <a href="meowmail/smtpdelivery.html">meowmail/smtpdelivery</a>, <a href="meowmail/smtpserver.html">meowmail/smtpserver</a>.<br/><p /><h2>API symbols</h2>
 <dl><dt><a name="apLoginPass" href="#apLoginPass"><span>apLoginPass:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="smtpauth: AuthProgress.apLoginPass" href="meowmail/smtpauth.html#apLoginPass">smtpauth: AuthProgress.apLoginPass</a></li>
@@ -37,20 +37,10 @@
 <dt><a name="apNone" href="#apNone"><span>apNone:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="smtpauth: AuthProgress.apNone" href="meowmail/smtpauth.html#apNone">smtpauth: AuthProgress.apNone</a></li>
-          <li><a class="reference external"
-          data-doc-search-tag="socksubmission: AuthPhase.apNone" href="meowmail/socksubmission.html#apNone">socksubmission: AuthPhase.apNone</a></li>
-          </ul></dd>
-<dt><a name="apPass" href="#apPass"><span>apPass:</span></a></dt><dd><ul class="simple">
-<li><a class="reference external"
-          data-doc-search-tag="socksubmission: AuthPhase.apPass" href="meowmail/socksubmission.html#apPass">socksubmission: AuthPhase.apPass</a></li>
           </ul></dd>
 <dt><a name="apPlain" href="#apPlain"><span>apPlain:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="smtpauth: AuthProgress.apPlain" href="meowmail/smtpauth.html#apPlain">smtpauth: AuthProgress.apPlain</a></li>
-          </ul></dd>
-<dt><a name="apUser" href="#apUser"><span>apUser:</span></a></dt><dd><ul class="simple">
-<li><a class="reference external"
-          data-doc-search-tag="socksubmission: AuthPhase.apUser" href="meowmail/socksubmission.html#apUser">socksubmission: AuthPhase.apUser</a></li>
           </ul></dd>
 <dt><a name="AUTH" href="#AUTH"><span>AUTH:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -72,10 +62,6 @@
 <li><a class="reference external"
           data-doc-search-tag="smtpauth: AuthDecision.authOk" href="meowmail/smtpauth.html#authOk">smtpauth: AuthDecision.authOk</a></li>
           </ul></dd>
-<dt><a name="AuthPhase" href="#AuthPhase"><span>AuthPhase:</span></a></dt><dd><ul class="simple">
-<li><a class="reference external"
-          data-doc-search-tag="socksubmission: enum AuthPhase" href="meowmail/socksubmission.html#AuthPhase">socksubmission: enum AuthPhase</a></li>
-          </ul></dd>
 <dt><a name="AuthProgress" href="#AuthProgress"><span>AuthProgress:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="smtpauth: enum AuthProgress" href="meowmail/smtpauth.html#AuthProgress">smtpauth: enum AuthProgress</a></li>
@@ -87,6 +73,14 @@
 <dt><a name="AuthRequest" href="#AuthRequest"><span>AuthRequest:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="smtpauth: object AuthRequest" href="meowmail/smtpauth.html#AuthRequest">smtpauth: object AuthRequest</a></li>
+          </ul></dd>
+<dt><a name="bindListener465" href="#bindListener465"><span>bindListener465:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="smtpserver: proc bindListener465(server: SMTPServer; port: Port = Port(465))" href="meowmail/smtpserver.html#bindListener465%2CSMTPServer%2CPort">smtpserver: proc bindListener465(server: SMTPServer; port: Port = Port(465))</a></li>
+          </ul></dd>
+<dt><a name="bindListener587" href="#bindListener587"><span>bindListener587:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="smtpserver: proc bindListener587(server: SMTPServer; port: Port = Port(587))" href="meowmail/smtpserver.html#bindListener587%2CSMTPServer%2CPort">smtpserver: proc bindListener587(server: SMTPServer; port: Port = Port(587))</a></li>
           </ul></dd>
 <dt><a name="cmdCapability" href="#cmdCapability"><span>cmdCapability:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -156,14 +150,6 @@
 <li><a class="reference external"
           data-doc-search-tag="smtpserver: proc enableMxDelivery(server: SMTPServer; cfg = MXProviderConfig())" href="meowmail/smtpserver.html#enableMxDelivery%2CSMTPServer">smtpserver: proc enableMxDelivery(server: SMTPServer; cfg = MXProviderConfig())</a></li>
           </ul></dd>
-<dt><a name="enableSmtps465" href="#enableSmtps465"><span>enableSmtps465:</span></a></dt><dd><ul class="simple">
-<li><a class="reference external"
-          data-doc-search-tag="smtpserver: proc enableSmtps465(server: SMTPServer; port: Port = Port(465))" href="meowmail/smtpserver.html#enableSmtps465%2CSMTPServer%2CPort">smtpserver: proc enableSmtps465(server: SMTPServer; port: Port = Port(465))</a></li>
-          </ul></dd>
-<dt><a name="enableSubmission587" href="#enableSubmission587"><span>enableSubmission587:</span></a></dt><dd><ul class="simple">
-<li><a class="reference external"
-          data-doc-search-tag="smtpserver: proc enableSubmission587(server: SMTPServer; port: Port = Port(587))" href="meowmail/smtpserver.html#enableSubmission587%2CSMTPServer%2CPort">smtpserver: proc enableSubmission587(server: SMTPServer; port: Port = Port(587))</a></li>
-          </ul></dd>
 <dt><a name="EXPN" href="#EXPN"><span>EXPN:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="smtpserver: SMTPCommand.EXPN" href="meowmail/smtpserver.html#EXPN">smtpserver: SMTPCommand.EXPN</a></li>
@@ -171,6 +157,10 @@
 <dt><a name="HELO" href="#HELO"><span>HELO:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="smtpserver: SMTPCommand.HELO" href="meowmail/smtpserver.html#HELO">smtpserver: SMTPCommand.HELO</a></li>
+          </ul></dd>
+<dt><a name="HELP" href="#HELP"><span>HELP:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="smtpserver: SMTPCommand.HELP" href="meowmail/smtpserver.html#HELP">smtpserver: SMTPCommand.HELP</a></li>
           </ul></dd>
 <dt><a name="IMAPCommand" href="#IMAPCommand"><span>IMAPCommand:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -224,13 +214,7 @@
           </ul></dd>
 <dt><a name="newSMTPServer" href="#newSMTPServer"><span>newSMTPServer:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpserver: proc newSMTPServer(port: Port = Port(2525); enable587, enable465: bool = true;
-    someTlsCerts: Option[(string, string)] = none((string, string));
-              spoolDir = none(string); deliveryProvider: DeliveryProvider = nil;
-              enableMxDelivery = false; mxConfig = MXProviderConfig()): SMTPServer" href="meowmail/smtpserver.html#newSMTPServer%2CPort%2Cbool%2Cbool%2COption%5B%5D%2CDeliveryProvider">smtpserver: proc newSMTPServer(port: Port = Port(2525); enable587, enable465: bool = true;
-    someTlsCerts: Option[(string, string)] = none((string, string));
-              spoolDir = none(string); deliveryProvider: DeliveryProvider = nil;
-              enableMxDelivery = false; mxConfig = MXProviderConfig()): SMTPServer</a></li>
+          data-doc-search-tag="smtpserver: proc newSMTPServer(settings: SMTPSettings): SMTPServer" href="meowmail/smtpserver.html#newSMTPServer%2CSMTPSettings">smtpserver: proc newSMTPServer(settings: SMTPSettings): SMTPServer</a></li>
           </ul></dd>
 <dt><a name="NOOP" href="#NOOP"><span>NOOP:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -302,17 +286,9 @@
           <li><a class="reference external"
           data-doc-search-tag="smtpserver: proc start(server: SMTPServer)" href="meowmail/smtpserver.html#start%2CSMTPServer">smtpserver: proc start(server: SMTPServer)</a></li>
           </ul></dd>
-<dt><a name="startSubmissionSocketServer" href="#startSubmissionSocketServer"><span>startSubmissionSocketServer:</span></a></dt><dd><ul class="simple">
-<li><a class="reference external"
-          data-doc-search-tag="socksubmission: proc startSubmissionSocketServer(server: SMTPServer; port = Port(587))" href="meowmail/socksubmission.html#startSubmissionSocketServer%2CSMTPServer">socksubmission: proc startSubmissionSocketServer(server: SMTPServer; port = Port(587))</a></li>
-          </ul></dd>
 <dt><a name="STARTTLS" href="#STARTTLS"><span>STARTTLS:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="smtpserver: SMTPCommand.STARTTLS" href="meowmail/smtpserver.html#STARTTLS">smtpserver: SMTPCommand.STARTTLS</a></li>
-          </ul></dd>
-<dt><a name="SubmissionState" href="#SubmissionState"><span>SubmissionState:</span></a></dt><dd><ul class="simple">
-<li><a class="reference external"
-          data-doc-search-tag="socksubmission: object SubmissionState" href="meowmail/socksubmission.html#SubmissionState">socksubmission: object SubmissionState</a></li>
           </ul></dd>
 <dt><a name="VRFY" href="#VRFY"><span>VRFY:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -322,7 +298,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-02-23 17:56:27 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-02-23 23:01:37 UTC</small>
       </div>
     </div>
   </div>

@@ -62,16 +62,23 @@
   preference*: int           ## The preference value of the MX host, where lower values indicate higher priority.
   host*: string              ## The hostname of the MX server to which mail should be delivered.">MXHost</a></li>
 <li><a class="reference" href="#MXProviderConfig" title="MXProviderConfig = object
-  heloName*: string = &quot;localhost&quot; ## The HELO/EHLO name to use when connecting to MX hosts. This can be configured
-                                  ## to improve compatibility with certain mail servers that expect a valid domain name.
-  connectTimeoutMs*: int = 7000 ## The timeout in milliseconds for establishing a connection to an MX host. If the connection
-  commandTimeoutMs*: int = 10000 ## The timeout in milliseconds for waiting for responses to SMTP commands during the delivery process.
-  requireStartTls*: bool ## Whether to require STARTTLS support from MX hosts. If set to true, the provider will only attempt
-                         ## delivery to MX hosts that advertise STARTTLS in their EHLO response. This can improve security
-                         ## but may reduce deliverability if some recipient domains do not support STARTTLS.
-  maxMxHostsPerDomain*: int = 5 ## The maximum number of MX hosts to consider for each recipient domain. This limits the number of
-                                ## connection attempts and can help avoid long delays when a domain has many MX records.
-  debug*: bool = false       ## Whether to enable debug logging for the MX provider. When enabled, the provider will log detailed">MXProviderConfig</a></li>
+  heloName*: string = &quot;localhost&quot; ## The HELO/EHLO name to use when connecting to MX hosts.
+                                  ## This can be configured to improve compatibility with
+                                  ## certain mail servers that expect a valid domain name
+  connectTimeoutMs*: int = 7000 ## The timeout in milliseconds for establishing a connection
+                                ## to an MX host. If the connection
+  commandTimeoutMs*: int = 10000 ## The timeout in milliseconds for waiting for responses
+                                 ## to SMTP commands during the delivery process.
+  requireStartTls*: bool ## Whether to require STARTTLS support from MX hosts. If set to true,
+                         ## the provider will only attempt delivery to MX hosts that advertise
+                         ## STARTTLS in their EHLO response. This can improve security
+                         ## but may reduce deliverability if some recipient domains do
+                         ## not support STARTTLS.
+  maxMxHostsPerDomain*: int = 5 ## The maximum number of MX hosts to consider for each
+                                ## recipient domain. This limits the number of connection attempts
+                                ## and can help avoid long delays when a domain has many MX records.
+  debug*: bool = false ## Whether to enable debug logging for the MX provider.
+                       ## When enabled, the provider will log detailed">MXProviderConfig</a></li>
 
     </ul>
   </details>
@@ -132,16 +139,23 @@
 </div>
 <div id="MXProviderConfig">
   <dt><pre><a href="mxprovider.html#MXProviderConfig"><span class="Identifier">MXProviderConfig</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
-  <span class="Identifier">heloName</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">string</span> <span class="Other">=</span> <span class="StringLit">&quot;localhost&quot;</span> <span class="Comment">## The HELO/EHLO name to use when connecting to MX hosts. This can be configured</span>
-                                  <span class="Comment">## to improve compatibility with certain mail servers that expect a valid domain name.</span>
-  <span class="Identifier">connectTimeoutMs</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span> <span class="Other">=</span> <span class="DecNumber">7000</span> <span class="Comment">## The timeout in milliseconds for establishing a connection to an MX host. If the connection</span>
-  <span class="Identifier">commandTimeoutMs</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span> <span class="Other">=</span> <span class="DecNumber">10000</span> <span class="Comment">## The timeout in milliseconds for waiting for responses to SMTP commands during the delivery process.</span>
-  <span class="Identifier">requireStartTls</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Comment">## Whether to require STARTTLS support from MX hosts. If set to true, the provider will only attempt</span>
-                         <span class="Comment">## delivery to MX hosts that advertise STARTTLS in their EHLO response. This can improve security</span>
-                         <span class="Comment">## but may reduce deliverability if some recipient domains do not support STARTTLS.</span>
-  <span class="Identifier">maxMxHostsPerDomain</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span> <span class="Other">=</span> <span class="DecNumber">5</span> <span class="Comment">## The maximum number of MX hosts to consider for each recipient domain. This limits the number of</span>
-                                <span class="Comment">## connection attempts and can help avoid long delays when a domain has many MX records.</span>
-  <span class="Identifier">debug</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="DecNumber">false</span>       <span class="Comment">## Whether to enable debug logging for the MX provider. When enabled, the provider will log detailed</span></pre></dt>
+  <span class="Identifier">heloName</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">string</span> <span class="Other">=</span> <span class="StringLit">&quot;localhost&quot;</span> <span class="Comment">## The HELO/EHLO name to use when connecting to MX hosts.</span>
+                                  <span class="Comment">## This can be configured to improve compatibility with</span>
+                                  <span class="Comment">## certain mail servers that expect a valid domain name</span>
+  <span class="Identifier">connectTimeoutMs</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span> <span class="Other">=</span> <span class="DecNumber">7000</span> <span class="Comment">## The timeout in milliseconds for establishing a connection</span>
+                                <span class="Comment">## to an MX host. If the connection</span>
+  <span class="Identifier">commandTimeoutMs</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span> <span class="Other">=</span> <span class="DecNumber">10000</span> <span class="Comment">## The timeout in milliseconds for waiting for responses</span>
+                                 <span class="Comment">## to SMTP commands during the delivery process.</span>
+  <span class="Identifier">requireStartTls</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Comment">## Whether to require STARTTLS support from MX hosts. If set to true,</span>
+                         <span class="Comment">## the provider will only attempt delivery to MX hosts that advertise</span>
+                         <span class="Comment">## STARTTLS in their EHLO response. This can improve security</span>
+                         <span class="Comment">## but may reduce deliverability if some recipient domains do</span>
+                         <span class="Comment">## not support STARTTLS.</span>
+  <span class="Identifier">maxMxHostsPerDomain</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span> <span class="Other">=</span> <span class="DecNumber">5</span> <span class="Comment">## The maximum number of MX hosts to consider for each</span>
+                                <span class="Comment">## recipient domain. This limits the number of connection attempts</span>
+                                <span class="Comment">## and can help avoid long delays when a domain has many MX records.</span>
+  <span class="Identifier">debug</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="DecNumber">false</span> <span class="Comment">## Whether to enable debug logging for the MX provider.</span>
+                       <span class="Comment">## When enabled, the provider will log detailed</span></pre></dt>
   <dd>
     
     
@@ -206,7 +220,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-02-23 17:56:27 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-02-23 23:01:37 UTC</small>
       </div>
     </div>
   </div>

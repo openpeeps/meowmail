@@ -8,5 +8,5 @@ nim	cmdSelect	meowmail/imapserver.html#cmdSelect	IMAPCommand.cmdSelect		14
 nim	IMAPCommand	meowmail/imapserver.html#IMAPCommand	enum IMAPCommand		14
 nim	IMAPSession	meowmail/imapserver.html#IMAPSession	type IMAPSession		22
 nim	IMAPServer	meowmail/imapserver.html#IMAPServer	type IMAPServer		38
-nim	newIMAPServer	meowmail/imapserver.html#newIMAPServer,Port	proc newIMAPServer(port: Port = Port(143)): IMAPServer		225
-nim	start	meowmail/imapserver.html#start,IMAPServer	proc start(server: IMAPServer)		253
+nim	newIMAPServer	meowmail/imapserver.html#newIMAPServer,Port	proc newIMAPServer(port: Port = Port(143)): IMAPServer		228
+nim	start	meowmail/imapserver.html#start,IMAPServer	proc start(server: IMAPServer)		256
