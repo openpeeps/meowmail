@@ -1,0 +1,12 @@
+nimTitle	imapserver	meowmail/imapserver.html	module meowmail/imapserver		0
+nim	cmdUnknown	meowmail/imapserver.html#cmdUnknown	IMAPCommand.cmdUnknown		14
+nim	cmdCapability	meowmail/imapserver.html#cmdCapability	IMAPCommand.cmdCapability		14
+nim	cmdNoop	meowmail/imapserver.html#cmdNoop	IMAPCommand.cmdNoop		14
+nim	cmdLogout	meowmail/imapserver.html#cmdLogout	IMAPCommand.cmdLogout		14
+nim	cmdLogin	meowmail/imapserver.html#cmdLogin	IMAPCommand.cmdLogin		14
+nim	cmdSelect	meowmail/imapserver.html#cmdSelect	IMAPCommand.cmdSelect		14
+nim	IMAPCommand	meowmail/imapserver.html#IMAPCommand	enum IMAPCommand		14
+nim	IMAPSession	meowmail/imapserver.html#IMAPSession	type IMAPSession		22
+nim	IMAPServer	meowmail/imapserver.html#IMAPServer	type IMAPServer		38
+nim	newIMAPServer	meowmail/imapserver.html#newIMAPServer,Port	proc newIMAPServer(port: Port = Port(143)): IMAPServer		225
+nim	start	meowmail/imapserver.html#start,IMAPServer	proc start(server: IMAPServer)		253

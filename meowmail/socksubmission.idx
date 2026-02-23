@@ -1,0 +1,7 @@
+nimTitle	socksubmission	meowmail/socksubmission.html	module meowmail/socksubmission		0
+nim	apNone	meowmail/socksubmission.html#apNone	AuthPhase.apNone		22
+nim	apUser	meowmail/socksubmission.html#apUser	AuthPhase.apUser		22
+nim	apPass	meowmail/socksubmission.html#apPass	AuthPhase.apPass		22
+nim	AuthPhase	meowmail/socksubmission.html#AuthPhase	enum AuthPhase		22
+nim	SubmissionState	meowmail/socksubmission.html#SubmissionState	object SubmissionState		26
+nim	startSubmissionSocketServer	meowmail/socksubmission.html#startSubmissionSocketServer,SMTPServer	proc startSubmissionSocketServer(server: SMTPServer; port = Port(587))		280

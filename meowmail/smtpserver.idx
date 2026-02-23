@@ -1,34 +1,25 @@
 nimTitle	smtpserver	meowmail/smtpserver.html	module meowmail/smtpserver		0
-nim	HELO	meowmail/smtpserver.html#HELO	SMTPCommand.HELO		20
-nim	EHLO	meowmail/smtpserver.html#EHLO	SMTPCommand.EHLO		20
-nim	STARTTLS	meowmail/smtpserver.html#STARTTLS	SMTPCommand.STARTTLS		20
-nim	AUTH	meowmail/smtpserver.html#AUTH	SMTPCommand.AUTH		20
-nim	MAIL	meowmail/smtpserver.html#MAIL	SMTPCommand.MAIL		20
-nim	RCPT	meowmail/smtpserver.html#RCPT	SMTPCommand.RCPT		20
-nim	DATA	meowmail/smtpserver.html#DATA	SMTPCommand.DATA		20
-nim	QUIT	meowmail/smtpserver.html#QUIT	SMTPCommand.QUIT		20
-nim	RSET	meowmail/smtpserver.html#RSET	SMTPCommand.RSET		20
-nim	NOOP	meowmail/smtpserver.html#NOOP	SMTPCommand.NOOP		20
-nim	VRFY	meowmail/smtpserver.html#VRFY	SMTPCommand.VRFY		20
-nim	EXPN	meowmail/smtpserver.html#EXPN	SMTPCommand.EXPN		20
-nim	SMTPCommand	meowmail/smtpserver.html#SMTPCommand	enum SMTPCommand		20
-nim	apNone	meowmail/smtpserver.html#apNone	AuthProgress.apNone		23
-nim	apPlain	meowmail/smtpserver.html#apPlain	AuthProgress.apPlain		23
-nim	apLoginUser	meowmail/smtpserver.html#apLoginUser	AuthProgress.apLoginUser		23
-nim	apLoginPass	meowmail/smtpserver.html#apLoginPass	AuthProgress.apLoginPass		23
-nim	AuthProgress	meowmail/smtpserver.html#AuthProgress	enum AuthProgress		23
-nim	adInvalid	meowmail/smtpserver.html#adInvalid	AuthDecision.adInvalid		26
-nim	adOk	meowmail/smtpserver.html#adOk	AuthDecision.adOk		26
-nim	adTempFail	meowmail/smtpserver.html#adTempFail	AuthDecision.adTempFail		26
-nim	AuthDecision	meowmail/smtpserver.html#AuthDecision	enum AuthDecision		26
-nim	AuthRequest	meowmail/smtpserver.html#AuthRequest	object AuthRequest		29
-nim	AuthProvider	meowmail/smtpserver.html#AuthProvider	type AuthProvider		42
-nim	SMTPSession	meowmail/smtpserver.html#SMTPSession	type SMTPSession		45
-nim	SMTPServer	meowmail/smtpserver.html#SMTPServer	type SMTPServer		72
-nim	newHTTPAuthProvider	meowmail/smtpserver.html#newHTTPAuthProvider,string,string,int	proc newHTTPAuthProvider(url: string; bearerToken = ""; timeoutMs = 1200): AuthProvider		172
-nim	enableSubmission587	meowmail/smtpserver.html#enableSubmission587,SMTPServer,Port	proc enableSubmission587(server: SMTPServer; port: Port = Port(587))		644
-nim	enableSmtps465	meowmail/smtpserver.html#enableSmtps465,SMTPServer,Port	proc enableSmtps465(server: SMTPServer; port: Port = Port(465))		650
-nim	opensslLastError	meowmail/smtpserver.html#opensslLastError	proc opensslLastError(): string		656
-nim	setupTlsCtx	meowmail/smtpserver.html#setupTlsCtx,SMTPServer,string,string	proc setupTlsCtx(server: SMTPServer; certPath, keyPath: string): bool		664
-nim	newSMTPServer	meowmail/smtpserver.html#newSMTPServer,Port,bool,bool,Option[]	proc newSMTPServer(port: Port = Port(2525); enable587, enable465: bool = true;\n              someTlsCerts: Option[(string, string)]): SMTPServer		704
-nim	start	meowmail/smtpserver.html#start,SMTPServer	proc start(server: SMTPServer)		761
+nim	smtpUnknownCmd	meowmail/smtpserver.html#smtpUnknownCmd	SMTPCommand.smtpUnknownCmd		23
+nim	HELO	meowmail/smtpserver.html#HELO	SMTPCommand.HELO		23
+nim	EHLO	meowmail/smtpserver.html#EHLO	SMTPCommand.EHLO		23
+nim	STARTTLS	meowmail/smtpserver.html#STARTTLS	SMTPCommand.STARTTLS		23
+nim	AUTH	meowmail/smtpserver.html#AUTH	SMTPCommand.AUTH		23
+nim	MAIL	meowmail/smtpserver.html#MAIL	SMTPCommand.MAIL		23
+nim	RCPT	meowmail/smtpserver.html#RCPT	SMTPCommand.RCPT		23
+nim	DATA	meowmail/smtpserver.html#DATA	SMTPCommand.DATA		23
+nim	QUIT	meowmail/smtpserver.html#QUIT	SMTPCommand.QUIT		23
+nim	RSET	meowmail/smtpserver.html#RSET	SMTPCommand.RSET		23
+nim	NOOP	meowmail/smtpserver.html#NOOP	SMTPCommand.NOOP		23
+nim	VRFY	meowmail/smtpserver.html#VRFY	SMTPCommand.VRFY		23
+nim	EXPN	meowmail/smtpserver.html#EXPN	SMTPCommand.EXPN		23
+nim	SMTPCommand	meowmail/smtpserver.html#SMTPCommand	enum SMTPCommand		23
+nim	SMTPSession	meowmail/smtpserver.html#SMTPSession	type SMTPSession		40
+nim	SMTPSettings	meowmail/smtpserver.html#SMTPSettings	object SMTPSettings		67
+nim	SMTPServer	meowmail/smtpserver.html#SMTPServer	type SMTPServer		78
+nim	enableSubmission587	meowmail/smtpserver.html#enableSubmission587,SMTPServer,Port	proc enableSubmission587(server: SMTPServer; port: Port = Port(587))		634
+nim	enableSmtps465	meowmail/smtpserver.html#enableSmtps465,SMTPServer,Port	proc enableSmtps465(server: SMTPServer; port: Port = Port(465))		640
+nim	enableMxDelivery	meowmail/smtpserver.html#enableMxDelivery,SMTPServer	proc enableMxDelivery(server: SMTPServer; cfg = MXProviderConfig())		646
+nim	opensslLastError	meowmail/smtpserver.html#opensslLastError	proc opensslLastError(): string		654
+nim	setupTlsCtx	meowmail/smtpserver.html#setupTlsCtx,SMTPServer,string,string	proc setupTlsCtx(server: SMTPServer; certPath, keyPath: string): bool		662
+nim	newSMTPServer	meowmail/smtpserver.html#newSMTPServer,Port,bool,bool,Option[],DeliveryProvider	proc newSMTPServer(port: Port = Port(2525); enable587, enable465: bool = true;\n    someTlsCerts: Option[(string, string)] = none((string, string));\n              spoolDir = none(string); deliveryProvider: DeliveryProvider = nil;\n              enableMxDelivery = false; mxConfig = MXProviderConfig()): SMTPServer		702
+nim	start	meowmail/smtpserver.html#start,SMTPServer	proc start(server: SMTPServer)		780
