@@ -4,13 +4,16 @@
 #          Made by Humans from OpenPeeps
 #          https://github.com/openpeeps/meowmail
 
-import std/[posix, tables, strutils, options,
-            base64, os, httpclient, json]
+import std/[posix, tables, strutils,
+      options, threadpool, base64, os, openssl]
 
 from std/net import Port, `$`
 
 import libevent/bindings/[event, buffer, bufferevent,
-                          bufferevent_ssl, http, listener]
+              #[bufferevent_ssl,]# http, listener]
+
+import ./smtpauth, ./smtpdelivery, ./mxprovider
+export mxprovider
 
 const
   MaxCommandLineLen = 510 # 512 including CRLF
@@ -18,29 +21,21 @@ const
 
 type
   SMTPCommand* = enum
-    HELO, EHLO, STARTTLS, AUTH, MAIL, RCPT, DATA, QUIT, RSET, NOOP, VRFY, EXPN
-
-  AuthProgress* = enum
-    apNone, apPlain, apLoginUser, apLoginPass
-
-  AuthDecision* = enum
-    adInvalid, adOk, adTempFail
-
-  AuthRequest* = object
-    username*: string
-      ## The username provided by the client during authentication.
-    password*: string
-      ## The password provided by the client during authentication.
-    mechanism*: string
-      ## The authentication mechanism being used (e.g., "PLAIN", "LOGIN").
-    remoteIp*: string
-      ## The IP address of the client attempting to authenticate.
-    heloName*: string
-      ## The HELO/EHLO name provided by the client, which may be useful for
-      ## logging or authentication decisions.
-
-  AuthProvider* = proc(req: AuthRequest): AuthDecision {.gcsafe.}
-    ## A callback type for providing authentication decisions. The server will call
+    ## Represents the various SMTP commands that
+    ## the server can process. This is used
+    smtpUnknownCmd,
+    HELO = "HELO",
+    EHLO = "EHLO",
+    STARTTLS = "STARTTLS",
+    AUTH = "AUTH",
+    MAIL = "MAIL",
+    RCPT = "RCPT",
+    DATA = "DATA",
+    QUIT = "QUIT",
+    RSET = "RSET",
+    NOOP = "NOOP",
+    VRFY = "VRFY",
+    EXPN = "EXPN"
 
   SMTPSession* = ref object
     ## Represents the state of an individual SMTP session/connection.
@@ -69,6 +64,17 @@ type
     tlsActive: bool
       # Whether the session has an active TLS connection (if STARTTLS is implemented in the future).
 
+  SMTPSettings* = object
+    ## Configuration settings for the SMTP server, including TLS options,
+    ## authentication requirements, and delivery configuration.
+    certifications*: Option[(string, string)]
+      # Optional tuple of (certFile, keyFile) for TLS configuration.
+    spoolDirectory*: string
+      # Directory path for spooling messages that cannot be immediately delivered.
+    enableMxDelivery*: bool
+      # Whether to enable direct MX delivery of incoming messages.
+    mxConfig*: MXProviderConfig
+
   SMTPServer* = ref object
     ## Represents the SMTP server instance, including its configuration and state.
     base*: ptr event_base
@@ -79,7 +85,7 @@ type
       ## Optional listener for port 587 (submission), if implemented in the future.
     listener465*: ptr evconnlistener
       ## Optional listener for port 465 (smtps), if implemented in the future.
-    tlsCtx*: SSL_CTX
+    tlsCtx*: SslCtx
       ## Optional TLS context for handling STARTTLS or
       ## implicit TLS connections in the future.
     enableStartTls*: bool
@@ -100,6 +106,8 @@ type
       ## An optional callback for handling authentication
       ## requests. If set, this will be used instead
       ## of `authUsers` for authentication decisions.
+    delivery*: SMTPDelivery
+      ## The SMTPDelivery configuration for handling message deliveries.
 
 var
   sessions {.threadvar.}: Table[uint, SMTPSession]
@@ -149,6 +157,8 @@ proc smtpHostname(): string =
 
 proc smtpReplyEhloCapabilities(bev: ptr bufferevent, hostname: string,
                               s: SMTPSession, server: SMTPServer) =
+  # Send the EHLO reply with the server's capabilities. This includes
+  # standard capabilities like PIPELINING and 8BITMIME,
   smtpReplyMulti(bev, 250, hostname & " Hello", true)
   smtpReplyMulti(bev, 250, "PIPELINING", true)
   smtpReplyMulti(bev, 250, "8BITMIME", true)
@@ -157,7 +167,7 @@ proc smtpReplyEhloCapabilities(bev: ptr bufferevent, hostname: string,
     smtpReplyMulti(bev, 250, "STARTTLS", true)
 
   # Common policy: AUTH only after TLS
-  if supportsAuth(server) and s.tlsActive:
+  if supportsAuth(server):
     smtpReplyMulti(bev, 250, "AUTH PLAIN LOGIN", true)
 
   smtpReplyMulti(bev, 250, "HELP", false)
@@ -168,48 +178,6 @@ proc decodeB64Safe(encoded: string, decoded: var string): bool =
     result = true
   except CatchableError:
     result = false
-
-proc newHTTPAuthProvider*(url: string, bearerToken = "", timeoutMs = 1200): AuthProvider =
-  ## POST url with JSON: {"username":"...","password":"...","mechanism":"...","remoteIp":"...","heloName":"..."}
-  ## Expected:
-  ##   200 + {"ok":true} => adOk
-  ##   401/403           => adInvalid
-  ##   timeout/5xx/etc   => adTempFail
-  var client = newHttpClient(timeout = timeoutMs)
-  result = proc(req: AuthRequest): AuthDecision {.gcsafe.} =
-    try:
-      var headers = newHttpHeaders()
-      headers["Content-Type"] = "application/json"
-      if bearerToken.len > 0:
-        headers["Authorization"] = "Bearer " & bearerToken
-
-      let payload = %*{
-        "username": req.username,
-        "password": req.password,
-        "mechanism": req.mechanism,
-        "remoteIp": req.remoteIp,
-        "heloName": req.heloName
-      }
-
-      let resp = client.request(url, httpMethod = HttpPost, headers = headers, body = $payload)
-      let code = resp.code.int
-
-      if code == 200:
-        try:
-          let node = parseJson(resp.body)
-          if node.kind == JObject and node.hasKey("ok") and node["ok"].getBool(false):
-            return adOk
-          return adInvalid
-        except CatchableError:
-          return adTempFail
-      elif code == 401 or code == 403:
-        return adInvalid
-      elif code >= 500:
-        return adTempFail
-      else:
-        return adInvalid
-    except CatchableError:
-      return adTempFail
 
 proc validateAuth(server: SMTPServer, s: SMTPSession, user, pass, mechanism: string): AuthDecision =
   let req = AuthRequest(
@@ -222,8 +190,8 @@ proc validateAuth(server: SMTPServer, s: SMTPSession, user, pass, mechanism: str
 
   if server.authProvider != nil: return server.authProvider(req)
   if server.authUsers.hasKey(user) and server.authUsers[user] == pass:
-    return adOk
-  adInvalid
+    return authOk
+  authInvalid
 
 proc smtpReplyAndClose(bev: ptr bufferevent, code: int, msg: string) =
   let k = bevKey(bev)
@@ -241,12 +209,12 @@ proc resetTxn(s: SMTPSession) =
 
 proc applyAuthDecision(bev: ptr bufferevent, s: SMTPSession, d: AuthDecision) =
   case d
-  of adOk:
+  of authOk:
     s.authenticated = true
     smtpReply(bev, 235, "Authentication successful")
-  of adInvalid:
+  of authInvalid:
     smtpReply(bev, 535, "Authentication credentials invalid")
-  of adTempFail:
+  of authFailure:
     smtpReply(bev, 454, "Temporary authentication failure")
 
 proc handleAuthFlow(bev: ptr bufferevent, server: SMTPServer, s: SMTPSession, line: string): bool =
@@ -319,71 +287,82 @@ proc onSMTPWrite(bev: ptr bufferevent, ctx: pointer) {.cdecl.} =
     if outBuf == nil or evbuffer_get_length(outBuf) == 0:
       closeSession(bev)
 
-proc handleStartTls(bev: ptr bufferevent, server: SMTPServer, s: SMTPSession) =
-  if s.tlsActive:
-    smtpReply(bev, 503, "TLS already active")
-    return
+# proc handleStartTls(bev: ptr bufferevent, server: SMTPServer, s: SMTPSession) =
+#   if s.tlsActive:
+#     smtpReply(bev, 503, "TLS already active")
+#     return
+#   if not server.enableStartTls or server.tlsCtx == nil:
+#     smtpReply(bev, 454, "TLS not available")
+#     return
 
-  if not server.enableStartTls or server.tlsCtx == nil:
-    smtpReply(bev, 454, "TLS not available")
-    return
+#   smtpReply(bev, 220, "Ready to start TLS")
+#   discard bufferevent_flush(bev, EV_WRITE, BEV_FLUSH)
 
-  when declared(SSL_new) and declared(bufferevent_openssl_filter_new):
-    # Announce upgrade first (RFC 3207)
-    smtpReply(bev, 220, "Ready to start TLS")
-    discard bufferevent_flush(bev, EV_WRITE, BEV_FLUSH)
+#   # Drop any pre-TLS pipelined bytes
+#   s.inbuf.setLen(0)
+#   let inBuf = bufferevent_get_input(bev)
+#   if inBuf != nil:
+#     discard evbuffer_drain(inBuf, evbuffer_get_length(inBuf))
 
-    # Drop any pre-TLS pipelined bytes
-    s.inbuf.setLen(0)
-    let inBuf = bufferevent_get_input(bev)
-    if inBuf != nil:
-      discard evbuffer_drain(inBuf, evbuffer_get_length(inBuf))
+#   let ssl = SSL_new(server.tlsCtx)
+#   if ssl == nil:
+#     smtpReplyAndClose(bev, 454, "TLS initialization failed")
+#     return
 
-    let ssl = SSL_new(server.tlsCtx)
-    if ssl == nil:
-      smtpReplyAndClose(bev, 454, "TLS initialization failed")
-      return
+#   let tlsBev = bufferevent_openssl_filter_new(
+#     server.base,
+#     bev, # underlying plaintext bufferevent
+#     ssl,
+#     BUFFEREVENT_SSL_ACCEPTING,
+#     (BEV_OPT_CLOSE_ON_FREE or BEV_OPT_DEFER_CALLBACKS).cint
+#   )
 
-    let tlsBev = bufferevent_openssl_filter_new(
-      server.base,
-      bev, # underlying plaintext bufferevent
-      ssl,
-      BUFFEREVENT_SSL_ACCEPTING,
-      (BEV_OPT_CLOSE_ON_FREE or BEV_OPT_DEFER_CALLBACKS).cint
-    )
+#   if tlsBev == nil:
+#     when declared(SSL_free):
+#       SSL_free(ssl)
+#     smtpReplyAndClose(bev, 454, "TLS initialization failed")
+#     return
 
-    if tlsBev == nil:
-      when declared(SSL_free):
-        SSL_free(ssl)
-      smtpReplyAndClose(bev, 454, "TLS initialization failed")
-      return
+#   # Session map key changes because bufferevent pointer changes
+#   let oldKey = bevKey(bev)
+#   let newKey = bevKey(tlsBev)
+#   if sessions.hasKey(oldKey):
+#     let sess = sessions[oldKey]
+#     sessions.del(oldKey)
+#     sessions[newKey] = sess
 
-    # Session map key changes because bufferevent pointer changes
-    let oldKey = bevKey(bev)
-    let newKey = bevKey(tlsBev)
-    if sessions.hasKey(oldKey):
-      let sess = sessions[oldKey]
-      sessions.del(oldKey)
-      sessions[newKey] = sess
+#   # RFC 3207: reset protocol state after TLS is established
+#   s.tlsActive = true
+#   s.greeted = false
+#   s.heloName.setLen(0)
+#   s.authenticated = false
+#   resetTxn(s)
 
-    # RFC 3207: reset protocol state after TLS is established
-    s.tlsActive = true
-    s.greeted = false
-    s.heloName.setLen(0)
-    s.authenticated = false
-    resetTxn(s)
+#   bufferevent_setcb(tlsBev, onSMTPRead, onSMTPWrite, onSMTPEvent, cast[pointer](server))
+#   discard bufferevent_enable(tlsBev, EV_READ or EV_WRITE)
 
-    bufferevent_setcb(tlsBev, onSMTPRead, onSMTPWrite, onSMTPEvent, cast[pointer](server))
-    discard bufferevent_enable(tlsBev, EV_READ or EV_WRITE)
-  else:
-    smtpReply(bev, 454, "TLS support not compiled in")
+proc startBackgroundDelivery(delivery: SMTPDelivery, req: DeliveryRequest) {.thread, gcsafe.} =
+  let d = delivery.deliverMessage(req)
+  case d
+  of ddOk:
+    echo "[mx] delivered: from=", req.mailFrom, " to=", req.rcptTo.join(",")
+  of ddTempFail:
+    echo "[mx] tempfail: from=", req.mailFrom, " to=", req.rcptTo.join(","), " -> spooling"
+    discard delivery.spoolDeliver(req)
+  of ddPermFail:
+    echo "[mx] permfail: from=", req.mailFrom, " to=", req.rcptTo.join(","), " -> spooling"
+    discard delivery.spoolDeliver(req)
 
 proc handleSmtpLine(bev: ptr bufferevent, server: SMTPServer, line: string) =
+  # This is the main command processing function. It takes a
+  # complete line of input from the client and processes it according
+  # to the SMTP protocol.
   let k = bevKey(bev)
   if not sessions.hasKey(k): return
   let s = sessions[k]
 
-  # If we're in the middle of an auth flow, handle that first before normal command processing
+  # If we're in the middle of an auth flow,
+  # handle that first before normal command processing
   if handleAuthFlow(bev, server, s, line): return
 
   if s.inData:
@@ -396,9 +375,19 @@ proc handleSmtpLine(bev: ptr bufferevent, server: SMTPServer, line: string) =
 
   if s.inData:
     if line == ".":
+      let req = DeliveryRequest(
+        mailFrom: s.mailFrom,
+        rcptTo: s.rcptTo,
+        data: s.dataLines.join("\r\n") & "\r\n",
+        heloName: s.heloName
+      )
+
+      spawn startBackgroundDelivery(server.delivery, req)
       smtpReply(bev, 250, "Message accepted for delivery")
       resetTxn(s)
-      return
+      return # don't process "." as a normal command
+
+    # collect DATA body lines
     if line.len > 0 and line[0] == '.':
       s.dataLines.add(line[1..^1]) # dot-unstuff
     else:
@@ -421,8 +410,8 @@ proc handleSmtpLine(bev: ptr bufferevent, server: SMTPServer, line: string) =
   of "STARTTLS":
     if s.mailFrom.len > 0 or s.rcptTo.len > 0 or s.inData:
       smtpReply(bev, 503, "Bad sequence of commands")
-    else:
-      handleStartTls(bev, server, s)
+    # else:
+      # handleStartTls(bev, server, s)
   of "AUTH":
     if not s.greeted:
       smtpReply(bev, 503, "Send EHLO/HELO first")
@@ -439,7 +428,6 @@ proc handleSmtpLine(bev: ptr bufferevent, server: SMTPServer, line: string) =
       else:
         let mech = p[0].toUpperAscii()
         let initial = if p.len > 1: p[1] else: ""
-
         case mech
         of "PLAIN":
           if initial.len == 0:
@@ -460,7 +448,6 @@ proc handleSmtpLine(bev: ptr bufferevent, server: SMTPServer, line: string) =
                 user = seg[0]
                 pass = seg[1]
               applyAuthDecision(bev, s, validateAuth(server, s, user, pass, "PLAIN"))
-
         of "LOGIN":
           if initial.len > 0:
             var userDecoded = ""
@@ -475,7 +462,6 @@ proc handleSmtpLine(bev: ptr bufferevent, server: SMTPServer, line: string) =
             smtpReply(bev, 334, "VXNlcm5hbWU6")
         else:
           smtpReply(bev, 504, "Unsupported authentication mechanism")
-
   of "MAIL":
     if server.requireAuth and not s.authenticated:
       smtpReply(bev, 530, "Authentication required")
@@ -566,6 +552,10 @@ proc onSMTPConnection(listener: ptr evconnlistener, fd: cint,
   # LibEvent calls this when a new client connection is accepted.
   # We create a new bufferevent for the connection,
   ensureSessionsInit()
+  
+  if ctx == nil:
+    discard close(fd)
+    return
 
   let server = cast[SMTPServer](ctx)
   if server == nil or server.base == nil:
@@ -576,23 +566,23 @@ proc onSMTPConnection(listener: ptr evconnlistener, fd: cint,
     tlsActiveNow = false
     bev: ptr bufferevent = nil
 
-  if listener == server.listener465:
-    if server.tlsCtx == nil:
-      discard close(fd)
-      return
+  # if listener == server.listener465:
+  #   if server.tlsCtx == nil:
+  #     discard close(fd)
+  #     return
 
-    let ssl = SSL_new(server.tlsCtx)
-    if ssl == nil:
-      discard close(fd)
-      return
+  #   let ssl = SSL_new(server.tlsCtx)
+  #   if ssl == nil:
+  #     discard close(fd)
+  #     return
     
-    bev = bufferevent_openssl_socket_new(
-      server.base, fd, ssl, BUFFEREVENT_SSL_ACCEPTING,
-      (BEV_OPT_CLOSE_ON_FREE or BEV_OPT_DEFER_CALLBACKS).cint
-    )
-    tlsActiveNow = true
-  else:
-    bev = bufferevent_socket_new(server.base, fd, BEV_OPT_CLOSE_ON_FREE)
+  #   bev = bufferevent_openssl_socket_new(
+  #     server.base, fd, ssl, BUFFEREVENT_SSL_CONNECTING,
+  #     (BEV_OPT_CLOSE_ON_FREE or BEV_OPT_DEFER_CALLBACKS).cint
+  #   )
+  #   tlsActiveNow = true
+  # else:
+  bev = bufferevent_socket_new(server.base, fd, BEV_OPT_CLOSE_ON_FREE)
 
   if bev == nil:
     discard close(fd) # bufferevent creation failed, close the socket and give up
@@ -643,7 +633,7 @@ proc bindListenerOn(server: SMTPServer, port: Port): ptr evconnlistener =
 
 proc enableSubmission587*(server: SMTPServer, port: Port = Port(587)) =
   if server.listener587 != nil: return
-  server.enableStartTls = true
+  server.enableStartTls = (server.tlsCtx != nil)
   server.listener587 = bindListenerOn(server, port)
   assert server.listener587 != nil, "Failed to bind SMTP submission listener (587)"
 
@@ -653,11 +643,19 @@ proc enableSmtps465*(server: SMTPServer, port: Port = Port(465)) =
   server.listener465 = bindListenerOn(server, port)
   assert server.listener465 != nil, "Failed to bind SMTPS listener (465)"
 
+proc enableMxDelivery*(server: SMTPServer, cfg = MXProviderConfig()) =
+  ## Installs MX delivery provider on this server instance.
+  ## If heloName is default/empty, use local hostname.
+  var mxCfg = cfg
+  if mxCfg.heloName.len == 0 or mxCfg.heloName == "localhost":
+    mxCfg.heloName = smtpHostname()
+  server.delivery.setProvider(newMXProvider(mxCfg))
+
 proc opensslLastError*(): string =
   let e = ERR_get_error()
   if e == 0: return "no openssl error"
   var buf = newString(256)
-  ERR_error_string_n(e, buf.cstring, buf.len.csize_t)
+  discard ERR_error_string(e, buf.cstring)
   let z = buf.find('\0')
   result = (if z >= 0: buf[0 ..< z] else: buf)
 
@@ -665,7 +663,7 @@ proc setupTlsCtx*(server: SMTPServer, certPath, keyPath: string): bool =
   let certPath = absolutePath(certPath)
   let keyPath = absolutePath(keyPath)
 
-  discard OPENSSL_init_ssl(0'u64, nil)
+  discard SSL_library_init()
 
   let tlsMethod = TLS_server_method()
   if tlsMethod == nil:
@@ -677,7 +675,7 @@ proc setupTlsCtx*(server: SMTPServer, certPath, keyPath: string): bool =
     stderr.writeLine("TLS error: SSL_CTX_new() failed")
     return false
 
-  discard SSL_CTX_set_min_proto_version(ctx, TLS1_2_VERSION.cint)
+  # discard SSL_CTX_set_min_proto_version(ctx, TLS1_2_VERSION.cint)
 
   if SSL_CTX_use_certificate_file(ctx, certPath.cstring, SSL_FILETYPE_PEM.cint) != 1:
     stderr.writeLine("TLS error: certificate load failed: ", opensslLastError())
@@ -701,7 +699,13 @@ proc setupTlsCtx*(server: SMTPServer, certPath, keyPath: string): bool =
   server.enableStartTls = true
   result = true
 
-proc newSMTPServer*(port: Port = Port(2525), enable587, enable465: bool = true, someTlsCerts: Option[(string, string)]): SMTPServer =
+proc newSMTPServer*(port: Port = Port(2525), enable587, enable465: bool = true,
+          someTlsCerts: Option[(string, string)] = none((string, string)),
+          spoolDir = none(string),
+          deliveryProvider: DeliveryProvider = nil,
+          enableMxDelivery = false,
+          mxConfig = MXProviderConfig()
+): SMTPServer =
   ## Creates a new SMTP server instance listening on the specified port. The server
   new(result)
   result.base = event_base_new()
@@ -709,6 +713,15 @@ proc newSMTPServer*(port: Port = Port(2525), enable587, enable465: bool = true, 
   result.port = port
   result.authUsers = initTable[string, string]()
   result.requireAuth = false
+  
+  # initialize delivery mechanism with spool directory from env or default
+  result.delivery = newSMTPDelivery(spoolDir = spoolDir, provider = deliveryProvider)
+
+  # Optional MX provider enablement (constructor arg and/or env toggle)
+  let mxEnv = getEnv("MEOWMAIL_SMTP_MX_ENABLED", "")
+  let mxEnvEnabled = mxEnv.len > 0 and (mxEnv.toLowerAscii() in ["1", "true", "yes", "on"])
+  if result.delivery.deliveryProvider == nil and (enableMxDelivery or mxEnvEnabled):
+    result.enableMxDelivery(mxConfig)
 
   # Optional local credentials
   let envUser = getEnv("MEOWMAIL_SMTP_USER", "")
@@ -748,15 +761,21 @@ proc newSMTPServer*(port: Port = Port(2525), enable587, enable465: bool = true, 
   assert result.listener != nil, "Failed to bind SMTP listener"
   evconnlistener_set_error_cb(result.listener, onListenerError)
 
+  var enabledTls = false
   if someTlsCerts.isSome:
-    let tlsCerts = someTlsCerts.get()
-    discard result.setupTlsCtx(tlsCerts[0], tlsCerts[1])
+    let (certPath, keyPath) = someTlsCerts.get()
+    enabledTls = result.setupTlsCtx(certPath, keyPath)
+    if not enabledTls:
+      echo "[smtp] TLS disabled: setupTlsCtx failed (cert/key load error?)"
 
-  # Optional TLS listeners for submission (587) and implicit TLS (465)
-  if enable587: result.enableSubmission587(Port(587))
-  # For implicit TLS on 465, we require that the TLS context is successfully set up with certs
-  # otherwise we skip enabling 465 to avoid a broken listener that can't accept connections
-  if enable465: result.enableSmtps465(Port(465))
+  if enable587:
+    result.enableSubmission587(Port(587))
+
+  if enable465:
+    if enabledTls:
+      result.enableSmtps465(Port(465))
+    else:
+      echo "[smtp] Skipping 465: TLS context unavailable"
 
 proc start*(server: SMTPServer) =
   ## Starts the SMTP server event loop. This call blocks until the
