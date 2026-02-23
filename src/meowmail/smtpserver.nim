@@ -656,12 +656,15 @@ proc bindListenerOn(server: SMTPServer, port: Port): ptr evconnlistener =
     evconnlistener_set_error_cb(result, onListenerError)
 
 proc bindListener587*(server: SMTPServer, port: Port = Port(587)) =
+  ## Binds a listener for SMTP submission on the specified port (default 587).
   if server.listener587 != nil: return
   server.enableStartTls = (server.tlsCtx != nil)
   server.listener587 = bindListenerOn(server, port)
   assert server.listener587 != nil, "Failed to bind SMTP submission listener (587)"
 
 proc bindListener465*(server: SMTPServer, port: Port = Port(465)) =
+  ## Binds a listener for SMTPS on the specified port (default 465).
+  ## This requires a valid TLS context to be set up.
   if server.listener465 != nil: return
   assert server.tlsCtx != nil, "tlsCtx is nil (required for implicit TLS on 465)"
   server.listener465 = bindListenerOn(server, port)
@@ -676,6 +679,7 @@ proc enableMxDelivery*(server: SMTPServer, cfg = MXProviderConfig()) =
   server.delivery.setProvider(newMXProvider(mxCfg))
 
 proc opensslLastError*(): string =
+  ## Retrieves the last error message from OpenSSL's error queue
   let e = ERR_get_error()
   if e == 0: return "no openssl error"
   var buf = newString(256)
@@ -684,6 +688,7 @@ proc opensslLastError*(): string =
   result = (if z >= 0: buf[0 ..< z] else: buf)
 
 proc setupTlsCtx*(server: SMTPServer, certPath, keyPath: string): bool =
+  ## Sets up the TLS context for the server using the provided certificate and key files.
   let certPath = absolutePath(certPath)
   let keyPath = absolutePath(keyPath)
 

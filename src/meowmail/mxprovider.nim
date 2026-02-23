@@ -19,21 +19,28 @@ type
 
   MXProviderConfig* = object
     heloName*: string = "localhost"
-      ## The HELO/EHLO name to use when connecting to MX hosts. This can be configured
-      ## to improve compatibility with certain mail servers that expect a valid domain name.
+      ## The HELO/EHLO name to use when connecting to MX hosts.
+      ## This can be configured to improve compatibility with
+      ## certain mail servers that expect a valid domain name
     connectTimeoutMs*: int = 7000
-      ## The timeout in milliseconds for establishing a connection to an MX host. If the connection
+      ## The timeout in milliseconds for establishing a connection
+      ## to an MX host. If the connection
     commandTimeoutMs*: int = 10000
-      ## The timeout in milliseconds for waiting for responses to SMTP commands during the delivery process.
+      ## The timeout in milliseconds for waiting for responses
+      ## to SMTP commands during the delivery process.
     requireStartTls*: bool
-      ## Whether to require STARTTLS support from MX hosts. If set to true, the provider will only attempt
-      ## delivery to MX hosts that advertise STARTTLS in their EHLO response. This can improve security
-      ## but may reduce deliverability if some recipient domains do not support STARTTLS.
+      ## Whether to require STARTTLS support from MX hosts. If set to true,
+      ## the provider will only attempt delivery to MX hosts that advertise
+      ## STARTTLS in their EHLO response. This can improve security
+      ## but may reduce deliverability if some recipient domains do
+      ## not support STARTTLS.
     maxMxHostsPerDomain*: int = 5
-      ## The maximum number of MX hosts to consider for each recipient domain. This limits the number of
-      ## connection attempts and can help avoid long delays when a domain has many MX records.
+      ## The maximum number of MX hosts to consider for each
+      ## recipient domain. This limits the number of connection attempts
+      ## and can help avoid long delays when a domain has many MX records.
     debug*: bool = false
-      ## Whether to enable debug logging for the MX provider. When enabled, the provider will log detailed
+      ## Whether to enable debug logging for the MX provider.
+      ## When enabled, the provider will log detailed
 
 proc initMXProviderConfig*(
   heloName: string,
