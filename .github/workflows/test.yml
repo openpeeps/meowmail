@@ -29,7 +29,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            pkg-config libssl-dev libevent-dev ca-certificates
+            pkg-config libssl-dev libevent-dev ca-certificates swaks
 
       - run: sudo ldconfig
       - run: |
@@ -68,5 +68,7 @@ jobs:
             -extensions v3_req
 
       - run: nimble install -Y
-      - run: nim c -d:ssl src/${{ github.event.repository.name }}.nim
-      # - run: nimble test
+      - run: |
+          nim c -d:ssl -d:ghAction src/${{ github.event.repository.name }}.nim
+          nohup timeout 120s ./src/meowmail.out meowmail.log 2>&1 &
+      - run: nimble test
