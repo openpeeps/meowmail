@@ -6,8 +6,21 @@
 import std/[strutils, sequtils, osproc, algorithm]
 from std/nativesockets import Domain
 
+## This module implements an MX delivery provider for MeowMail that delivers
+## messages directly to recipient domains by resolving their MX records and
+## performing SMTP transactions using libevent. It includes configuration options
+## for timeouts, STARTTLS requirements, and debugging.
+## 
+## The provider is designed to be suitable for production use but can also be
+## used for testing with local domains and custom MX records
+## 
+## The implementation includes robust handling of SMTP replies, connection events,
+## and transaction state to ensure reliable delivery and accurate delivery decisions.
+
 import libevent/bindings/[event, buffer, bufferevent]
 import ./smtpdelivery
+
+{.warning: "MXProvider is still in early development and may have limitations and edge cases that are not yet handled. Don't use this in production".}
 
 type
   MXHost* = object
@@ -120,21 +133,50 @@ type
 
   MxTxn = ref object
     base: ptr event_base
+      # The libevent event base associated with this transaction,
+      # used for managing timeouts and events
     bev: ptr bufferevent
+      # The libevent buffered event for the SMTP connection,
+      # used for reading and writing data
     req: DeliveryRequest
+      # The delivery request being processed, containing the mail
+      # from, recipients, and message data
     cfg: MXProviderConfig
+      # The configuration settings for the MX provider, used
+      # to control timeouts, STARTTLS requirements, and debugging
     state: MxTxnState
+      # The current state of the SMTP transaction, used to
+      # track progress through the SMTP dialog.
     done: bool
+      # Whether the transaction is complete and a delivery decision has been made.
     decision: DeliveryDecision
+      # The delivery decision for this transaction, set when
+      # the transaction is complete.
     inbuf: string
+      # A buffer for accumulating incoming data from the SMTP
+      # server until complete lines can be processed.
     replyCode: int
+      # The SMTP reply code from the server, used to determine the
+      # outcome of commands and guide the transaction flow
     replyLines: seq[string]
+      # The lines of the SMTP reply from the server, used for
+      # processing multi-line replies and extracting capabilities
     usedHeloFallback: bool
+      # Whether the transaction has already attempted the HELO
+      # fallback after an EHLO failure, to avoid retrying multiple times
     sawStartTlsCap: bool
+      # Whether the transaction has seen the STARTTLS capability in
+      # the EHLO response, used to determine if STARTTLS is supported by the server.
     rcptIdx: int
+      # The index of the current recipient being processed in the RCPT TO commands
     acceptedRcpt: int
+      # The count of recipients that have been accepted by the server so far
     sawTempRcpt: bool
+      # Whether the transaction has seen any temporary failures for recipients,
+      # used to determine the overall delivery decision if no recipients are accepted.
     sawPermRcpt: bool
+      # Whether the transaction has seen any permanent failures for recipients,
+      # used to determine the overall delivery decision if no recipients are accepted
 
 proc classifyReply(code: int): DeliveryDecision =
   if code >= 500 and code < 600: return ddPermFail

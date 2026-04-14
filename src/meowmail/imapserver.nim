@@ -10,6 +10,8 @@ from std/net import Port, `$`
 import libevent/bindings/[event, buffer, bufferevent,  http, listener]
 import ./smtpauth, ./smtpserver
 
+{.warning: "IMAP support is very basic and incomplete in this version".}
+
 type
   IMAPCommand* = enum
     cmdUnknown = "UNKNOWN"
@@ -18,6 +20,13 @@ type
     cmdLogout = "LOGOUT"
     cmdLogin = "LOGIN"
     cmdSelect = "SELECT"
+    cmdFetch = "FETCH"
+    cmdStore = "STORE"
+    cmdCreate = "CREATE"
+    cmdDelete = "DELETE"
+    cmdRename = "RENAME"
+    cmdList = "LIST"
+    cmdSearch = "SEARCH"
 
   IMAPSession* = ref object
     ## Represents a single IMAP client session. This is stored in a
@@ -114,15 +123,19 @@ proc handleImapLine(bev: ptr bufferevent, server: IMAPServer, line: string) =
   let cmd = parseEnum[IMAPCommand](p[1].toUpperAscii(), cmdUnknown)
   case cmd
   of cmdCapability:
-    imapUntagged(bev, "CAPABILITY IMAP4rev1 STARTTLS AUTH=PLAIN")
+    # Handle the CAPABILITY command by responding with the capabilities we support.
+    imapUntagged(bev, "CAPABILITY IMAP4rev1 STARTTLS AUTH=LOGIN")
     imapTagged(bev, tag, "OK", "CAPABILITY completed")
   of cmdNoop:
     imapTagged(bev, tag, "OK", "NOOP completed")
   of cmdLogout:
+    # For LOGOUT, we send an untagged BYE response first, then a tagged OK
+    # response, and then mark the session for closing.
     imapUntagged(bev, "BYE Logging out")
     imapTagged(bev, tag, "OK", "LOGOUT completed")
     let k = bevKey(bev)
-    if sessions.hasKey(k): sessions[k].quitting = true
+    if likely(sessions.hasKey(k)):
+      sessions[k].quitting = true
   of cmdLogin:
     # Minimal parser: LOGIN <user> <pass> (no quoted-string parsing yet)
     if p.len < 4:
@@ -130,10 +143,14 @@ proc handleImapLine(bev: ptr bufferevent, server: IMAPServer, line: string) =
       return
     let user = p[2]
     let pass = p[3]
-    echo pass
     let k = bevKey(bev)
+    
+    # If we don't have a session for this connection,
+    # something went wrong. Just ignore the command.
     if not sessions.hasKey(k): return
     let s = sessions[k]
+    
+    # Check the credentials against our auth provider (or simple table for now)
     if server.authUsers.hasKey(user) and server.authUsers[user] == pass:
       s.authenticated = true
       s.username = user
@@ -155,6 +172,27 @@ proc handleImapLine(bev: ptr bufferevent, server: IMAPServer, line: string) =
     imapUntagged(bev, "0 EXISTS")
     imapUntagged(bev, "0 RECENT")
     imapTagged(bev, tag, "OK", "[READ-WRITE] SELECT completed")
+  of cmdFetch:
+    # TODO: Implement FETCH logic (retrieve messages)
+    imapTagged(bev, tag, "NO", "FETCH not implemented yet")
+  of cmdStore:
+    # TODO: Implement STORE logic (set message flags)
+    imapTagged(bev, tag, "NO", "STORE not implemented yet")
+  of cmdCreate:
+    # TODO: Implement CREATE logic (create mailbox)
+    imapTagged(bev, tag, "NO", "CREATE not implemented yet")
+  of cmdDelete:
+    # TODO: Implement DELETE logic (delete mailbox)
+    imapTagged(bev, tag, "NO", "DELETE not implemented yet")
+  of cmdRename:
+    # TODO: Implement RENAME logic (rename mailbox)
+    imapTagged(bev, tag, "NO", "RENAME not implemented yet")
+  of cmdList:
+    # TODO: Implement LIST logic (list mailboxes)
+    imapTagged(bev, tag, "NO", "LIST not implemented yet")
+  of cmdSearch:
+    # TODO: Implement SEARCH logic (search messages)
+    imapTagged(bev, tag, "NO", "SEARCH not implemented yet")
   else:
     imapTagged(bev, tag, "BAD", "Unsupported command")
 

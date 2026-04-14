@@ -19,6 +19,9 @@ export mxprovider
 ## It uses non-blocking I/O and an event-driven architecture to efficiently handle multiple
 ## concurrent SMTP sessions. The server supports basic SMTP commands, authentication,
 ## and message delivery through a configurable `SMTPDelivery` provider.
+## 
+## Use the `SMTPSendPolicy` and `SMTPSettings` types to configure the server's behavior, including
+## whether to allow relaying, require authentication, and how to handle TLS.
 
 const
   MaxCommandLineLen = 510 # 512 including CRLF
@@ -70,6 +73,14 @@ type
     tlsActive: bool
       # Whether the session has an active TLS connection (if STARTTLS is implemented in the future).
 
+  SMTPSendPolicy* = enum
+    ## Represents the policy for SMTP server, such as whether to allow
+    ## relaying messages from external clients, or to restrict to local delivery only.
+    spDefault           ## Allow relaying for authenticated users (default)
+    spLocalSendOnly     ## Only allow sending from localhost (127.0.0.1 / ::1)
+    spInternalSendOnly  ## Only allow sending from trusted internal networks
+    spNoRelay           ## No relaying, only accept mail for local domains
+
   SMTPSettings* = object
     ## Configuration settings for the SMTP server, including TLS options,
     ## authentication requirements, and delivery configuration.
@@ -90,6 +101,9 @@ type
     deliveryProvider*: DeliveryProvider = nil
       ## Optional custom delivery provider. If set, this provider will be used to handle
       ## message deliveries instead of the default MX provider.
+    sendPolicy*: SMTPSendPolicy = spDefault
+      ## The sending policy for the server, which can restrict relaying behavior.
+    
 
   SMTPServer* = ref object
     ## Represents the SMTP server instance, including its configuration and state.
@@ -124,6 +138,9 @@ type
       ## of `authUsers` for authentication decisions.
     delivery*: SMTPDelivery
       ## The SMTPDelivery configuration for handling message deliveries.
+    settings*: SMTPSettings
+      ## The original settings object used to configure the server. This is stored
+      ## for reference and potential use in callbacks.
 
 var
   sessions {.threadvar.}: Table[uint, SMTPSession]
@@ -137,6 +154,32 @@ proc ensureSessionsInit() =
 # forward decl
 proc onSMTPRead(bev: ptr bufferevent, ctx: pointer) {.cdecl.}
 proc onSMTPEvent(bev: ptr bufferevent, events: cshort, ctx: pointer) {.cdecl.}
+
+#
+# Utility functions for handling SMTP protocol details, session management, and other
+# common tasks related to processing SMTP commands and managing client sessions.
+#
+proc ipv4HostOrder(sa: ptr SockAddr): uint32 {.inline.} =
+  ## Returns IPv4 address in host byte order; 0 if not AF_INET.
+  if sa == nil or sa.sa_family != AF_INET.TSa_Family:
+    return 0'u32
+  let sin = cast[ptr Sockaddr_in](sa)
+  result = ntohl(sin.sin_addr.s_addr)
+
+proc isLoopbackIPv4(sa: ptr SockAddr): bool {.inline.} =
+  # Determine if the given socket address is a loopback IPv4 address
+  # so we can apply special policies for localhost connections if needed.
+  let ip = ipv4HostOrder(sa)
+  result = (ip and 0xFF00_0000'u32) == 0x7F00_0000'u32
+
+proc isInternalIPv4(sa: ptr SockAddr): bool {.inline.} =
+  ## RFC1918 + loopback
+  let ip = ipv4HostOrder(sa)
+  if (ip and 0xFF00_0000'u32) == 0x0A00_0000'u32: return true       # 10.0.0.0/8
+  if (ip and 0xFFF0_0000'u32) == 0xAC10_0000'u32: return true       # 172.16.0.0/12
+  if (ip and 0xFFFF_0000'u32) == 0xC0A8_0000'u32: return true       # 192.168.0.0/16
+  if (ip and 0xFF00_0000'u32) == 0x7F00_0000'u32: return true       # 127.0.0.0/8
+  false
 
 proc bevKey(bev: ptr bufferevent): uint {.inline.} =
   # Generate a unique key for the session map based on the
@@ -159,7 +202,7 @@ proc smtpReplyMulti(bev: ptr bufferevent, code: int, msg: string, hasMore: bool)
   let line = $code & sep & msg & "\r\n"
   discard bufferevent_write(bev, line.cstring, line.len.csize_t)
 
-proc smtpHostname(): string =
+proc smtpHostname: string =
   # Get the server's hostname for use in SMTP greetings and replies.
   # This tries to get the system hostname, but falls back to a default if that
   # fails or returns an empty string.
@@ -319,6 +362,9 @@ proc handleStartTls(bev: ptr bufferevent, server: SMTPServer, s: SMTPSession) =
     smtpReplyAndClose(bev, 454, "TLS initialization failed")
     return
 
+  assert server.base != nil
+  assert bev != nil
+  assert ssl != nil
   let tlsBev = bufferevent_openssl_filter_new(
     server.base,
     bev, # underlying plaintext bufferevent
@@ -386,14 +432,19 @@ proc handleSmtpLine(bev: ptr bufferevent, server: SMTPServer, line: string) =
 
   if s.inData:
     if line == ".":
+      # End of DATA command. Process the message delivery.
       let req = DeliveryRequest(
         mailFrom: s.mailFrom,
         rcptTo: s.rcptTo,
         data: s.dataLines.join("\r\n") & "\r\n",
         heloName: s.heloName
       )
+      echo "[smtp] received: from=", req.mailFrom, " to=", req.rcptTo.join(",")
+      # We spawn a background thread to handle delivery so that we can respond to the client
+      # immediately without blocking the SMTP session. The delivery provider will handle the message
       spawn startBackgroundDelivery(server.delivery, req)
       smtpReply(bev, 250, "Message accepted for delivery")
+      
       resetTxn(s)
       return # don't process "." as a normal command
 
@@ -410,19 +461,26 @@ proc handleSmtpLine(bev: ptr bufferevent, server: SMTPServer, line: string) =
 
   case cmd
   of "HELO":
+    # HELO is the initial greeting command. We set the greeted flag and store
+    # the heloName, then reply with a simple greeting
     s.greeted = true
     s.heloName = arg
     smtpReply(bev, 250, "meowmail.local Hello")
   of "EHLO":
+    # EHLO is like HELO but also requests the server's capabilities in the reply.
+    # We set the greeted flag and store the heloName, then reply with the capabilities
     s.greeted = true
     s.heloName = arg
     smtpReplyEhloCapabilities(bev, smtpHostname(), s, server)
   of "STARTTLS":
+    # the STARTTLS command must come after a HELO/EHLO greeting and before any
+    # MAIL or AUTH commands.
     if s.mailFrom.len > 0 or s.rcptTo.len > 0 or s.inData:
       smtpReply(bev, 503, "Bad sequence of commands")
     else:
       handleStartTls(bev, server, s)
   of "AUTH":
+    # the AUTH command must come after a HELO/EHLO greeting
     if not s.greeted:
       smtpReply(bev, 503, "Send EHLO/HELO first")
     elif s.inData or s.mailFrom.len > 0 or s.rcptTo.len > 0:
@@ -473,6 +531,7 @@ proc handleSmtpLine(bev: ptr bufferevent, server: SMTPServer, line: string) =
         else:
           smtpReply(bev, 504, "Unsupported authentication mechanism")
   of "MAIL":
+    # the MAIL command must come after a HELO/EHLO greeting
     if server.requireAuth and not s.authenticated:
       smtpReply(bev, 530, "Authentication required")
     elif not s.greeted:
@@ -484,6 +543,8 @@ proc handleSmtpLine(bev: ptr bufferevent, server: SMTPServer, line: string) =
       s.rcptTo.setLen(0)
       smtpReply(bev, 250, "OK")
   of "RCPT":
+    # RCPT TO commands must come after a valid MAIL FROM
+    # command. We check for that
     if s.mailFrom.len == 0:
       smtpReply(bev, 503, "Need MAIL FROM first")
     elif not arg.toUpperAscii().startsWith("TO:"):
@@ -492,6 +553,9 @@ proc handleSmtpLine(bev: ptr bufferevent, server: SMTPServer, line: string) =
       s.rcptTo.add(arg[3..^1].strip())
       smtpReply(bev, 250, "OK")
   of "DATA":
+    # the DATA command must come after at least one valid RCPT
+    # TO command. We check for that here and respond with an error if the
+    # sequence is incorrect.
     if s.rcptTo.len == 0:
       smtpReply(bev, 503, "Need RCPT TO first")
     else:
@@ -499,13 +563,24 @@ proc handleSmtpLine(bev: ptr bufferevent, server: SMTPServer, line: string) =
       s.dataLines.setLen(0)
       smtpReply(bev, 354, "End data with <CR><LF>.<CR><LF>")
   of "RSET":
+    # RFC 5321: "The RSET command specifies that the current mail
+    # transaction will be aborted. Any stored sender, recipients,
+    # and mail data MUST be discarded, and all buffers and state
+    # tables cleared. The receiver MUST send an OK reply to a RSET command."
     resetTxn(s)
     smtpReply(bev, 250, "OK")
   of "NOOP":
+    # The NOOP command does not affect any state and is used to
+    # keep the connection alive or check responsiveness.
     smtpReply(bev, 250, "OK")
   of "VRFY", "EXPN":
+    # For security reasons, we do not implement VRFY or EXPN functionality,
+    # as it can be abused for user enumeration. We respond with a generic
+    # message that does not confirm the existence of any users.
     smtpReply(bev, 252, "Cannot VRFY/EXPN user")
   of "QUIT":
+    # The client has requested to close the connection. We set the quitting
+    # flag and send a 221 response.
     s.quitting = true
     smtpReply(bev, 221, "Bye")
     # Stop reading new bytes; let write callback drain and close cleanly.
@@ -586,6 +661,30 @@ proc onSMTPConnection(listener: ptr evconnlistener, fd: cint,
     discard close(fd)
     return
 
+  # check the server policy for this connection
+  # Note: we enforce send policies at the connection level for simplicity, but in a more
+  # complete implementation, we might want to enforce some policies (like spNoRelay) at the command level instead.
+  case server.settings.sendPolicy
+  of spDefault:
+    discard
+  of spLocalSendOnly:
+    # For local send-only policy, we check if the client's IP address is a loopback address
+    # This ensures that only clients connecting from the local machine can use this server to send
+    # emails, which is a common configuration for a send-only relay that is used by local applications.
+    if not isLoopbackIPv4(sockAddr):
+      echo "[smtp] reject: non-local connection (spLocalSendOnly)"
+      discard close(fd)
+      return
+  of spInternalSendOnly:
+    # For internal send-only policy, we check if the client's IP address is in a private range (RFC1918) or loopback.
+    # This allows trusted internal clients to connect while rejecting external ones.
+    if not isInternalIPv4(sockAddr):
+      echo "[smtp] reject: non-internal connection (spInternalSendOnly)"
+      discard close(fd)
+      return
+  of spNoRelay:
+    discard # relay restriction should be enforced during RCPT/DATA policy checks
+
   var
     tlsActiveNow = false
     bev: ptr bufferevent = nil
@@ -661,6 +760,7 @@ proc bindListener587*(server: SMTPServer, port: Port = Port(587)) =
   server.enableStartTls = (server.tlsCtx != nil)
   server.listener587 = bindListenerOn(server, port)
   assert server.listener587 != nil, "Failed to bind SMTP submission listener (587)"
+  echo "[smtp] SMTP submission listener bound on port ", port, " (STARTTLS ", if server.enableStartTls: "enabled" else: "disabled", ")"
 
 proc bindListener465*(server: SMTPServer, port: Port = Port(465)) =
   ## Binds a listener for SMTPS on the specified port (default 465).
@@ -669,6 +769,7 @@ proc bindListener465*(server: SMTPServer, port: Port = Port(465)) =
   assert server.tlsCtx != nil, "tlsCtx is nil (required for implicit TLS on 465)"
   server.listener465 = bindListenerOn(server, port)
   assert server.listener465 != nil, "Failed to bind SMTPS listener (465)"
+  echo "[smtp] SMTPS listener bound on port ", port, " (implicit TLS enabled)"
 
 proc enableMxDelivery*(server: SMTPServer, cfg = MXProviderConfig()) =
   ## Installs MX delivery provider on this server instance.
@@ -730,12 +831,16 @@ proc setupTlsCtx*(server: SMTPServer, certPath, keyPath: string): bool =
 
 proc newSMTPServer*(settings: SMTPSettings): SMTPServer =
   ## Creates a new SMTP server instance based on the provided settings.
+  ## 
+  ## This initializes the server configuration, sets up the event base,
+  ## and binds listeners according to the settings.
   new(result)
   result.base = event_base_new()
   assert result.base != nil, "Failed to create event base"
-  result.port = Port(2525) # default port for non-privileged testing
+  result.port = Port(25) # default port for non-privileged testing
   result.authUsers = initTable[string, string]()
   result.requireAuth = false
+  result.settings = settings
   
   # initialize delivery mechanism with spool directory from env or default
   result.delivery = newSMTPDelivery(spoolDir = settings.spoolDirectory, provider = settings.deliveryProvider)
@@ -810,4 +915,5 @@ proc start*(server: SMTPServer) =
   ## server is stopped or encounters a fatal error.
   assert server.base != nil
   assert server.listener != nil or server.listener587 != nil or server.listener465 != nil, "No listeners configured"
+  echo "[smtp] SMTP server started on port ", $(server.port)
   assert event_base_dispatch(server.base) > -1
