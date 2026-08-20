@@ -6,9 +6,12 @@
 
 import std/[posix, options, os, times]
 
+import ../imap/mailstore
+
 ## This module implements the SMTP delivery logic for MeowMail. It defines the
 ## `SMTPDelivery` type, which is responsible for handling message deliveries, either
-## by spooling messages to disk or by using a custom delivery provider.
+## by delivering locally into a Maildir store, by spooling messages to disk, or
+## by using a custom delivery provider.
 ## 
 ## The module also defines the `DeliveryRequest` type, which encapsulates the
 ## information about a message that needs to be delivered, including the envelope sender,
@@ -42,16 +45,22 @@ type
       ## Optional directory path where messages will be spooled
       ## if no delivery provider is configured. If not set, a
       ## default temporary directory will be used
+    localStore*: MaildirStore
+      ## Optional Maildir store. When set, recipients in `localStore.localDomains`
+      ## are delivered directly into their per-user Maildir instead of being
+      ## spooled or MX-delivered.
 
 var spoolSeq {.threadvar.}: uint64
 
 proc newSMTPDelivery*(spoolDir: Option[string],
-                provider: DeliveryProvider = nil): SMTPDelivery =
+                provider: DeliveryProvider = nil,
+                localStore: MaildirStore = nil): SMTPDelivery =
   ## Creates a new SMTPDelivery instance with the
   ## specified spool directory and delivery provider
   new(result)
   result.deliveryProvider = provider
   result.spoolDir = spoolDir
+  result.localStore = localStore
 
 proc defaultSpoolDir*(smtpd: SMTPDelivery): string =
   ## Returns the default spool directory path. This is used when no
@@ -95,8 +104,25 @@ proc spoolDeliver*(smtpd: SMTPDelivery, req: DeliveryRequest): DeliveryDecision 
     ddTempFail
 
 proc deliverMessage*(smtpd: SMTPDelivery, req: DeliveryRequest): DeliveryDecision =
-  ## Delivers a message using the configured delivery
-  ## provider or by spooling to disk if no provider is set.
+  ## Delivers a message using local Maildir delivery (for local recipients),
+  ## a custom delivery provider, or by spooling to disk.
+  if smtpd.localStore != nil:
+    # Route local recipients into their Maildir; hand the rest to the
+    # provider / spool.
+    var remote = DeliveryRequest(mailFrom: req.mailFrom, heloName: req.heloName)
+    var sawLocal = false
+    for rcpt in req.rcptTo:
+      if smtpd.localStore.isLocal(rcpt):
+        sawLocal = true
+        if not smtpd.localStore.deliver(req.mailFrom, rcpt, req.data):
+          return ddTempFail
+      else:
+        remote.rcptTo.add(rcpt)
+    if remote.rcptTo.len == 0:
+      return ddOk
+    if smtpd.deliveryProvider != nil:
+      return smtpd.deliveryProvider(remote)
+    return smtpd.spoolDeliver(remote)
   if smtpd.deliveryProvider != nil:
     return smtpd.deliveryProvider(req)
   smtpd.spoolDeliver(req)
@@ -110,4 +136,6 @@ proc setProvider*(smtpd: var SMTPDelivery, provider: DeliveryProvider) =
 proc setSpoolDir*(smtpd: var SMTPDelivery, spoolDir: string) =
   ## Sets the directory where messages will be spooled if no delivery
   ## provider is configured. If not set, a default temporary directory will be used.
-  smtpd.spoolDir = (if spoolDir.len > 0: some(spoolDir) else: none(string))
+  smtpd.spoolDir =
+    if spoolDir.len > 0: some(spoolDir)
+    else: none(string)

@@ -16,6 +16,7 @@ type
   AuthProgress* = enum
     ## Tracks the current step in an ongoing
     ## authentication process. This is used to manage
+    ## multi-step authentication mechanisms (e.g., LOGIN).
     apNone, apPlain, apLoginUser, apLoginPass
 
   AuthDecision* = enum

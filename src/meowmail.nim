@@ -4,58 +4,47 @@
 #          Made by Humans from OpenPeeps
 #          https://github.com/openpeeps/meowmail
 
-from std/net import Port, `$`
-import ./meowmail/[smtpserver, smtpauth, imapserver]
+when defined(macosx):
+  # spf2 headers require arpa/nameser.h (ns_type) to be included first; the
+  # passC flags in meowmail.nims are applied after the pkg/spf pragmas.
+  {.passC: "-include arpa/nameser.h".}
 
 when isMainModule:
-  # This is a simple example of how to start the MeowMail server with a
-  # custom authentication provider and delivery provider.
-  import std/[options, os]
-  import pkg/smtp
-  
-  let certs = some((absolutePath("tests/certs/smtp-cert.pem"), absolutePath("tests/certs/smtp-key.pem")))
-  var smtpServerInstance = newSMTPServer(
-    settings = SMTPSettings(
-      certifications: certs,
-      mxConfig: initMXProviderConfig(
-        heloName = "mail.yourdomain.tld",
-        requireStartTls = false,
-        debug = true
-      )
-    )
-  )
+  import pkg/kapsis
+  import ./meowmail/cli/commands
 
-  var thr: array[0..1, Thread[(ptr SMTPServer, Port)]]
+  initKapsis do:
+    commands:
+      -- "Configuration"
+      init string(init):
+        ## Initialize a MeowMail config file
 
-  proc initSMTPServer(args: (ptr SMTPServer, Port)) {.thread.} =
-    # Initialize the SMTP server with the specified port and set up the authentication provider.
-    {.gcsafe.}:
-      let (server, port) = args
-      # when the server receives and auth request, this auth provider will be triggered to 
-      # validate the credentials. In a real implementation, you will need to
-      # bring your own user database and the logic to validate the credentials.
-      # - You can use pkg/ozark for ORM and database access if needed
-      # - For password hashing and validation, consider using `pkg/e2ee`
-      server[].authProvider = proc(req: AuthRequest): AuthDecision {.gcsafe.} =
-        # todo implement a real auth system here
-        if req.username == "alice" and req.password == "secret":
-          result = AuthDecision.authOk # otherwise default `AuthDecision.authInvalid` is returned
-      server[].start()
+      -- "SMTP Server"
+      start path(config):
+        ## Start the MeowMail server
 
-  # create thread for main SMTP server
-  createThread(thr[0], initSMTPServer, (addr(smtpServerInstance), Port(25)))
+      -- "DNS Records"
+      spf string(ip4), ?string(ip6), ?string(includes):
+        ## Generate SPF record
+      dkim path(dkim):
+        ## Generate DKIM record
+      dmarc path(dmarc):
+        ## Generate DMARC record
 
-  # give the main server a moment to start up
-  # before starting the submission server
-  sleep(100)
+      -- "Queue Management"
+      queueList string(queueDir):
+        ## List queued messages
+      queueStats string(queueDir):
+        ## Show queue statistics
+      queueFlush string(queueDir):
+        ## Force delivery of pending messages
+      queueRetry string(queueDir), string(id):
+        ## Requeue a specific message
+      queueDelete string(queueDir), string(id):
+        ## Remove a message from queue
+      queuePurge string(queueDir):
+        ## Remove delivered/bounced/failed messages
 
-  # create thread for imap server
-  proc initImapServer(port: Port) =
-    let imapServerInstance = newIMAPServer(port)
-    imapServerInstance.start()
-
-  var imapThread: Thread[Port]
-  createThread(imapThread, initImapServer, Port(143))
-
-  joinThreads(thr)
-       
+else:
+  import ./meowmail/smtp/[smtpserver, smtpdelivery, smtpauth, mxprovider]
+  export smtpserver, smtpdelivery, smtpauth, mxprovider
