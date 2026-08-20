@@ -109,7 +109,7 @@ proc deliverMessage*(smtpd: SMTPDelivery, req: DeliveryRequest): DeliveryDecisio
   if smtpd.localStore != nil:
     # Route local recipients into their Maildir; hand the rest to the
     # provider / spool.
-    var remote = DeliveryRequest(mailFrom: req.mailFrom, heloName: req.heloName)
+    var remote = DeliveryRequest(mailFrom: req.mailFrom, heloName: req.heloName, data: req.data)
     var sawLocal = false
     for rcpt in req.rcptTo:
       if smtpd.localStore.isLocal(rcpt):

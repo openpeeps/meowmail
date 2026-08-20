@@ -183,6 +183,12 @@ proc startCommand*(v: Values) =
   smtpServerInstance = newSMTPServer(settings = cfg.toSMTPSettings())
   applyAuth(smtpServerInstance, cfg)
 
+  # Initialize TLS if configured
+  if cfg.certifications.isSome:
+    let (cert, key) = cfg.certifications.get()
+    if not smtpServerInstance.setupTlsCtx(cert, key):
+      stderr.writeLine("TLS setup failed: ", cert, " + ", key)
+
   # Load DKIM signing key if configured
   if cfg.dkimEnabled and cfg.dkimKeyFile.len > 0 and cfg.dkimDomain.len > 0:
     try:
@@ -409,6 +415,4 @@ proc queuePurgeCommand*(v: Values) =
       except CatchableError:
         discard
       q.removeEntry(entry.id)
-      inc purged
-    dec i
-  echo "Purged ", purged, " messages from queue"
+    
