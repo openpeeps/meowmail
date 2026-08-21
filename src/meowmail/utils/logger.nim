@@ -247,3 +247,15 @@ proc `logsFolder=`*(self: var Logger, newLogsFolder: string) {.raises: [IOError,
     raise newException(IOError, fmt"`{newLogsFolder}` isn't a valid path or doesn't exists")
   self.logsFolder = newLogsFolder
 
+# ── Process-wide logger ──────────────────────────────────────────────────────
+
+var logitGlobal*: Logger = nil
+  ## Process-wide logger instance. Installed once during server startup via
+  ## `setGlobalLogger`; safe to read from any thread afterwards (the Logger
+  ## itself is internally synchronized). Always nil-check before use — CLI-only
+  ## code paths never install one.
+
+proc setGlobalLogger*(logger: Logger) {.inline.} =
+  ## Install `logger` as the process-wide logger (see `logitGlobal`).
+  logitGlobal = logger
+

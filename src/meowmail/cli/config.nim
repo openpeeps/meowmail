@@ -42,6 +42,18 @@ type
     adminEnabled*: bool
     adminPort*: int
     adminHost*: string
+    queueSpoolDir*: string
+    queueMaxRetries*: int
+    queueBaseDelay*: int
+    queueMaxDelay*: int
+    queueRunnerInterval*: int
+    checkSenderDomain*: bool
+    checkRcptDomain*: bool
+    msgPerHour*: int
+    msgPerDay*: int
+    userMsgPerHour*: int
+    userMsgPerDay*: int
+    smtpCommandsLog*: bool
 
 proc loadConfig*(path: string): MeowMailConfig =
   ## Parse a `meowmail.config.toml` file.
@@ -116,6 +128,18 @@ proc loadConfig*(path: string): MeowMailConfig =
   result.adminEnabled = boolOf("admin.enabled", false)
   result.adminPort = intOf("admin.port", 8081)
   result.adminHost = strOf("admin.host", "127.0.0.1")
+  result.queueSpoolDir = strOf("queue.spool_dir")
+  result.queueMaxRetries = intOf("queue.max_retries", 20)
+  result.queueBaseDelay = intOf("queue.base_delay", 300)
+  result.queueMaxDelay = intOf("queue.max_delay", 86400)
+  result.queueRunnerInterval = intOf("queue.runner_interval", 30)
+  result.checkSenderDomain = boolOf("smtp.validation.check_sender_domain")
+  result.checkRcptDomain = boolOf("smtp.validation.check_rcpt_domain")
+  result.msgPerHour = intOf("smtp.limits.messages_per_hour", 100)
+  result.msgPerDay = intOf("smtp.limits.messages_per_day", 1000)
+  result.userMsgPerHour = intOf("smtp.limits.user_messages_per_hour")
+  result.userMsgPerDay = intOf("smtp.limits.user_messages_per_day")
+  result.smtpCommandsLog = boolOf("logging.smtp_commands")
 
 proc toSMTPSettings*(cfg: MeowMailConfig): SMTPSettings =
   ## Convert a parsed config into `SMTPSettings`.
@@ -136,6 +160,13 @@ proc toSMTPSettings*(cfg: MeowMailConfig): SMTPSettings =
     mxConfig: cfg.mxCfg,
     maildirBase: (if cfg.maildirBase.len > 0: some(cfg.maildirBase) else: none(string)),
     localDomains: cfg.localDomains,
+    checkSenderDomain: cfg.checkSenderDomain,
+    checkRcptDomain: cfg.checkRcptDomain,
+    msgPerHour: cfg.msgPerHour,
+    msgPerDay: cfg.msgPerDay,
+    userMsgPerHour: cfg.userMsgPerHour,
+    userMsgPerDay: cfg.userMsgPerDay,
+    smtpCommandsLog: cfg.smtpCommandsLog,
   )
 
 proc applyAuth*(server: SMTPServer, cfg: MeowMailConfig) =
@@ -145,3 +176,4 @@ proc applyAuth*(server: SMTPServer, cfg: MeowMailConfig) =
   if cfg.authUrl.len > 0:
     server.authProvider = newHTTPAuthProvider(cfg.authUrl, cfg.authToken, cfg.authTimeoutMs)
   server.requireAuth = cfg.requireAuth
+  server.requireTlsForAuth = cfg.requireTlsForAuth

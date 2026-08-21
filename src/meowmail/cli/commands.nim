@@ -8,6 +8,7 @@ import ../smtp/[smtpserver, smtpdelivery, smtpauth, mxprovider, dkim, queue]
 import ../imap/[imapserver, mailstore]
 import ../jmap/server as jmapserver
 import ../restapi/admin
+import ../utils/logger
 import powpow/net/tls
 import ./config
 
@@ -164,6 +165,21 @@ proc runAdminServer(server: AdminServer) {.thread.} =
   {.cast(gcsafe).}:
     server.start()
 
+var queueDelivery: ptr SMTPDelivery
+var queueIntervalMs = 30_000
+proc queueDeliverProc(req: DeliveryRequest): DeliveryDecision {.gcsafe.} =
+  ## Delivery callback for the background queue runner.
+  {.cast(gcsafe).}:
+    if queueDelivery != nil:
+      result = queueDelivery[].deliverMessage(req)
+
+var queueThread: Thread[Queue]
+proc runQueueRunner(q: Queue) {.thread.} =
+  ## Background queue runner: retries deferred messages until delivered,
+  ## bouncing to the sender on permanent failure or retry exhaustion.
+  {.cast(gcsafe).}:
+    q.runQueue(queueDeliverProc, queueIntervalMs)
+
 proc startCommand*(v: Values) =
   ## Start the MeowMail server using the specified configuration
   let cfgPath = v.get("config").getPath.path
@@ -193,18 +209,25 @@ proc startCommand*(v: Values) =
   if cfg.dkimEnabled and cfg.dkimKeyFile.len > 0 and cfg.dkimDomain.len > 0:
     try:
       smtpServerInstance.dkimKey = newDkimKey(cfg.dkimDomain, cfg.dkimSelector, cfg.dkimKeyFile)
-      echo "DKIM signing enabled for ", cfg.dkimDomain
+      logger.info(smtpServerInstance.logger, "DKIM signing enabled for " & cfg.dkimDomain)
     except CatchableError as e:
       stderr.writeLine("DKIM key load error: ", e.msg)
 
   # Initialize outbound message queue
-  let spoolDir = if cfg.spoolDirectory.len > 0: cfg.spoolDirectory
+  let spoolDir = if cfg.queueSpoolDir.len > 0: cfg.queueSpoolDir
+                 elif cfg.spoolDirectory.len > 0: cfg.spoolDirectory
                  else: getTempDir() / "meowmail-queue"
-  smtpServerInstance.queue = newQueue(spoolDir)
+  smtpServerInstance.queue = newQueue(spoolDir, cfg.queueMaxRetries,
+                                      cfg.queueBaseDelay, cfg.queueMaxDelay)
   smtpServerInstance.queue.load()
   let qs = smtpServerInstance.queue.stats()
   if qs.total > 0:
-    echo "Queue: ", qs.total, " messages (", qs.deferred, " deferred)"
+    logger.info(smtpServerInstance.logger, "Queue: " & $qs.total & " messages (" & $qs.deferred & " deferred)")
+
+  # Background queue runner (drains deferred messages with retry/backoff)
+  queueDelivery = addr smtpServerInstance.delivery
+  queueIntervalMs = cfg.queueRunnerInterval * 1000
+  createThread(queueThread, runQueueRunner, smtpServerInstance.queue)
 
   # create thread for main SMTP server
   createThread(thr[0], initSMTPServer, (addr(smtpServerInstance), Port(cfg.listenPort)))
@@ -253,6 +276,7 @@ proc startCommand*(v: Values) =
     createThread(adminThread, runAdminServer, adminSvr)
 
   joinThreads(thr)
+  joinThread(queueThread)
   if cfg.imapEnabled:
     joinThread(imapThread)
   if cfg.jmapEnabled:

@@ -4,7 +4,7 @@
 #          Made by Humans from OpenPeeps
 #          https://github.com/openpeeps/meowmail
 
-import std/[strutils, sequtils, osproc, algorithm]
+import std/[strutils, sequtils, algorithm]
 import ./auth/[spf_preflight, dmarc_preflight]
 
 ## This module implements an MX delivery provider for MeowMail that delivers
@@ -20,6 +20,7 @@ import ./auth/[spf_preflight, dmarc_preflight]
 ## SMTP dialog is driven by the loop until a final delivery decision is made.
 
 import powpow
+import ../utils/logger
 import ./smtpdelivery
 
 {.warning: "MXProvider is still in early development and may have limitations and edge cases that are not yet handled. Don't use this in production".}
@@ -132,45 +133,31 @@ proc extractRcptDomain(rcpt: string): string =
   if atPos < 0 or atPos == v.high: return
   result = v[atPos + 1 .. ^1].strip().toLowerAscii()
 
-proc parseMxLine(line: string): MXHost =
-  # dig +short MX google.com
-  let parts = line.splitWhitespace()
-  if parts.len < 2:
-    return MXHost(preference: high(int))
+proc resolveMxHosts*(domain: string, maxHosts = 5): seq[MXHost] {.gcsafe.} =
+  ## Resolve MX records for `domain` using powpow's native async DNS resolver.
+  if domain.len == 0: return
+  {.cast(gcsafe).}:
+    let loop = newLoop()
+    var done = false
+    var results: seq[MXHost]
+    loop.resolveMxAsync(domain) do (records: seq[MxRecord]; err: string):
+      if err.len == 0:
+        for r in records:
+          results.add(MXHost(preference: r.pref, host: r.exchange))
+      done = true
+      loop.stop()
+    if not done:
+      loop.run()
+    loop.close()
+    results.sort(proc(a, b: MXHost): int = cmp(a.preference, b.preference))
 
-  var host = parts[1].strip()
-  if host.endsWith("."):
-    host.setLen(host.len - 1)
+    # RFC behavior: if no MX, try the domain itself.
+    if results.len == 0 and domain.len > 0:
+      results.add(MXHost(preference: 0, host: domain.toLowerAscii()))
 
-  var pref = high(int)
-  try:
-    pref = parseInt(parts[0])
-  except ValueError:
-    pref = high(int)
-
-  result.preference = pref
-  result.host = host.toLowerAscii()
-
-proc resolveMxHosts*(domain: string, maxHosts = 5): seq[MXHost] =
-  ## Temporary resolver via `dig` (available on macOS by default).
-  ## Later replace with c-ares / native DNS.
-  let (outp, exitCode) = execCmdEx("dig +short MX " & domain)
-  if exitCode == 0:
-    for raw in outp.splitLines():
-      let line = raw.strip()
-      if line.len == 0: continue
-      let mx = parseMxLine(line)
-      if mx.host.len > 0:
-        result.add(mx)
-
-  result.sort(proc(a, b: MXHost): int = cmp(a.preference, b.preference))
-
-  # RFC behavior: if no MX, try the domain itself.
-  if result.len == 0 and domain.len > 0:
-    result.add(MXHost(preference: 0, host: domain.toLowerAscii()))
-
-  if result.len > maxHosts and maxHosts > 0:
-    result.setLen(maxHosts)
+    if results.len > maxHosts and maxHosts > 0:
+      results.setLen(maxHosts)
+    results
 
 type
   MxTxnState = enum
@@ -235,8 +222,8 @@ proc setDone(txn: MxTxn, d: DeliveryDecision): DeliveryDecision {.discardable.} 
   txn.decision
 
 proc smtpWriteLine(txn: MxTxn, line: string): bool =
-  if txn.cfg.debug:
-    echo "[mx] > ", line
+  if txn.cfg.debug and logitGlobal != nil:
+    logitGlobal.debug("[mx] > " & line)
   if txn.conn == nil: return false
   let s = line & "\r\n"
   result = txn.conn.send(s) == s.len
@@ -389,8 +376,8 @@ proc handleReply(txn: MxTxn, code: int): DeliveryDecision {.discardable.} =
     discard
 
 proc processReplyLine(txn: MxTxn, line: string): DeliveryDecision {.discardable.} =
-  if txn.cfg.debug:
-    echo "[mx] < ", line
+  if txn.cfg.debug and logitGlobal != nil:
+    logitGlobal.debug("[mx] < " & line)
 
   if line.len < 3:
     return setDone(txn, ddTempFail)
@@ -443,8 +430,8 @@ proc onMxClose(conn: Connection) =
     setDone(txn, ddTempFail)
 
 proc mxLog(cfg: MXProviderConfig, msg: string) =
-  if cfg.debug:
-    echo "[mx] ", msg
+  if cfg.debug and logitGlobal != nil:
+    logitGlobal.debug("[mx] " & msg)
 
 proc deliverToMxHost(req: DeliveryRequest,
         mxHost: MXHost, cfg: MXProviderConfig): DeliveryDecision {.gcsafe.} =

@@ -25,11 +25,16 @@ jobs:
         with:
           nim-version: ${{ matrix.nim-version }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Fetch powpow + openparser (sibling dirs used by config.nims)
+        run: |
+          git clone --depth 1 https://github.com/openpeeps/powpow ../powpow
+          git clone --depth 1 https://github.com/openpeeps/openparser ../openparser
       - name: Install deps
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            pkg-config libssl-dev libevent-dev ca-certificates
+            pkg-config libssl-dev ca-certificates \
+            libspf2-dev libopendmarc-dev
 
       - run: sudo ldconfig
       - run: |

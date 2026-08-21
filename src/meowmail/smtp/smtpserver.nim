@@ -10,7 +10,7 @@ from std/net import Port, `$`
 
 import powpow
 import powpow/net/tlsapi
-import ./smtpauth, ./smtpdelivery, ./mxprovider, ./dkim, ./queue, ./bounce, ./ratelimit
+import ./smtpauth, ./smtpdelivery, ./mxprovider, ./dkim, ./queue, ./bounce, ./ratelimit, ./address
 import ./auth/inbound
 import ../imap/msgparse
 import pkg/spf
@@ -74,6 +74,8 @@ type
       # Whether the client has issued a QUIT command.
     authenticated: bool
       # Whether the client has successfully authenticated.
+    authUser: string
+      # The authenticated username (set on successful auth).
     authProgress: AuthProgress
       # Tracks the current step in the authentication process, if any.
     authTempUser: string
@@ -118,6 +120,20 @@ type
       ## and "meowmail.local" when a Maildir base is configured.
     sendPolicy*: SMTPSendPolicy = spDefault
       ## The sending policy for the server.
+    checkSenderDomain*: bool = false
+      ## When true, validate the sender domain has MX/A records at MAIL FROM time.
+    checkRcptDomain*: bool = false
+      ## When true, validate recipient domain has MX/A records at RCPT TO time.
+    msgPerHour*: int = 100
+      ## Max messages per IP per hour (0 = unlimited).
+    msgPerDay*: int = 1000
+      ## Max messages per IP per day (0 = unlimited).
+    userMsgPerHour*: int = 0
+      ## Max messages per authenticated user per hour (0 = unlimited).
+    userMsgPerDay*: int = 0
+      ## Max messages per authenticated user per day (0 = unlimited).
+    smtpCommandsLog*: bool = false
+      ## Log each SMTP command with IP and reply code.
 
   SMTPListener = tuple
     ipv4: TcpServer
@@ -126,6 +142,10 @@ type
   SMTPServer* = ref object
     ## Represents the SMTP server instance, including its configuration and state.
     loop*: Loop
+    ipMsgLimits*: RateLimiter
+      ## Per-IP message rate limiter (hourly + daily windows).
+    userMsgLimits*: RateLimiter
+      ## Per-authenticated-user message rate limiter.
       ## The powpow event loop driving all listeners and sessions.
     listener*: SMTPListener
       ## Listener for standard SMTP (port 25).
@@ -279,7 +299,7 @@ proc smtpReplyEhloCapabilities(conn: Connection, hostname: string,
     smtpReplyMulti(conn, 250, "STARTTLS", true)
 
   # Common policy: AUTH only after TLS
-  if supportsAuth(server):
+  if supportsAuth(server) and not (server.requireTlsForAuth and not s.tlsActive):
     smtpReplyMulti(conn, 250, "AUTH PLAIN LOGIN", true)
 
   smtpReplyMulti(conn, 250, "HELP", false)
@@ -291,6 +311,21 @@ proc decodeB64Safe(encoded: string, decoded: var string): bool =
     result = true
   except CatchableError:
     result = false
+
+proc extractRcptDomain(rcpt: string): string =
+  ## Extract and lowercase the domain part of an envelope address.
+  let a = rcpt.strip().strip(chars = {'<', '>'})
+  let at = a.rfind('@')
+  if at >= 0: result = a[at + 1 .. ^1].toLowerAscii()
+
+proc isLocalRecipient(server: SMTPServer, rcpt: string): bool =
+  ## Whether the recipient's domain is treated as local.
+  let dom = extractRcptDomain(rcpt)
+  if dom.len == 0: return false
+  if server.delivery != nil and server.delivery.localStore != nil:
+    return server.delivery.localStore.isLocal(rcpt)
+  for d in server.settings.localDomains:
+    if dom == d.toLowerAscii(): return true
 
 proc validateAuth(server: SMTPServer, s: SMTPSession,
                       user, pass, mechanism: string): AuthDecision =
@@ -328,12 +363,14 @@ proc resetTxn(s: SMTPSession) =
   s.dataLines.setLen(0)
   s.authProgress = apNone
   s.authTempUser.setLen(0)
+  s.authUser.setLen(0)
 
 proc applyAuthDecision(conn: Connection, s: SMTPSession, d: AuthDecision,
                        server: SMTPServer = nil) =
   case d
   of authOk:
     s.authenticated = true
+    s.authUser = s.authTempUser
     smtpReply(conn, 235, "Authentication successful")
   of authInvalid:
     smtpReply(conn, 535, "Authentication credentials invalid")
@@ -507,6 +544,16 @@ proc handleSmtpLine(conn: Connection, server: SMTPServer, line: string) =
         heloName: s.heloName
       )
 
+      # Check per-IP / per-user message quotas
+      let clientIp = conn.getClientIp()
+      if not server.ipMsgLimits.allow(clientIp):
+        smtpReply(conn, 452, "Too many messages, try again later")
+        return
+      if s.authenticated and s.authUser.len > 0:
+        if not server.userMsgLimits.allow("user:" & s.authUser):
+          smtpReply(conn, 452, "Too many messages, try again later")
+          return
+
       globalLogger.info("[smtp] received message: from=" & req.mailFrom & " to=" & req.rcptTo.join(", "))
 
       # Spawn a background thread to handle delivery so that we can respond
@@ -527,6 +574,11 @@ proc handleSmtpLine(conn: Connection, server: SMTPServer, line: string) =
   let parts = line.split(' ', maxsplit = 1)
   let cmd = parts[0].toUpperAscii()
   let arg = if parts.len > 1: parts[1].strip() else: ""
+
+  if server.settings.smtpCommandsLog:
+    let clientIp = conn.getClientIp()
+    let userTag = if s.authenticated and s.authUser.len > 0: " user=" & s.authUser else: ""
+    server.logger.debug("[smtp] cmd=" & cmd & " ip=" & clientIp & userTag)
 
   case cmd
   of "HELO":
@@ -549,6 +601,8 @@ proc handleSmtpLine(conn: Connection, server: SMTPServer, line: string) =
       smtpReply(conn, 503, "Bad sequence of commands")
     elif not supportsAuth(server):
       smtpReply(conn, 503, "Authentication not enabled")
+    elif server.requireTlsForAuth and not s.tlsActive:
+      smtpReply(conn, 530, "Must issue a STARTTLS command first")
     elif s.authenticated:
       smtpReply(conn, 503, "Already authenticated")
     elif server.rateLimit != nil and server.rateLimit.isLockedOut(conn.getClientIp()):
@@ -603,11 +657,11 @@ proc handleSmtpLine(conn: Connection, server: SMTPServer, line: string) =
       smtpReply(conn, 501, "Syntax: MAIL FROM:<address>")
     else:
       let fromPart = arg[5..^1].strip()
-      # Basic address validation
+      # Validate sender address syntax via RFC 5321 parser
       if fromPart.len > 0 and fromPart != "<>":
-        let rcptAddr = fromPart.strip(chars = {'<', '>'})
-        if rcptAddr.len > 0 and '@' notin rcptAddr:
-          smtpReply(conn, 501, "Invalid sender address")
+        let mb = parseMailbox(fromPart)
+        if not mb.hasValidSyntax():
+          smtpReply(conn, 501, "Invalid sender address: " & mb.error)
           return
       # Parse SIZE parameter (RFC 1870): MAIL FROM:<addr> SIZE=<n>
       var claimedSize = 0
@@ -632,8 +686,20 @@ proc handleSmtpLine(conn: Connection, server: SMTPServer, line: string) =
     elif s.rcptTo.len >= DefaultSmtpLimits.maxRecipients:
       smtpReply(conn, 552, "Too many recipients")
     else:
-      s.rcptTo.add(arg[3..^1].strip())
-      smtpReply(conn, 250, "OK")
+      let rcptAddr = arg[3..^1].strip()
+      # Validate recipient address syntax
+      if rcptAddr.len > 0:
+        let mb = parseMailbox(rcptAddr)
+        if not mb.hasValidSyntax():
+          smtpReply(conn, 501, "Invalid recipient address: " & mb.error)
+          return
+      if server.settings.sendPolicy == spNoRelay and
+           not isLocalRecipient(server, rcptAddr):
+        server.logger.warn("[smtp] relay denied (spNoRelay) for recipient " & rcptAddr)
+        smtpReply(conn, 554, "Relay access denied")
+      else:
+        s.rcptTo.add(rcptAddr)
+        smtpReply(conn, 250, "OK")
   of "DATA":
     if s.rcptTo.len == 0:
       smtpReply(conn, 503, "Need RCPT TO first")
@@ -855,6 +921,7 @@ proc newSMTPServer*(settings: SMTPSettings): SMTPServer =
   )
   result.logger.start()
   globalLogger = result.logger # set global logger for use in other modules
+  logger.setGlobalLogger(result.logger) # shared facility for modules without a server ref
 
   # initialize delivery mechanism with spool directory from env or default
   result.delivery =
@@ -862,6 +929,14 @@ proc newSMTPServer*(settings: SMTPSettings): SMTPServer =
                       provider = settings.deliveryProvider)
   # initialize rate limiter
   result.rateLimit = newSmtpRateLimit()
+
+  # initialize per-IP / per-user message quota limiters (powpow multi-window)
+  result.ipMsgLimits = newMultiRateLimiter(
+    result.loop,
+    [(settings.msgPerHour, 3_600_000), (settings.msgPerDay, 86_400_000)])
+  result.userMsgLimits = newMultiRateLimiter(
+    result.loop,
+    [(settings.userMsgPerHour, 3_600_000), (settings.userMsgPerDay, 86_400_000)])
 
   # Optional local Maildir delivery (env override takes precedence over config)
   let envMaildir = getEnv("MEOWMAIL_MAILDIR", "")

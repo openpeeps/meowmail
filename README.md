@@ -101,6 +101,19 @@ hostname = "mail.example.com"
 enabled = true
 port = 25
 
+[smtp.listen.submission587]
+enabled = true
+port = 587
+
+[smtp.listen.smtps465]
+enabled = true
+port = 465
+
+[smtp.tls]
+enabled = true
+cert_file = "/etc/ssl/certs/meowmail.crt"
+key_file = "/etc/ssl/private/meowmail.key"
+
 [smtp.auth]
 required = true
 
@@ -118,6 +131,21 @@ port = 143
 [jmap]
 enabled = true
 port = 8080
+
+[dkim]
+enabled = true
+domain = "example.com"
+selector = "meowmail"
+key_file = "/etc/ssl/private/meowmail-dkim.key"
+
+[logging]
+level = "info"
+format = "text"
+
+[admin]
+enabled = true
+port = 8081
+host = "127.0.0.1"
 ```
 
 ### 3. Start the server
@@ -174,6 +202,65 @@ MeowMail uses TOML configuration. See `example/meowmail.config.toml` for all opt
 [logging]           # Log format, rotation, level filtering
 [queue]             # Outbound queue settings
 [admin]             # Admin API endpoint
+```
+
+### Generating SSL Certificates
+
+**Self-signed (development):**
+```bash
+# Generate key + cert in one step
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout /etc/ssl/private/meowmail.key \
+  -out /etc/ssl/certs/meowmail.crt \
+  -subj "/CN=localhost"
+```
+
+**Let's Encrypt (production):**
+```bash
+# Install certbot
+apt install certbot        # Debian/Ubuntu
+brew install certbot       # macOS
+
+# Get a certificate (standalone mode)
+certbot certonly --standalone -d mail.example.com
+
+# Certs are at:
+#   /etc/letsencrypt/live/mail.example.com/fullchain.pem
+#   /etc/letsencrypt/live/mail.example.com/privkey.pem
+
+# Auto-renew (add to crontab)
+0 3 * * * certbot renew --quiet
+```
+
+1. Generate the self-signed cert (on your server):
+```
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+  -keyout /etc/ssl/private/meowmail-example.key \
+  -out /etc/ssl/certs/meowmail-example.crt \
+  -subj "/CN=localhost"
+```
+
+2. Set the paths in your TOML config:
+
+```toml
+[smtp.tls]
+enabled = true
+cert_file = "/etc/ssl/certs/meowmail.crt"
+key_file = "/etc/ssl/private/meowmail.key"
+```
+
+**DKIM key pair:**
+```bash
+# Generate RSA key for DKIM signing
+openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 \
+  -out /etc/ssl/private/meowmail-dkim.key
+
+# Extract public key for DNS
+openssl rsa -in /etc/ssl/private/meowmail-dkim.key \
+  -pubout -outform PEM | \
+  sed -n '/-----BEGIN/,/-----END/p' | tr -d '\n' | \
+  sed 's/-----BEGIN PUBLIC KEY-----//;s/-----END PUBLIC KEY-----//'
+# Paste the output into your DNS TXT record
 ```
 
 ### Environment variables

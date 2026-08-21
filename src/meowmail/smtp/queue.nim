@@ -6,6 +6,8 @@
 
 import std/[os, strutils, times, options, algorithm, sequtils, locks, posix]
 import ./smtpdelivery
+import ./bounce
+import ../imap/mailstore
 
 type
   QueueStatus* = enum
@@ -243,10 +245,33 @@ proc stats*(queue: Queue): tuple[total, deferred, active, delivered, bounced: in
 
 # ── Queue runner ──────────────────────────────────────────────────────────────
 
+proc bounceEntry(queue: Queue, entry: QueueEntry, localStore: MaildirStore,
+                 status: DsnStatus, diag: string) =
+  ## Generate DSN bounces for a failed queue entry. Local senders receive the
+  ## bounce in their Maildir; remote senders get it enqueued for MX delivery
+  ## with a null return-path (loop-safe: bounces never generate bounces).
+  for rcpt in entry.rcptTo:
+    let (bounceTo, bounceBody) = generateBounce(
+      entry.mailFrom, rcpt, entry.heloName, status, diag)
+    if bounceTo.len == 0 or bounceBody.len == 0:
+      continue  # loop prevention (empty sender or postmaster)
+    if localStore != nil and localStore.isLocal(bounceTo):
+      discard localStore.deliver("MAILER-DAEMON@meowmail.local", bounceTo, bounceBody)
+    else:
+      discard queue.enqueue(DeliveryRequest(
+        mailFrom: "",
+        rcptTo: @[bounceTo],
+        data: bounceBody,
+        heloName: "meowmail.local",
+      ))
+
 proc runQueue*(queue: Queue,
                deliverProc: proc(req: DeliveryRequest): DeliveryDecision {.gcsafe.},
-               intervalMs: int = 30_000) =
+               intervalMs: int = 30_000,
+               localStore: MaildirStore = nil) =
   ## Background queue runner. Processes pending entries at the given interval.
+  ## Temporary failures are retried with exponential backoff; permanent
+  ## failures and exhausted retries generate DSN bounces to the sender.
   ## This proc runs forever (should be called from a thread).
   {.cast(gcsafe).}:
     while true:
@@ -280,8 +305,15 @@ proc runQueue*(queue: Queue,
             queue.markDelivered(entry.id)
           of ddTempFail:
             queue.markFailed(entry.id, "temporary failure")
+            # If retries are now exhausted, notify the sender and drop the entry.
+            let e = queue.getEntry(entry.id)
+            if e.id.len > 0 and e.status == qsBounced:
+              bounceEntry(queue, e, localStore, dsnMessageExpired, e.lastError)
+              queue.removeEntry(e.id)
           of ddPermFail:
-            queue.markFailed(entry.id, "permanent failure")
+            # Permanent failure: bounce immediately instead of retrying.
+            bounceEntry(queue, entry, localStore, dsnFailed, "permanent failure")
+            queue.removeEntry(entry.id)
         except CatchableError as e:
           queue.markFailed(entry.id, e.msg)
 
