@@ -32,18 +32,20 @@ when isMainModule:
         ## Generate DMARC record
 
       -- "Queue Management"
-      queueList string(queueDir):
-        ## List queued messages
-      queueStats string(queueDir):
-        ## Show queue statistics
-      queueFlush string(queueDir):
-        ## Force delivery of pending messages
-      queueRetry string(queueDir), string(id):
-        ## Requeue a specific message
-      queueDelete string(queueDir), string(id):
-        ## Remove a message from queue
-      queuePurge string(queueDir):
-        ## Remove delivered/bounced/failed messages
+      queue:
+        ## Manage queue messages
+        list string(queueDir):
+          ## List queued messages
+        stats string(queueDir):
+          ## Show queue statistics
+        flush string(queueDir):
+          ## Force delivery of pending messages
+        retry string(queueDir), string(id):
+          ## Requeue a specific message
+        delete string(queueDir), string(id):
+          ## Remove a message from queue
+        purge string(queueDir):
+          ## Remove delivered/bounced/failed messages
 
 else:
   import ./meowmail/smtp/[smtpserver, smtpdelivery, smtpauth, mxprovider]
