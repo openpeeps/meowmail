@@ -159,6 +159,25 @@ proc resolveMxHosts*(domain: string, maxHosts = 5): seq[MXHost] {.gcsafe.} =
       results.setLen(maxHosts)
     results
 
+proc resolveTxtRecords*(hostname: string): seq[string] {.gcsafe.} =
+  ## Resolve TXT records for `hostname` using powpow's native async DNS resolver.
+  ## Returns the raw TXT data strings (one per record). Empty seq on NODATA.
+  if hostname.len == 0: return
+  {.cast(gcsafe).}:
+    let loop = newLoop()
+    var done = false
+    var results: seq[string]
+    loop.resolveTxtAsync(hostname) do (records: seq[TxtRecord]; err: string):
+      if err.len == 0:
+        for r in records:
+          results.add(r.data)
+      done = true
+      loop.stop()
+    if not done:
+      loop.run()
+    loop.close()
+    results
+
 type
   MxTxnState = enum
     msBanner, msEhlo, msHelo, msStartTls, msMailFrom,
@@ -518,28 +537,28 @@ proc newMXProvider*(cfg = MXProviderConfig(), performSpfPreflight = true, perfor
   ## Creates a new MX delivery provider with the specified configuration. The returned
   ## provider will attempt to deliver messages directly to recipient domains by resolving
   ## their MX records and performing SMTP transactions.
-  result = proc(req: DeliveryRequest): DeliveryDecision {.gcsafe.} =
+  result = proc(req: DeliveryRequest): DeliveryOutcome {.gcsafe.} =
     if req.rcptTo.len == 0:
-      return ddPermFail
+      return okOutcome(ddPermFail)
 
     # when enabled, perform SPF and DMARC preflight checks before attempting
     # delivery to MX hosts.
     if performSpfPreflight:
       let spfDecision = runSpfPreflight(req, cfg)
       if spfDecision != ddOk:
-        return spfDecision
+        return okOutcome(spfDecision)
 
     if performDmarcPreflight:
       let dmarcDecision = runDmarcPreflight(req, cfg)
       if dmarcDecision != ddOk:
-        return dmarcDecision
+        return okOutcome(dmarcDecision)
 
     # Validate recipients and collect unique domains.
     var domains: seq[string] = @[]
     for rcpt in req.rcptTo:
       let domain = extractRcptDomain(rcpt)
       if domain.len == 0:
-        return ddPermFail
+        return okOutcome(ddPermFail)
       if domain notin domains:
         domains.add(domain)
 
@@ -550,5 +569,5 @@ proc newMXProvider*(cfg = MXProviderConfig(), performSpfPreflight = true, perfor
 
       let d = deliverToDomain(domainReq, domain, cfg)
       if d != ddOk:
-        return d
-    ddOk
+        return okOutcome(d)
+    okOutcome(ddOk)

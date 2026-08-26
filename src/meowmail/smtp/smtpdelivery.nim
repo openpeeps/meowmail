@@ -6,6 +6,7 @@
 
 import std/[posix, options, os, times]
 
+import pkg/flysystem
 import ../imap/mailstore
 
 ## This module implements the SMTP delivery logic for MeowMail. It defines the
@@ -23,6 +24,26 @@ type
   DeliveryDecision* = enum
     ddOk, ddTempFail, ddPermFail
 
+  RcptFailure* = object
+    rcpt*: string
+      ## The recipient address rejected by the remote host.
+    permanent*: bool
+      ## true = 5xx at RCPT TO; false = temporary 4xx rejection.
+
+  DeliveryOutcome* = object
+    decision*: DeliveryDecision
+      ## Overall transaction result for this delivery request.
+    failedRcpts*: seq[RcptFailure]
+      ## Recipients the remote host rejected while others were accepted
+      ## (partial acceptance). Empty on whole-request failures.
+
+proc okOutcome*(decision = ddOk, failed: seq[RcptFailure] = @[]): DeliveryOutcome {.inline.} =
+  DeliveryOutcome(decision: decision, failedRcpts: failed)
+
+func isOk*(o: DeliveryOutcome): bool {.inline.} =
+  o.decision == ddOk
+
+type
   DeliveryRequest* = object
     mailFrom*: string
       ## The envelope sender address specified in the MAIL FROM command.
@@ -35,7 +56,7 @@ type
       ## This can be useful for making delivery decisions based on the
       ## client's identity or for logging purposes
 
-  DeliveryProvider* = proc(req: DeliveryRequest): DeliveryDecision {.gcsafe.}
+  DeliveryProvider* = proc(req: DeliveryRequest): DeliveryOutcome {.gcsafe.}
 
   SMTPDelivery* = ref object
     deliveryProvider*: DeliveryProvider
@@ -45,12 +66,20 @@ type
       ## Optional directory path where messages will be spooled
       ## if no delivery provider is configured. If not set, a
       ## default temporary directory will be used
+    spoolStore*: StorageDriver
+      ## Flysystem-backed storage for the spool directory (atomic writes,
+      ## traversal-safe paths). Created eagerly for the resolved spool dir.
     localStore*: MaildirStore
       ## Optional Maildir store. When set, recipients in `localStore.localDomains`
       ## are delivered directly into their per-user Maildir instead of being
       ## spooled or MX-delivered.
 
 var spoolSeq {.threadvar.}: uint64
+
+proc defaultSpoolDir*(smtpd: SMTPDelivery): string =
+  ## Returns the default spool directory path. This is used when no
+  ## custom spool directory is configured.
+  result = getTempDir() / "meowmail-spool"
 
 proc newSMTPDelivery*(spoolDir: Option[string],
                 provider: DeliveryProvider = nil,
@@ -60,33 +89,19 @@ proc newSMTPDelivery*(spoolDir: Option[string],
   new(result)
   result.deliveryProvider = provider
   result.spoolDir = spoolDir
+  result.spoolStore = newLocalDriver(
+    (if spoolDir.isSome: spoolDir.get else: result.defaultSpoolDir()))
   result.localStore = localStore
 
-proc defaultSpoolDir*(smtpd: SMTPDelivery): string =
-  ## Returns the default spool directory path. This is used when no
-  ## custom spool directory is configured.
-  result = getTempDir() / "meowmail-spool"
-
-proc spoolDeliver*(smtpd: SMTPDelivery, req: DeliveryRequest): DeliveryDecision =
+proc spoolDeliver*(smtpd: SMTPDelivery, req: DeliveryRequest): DeliveryOutcome =
   ## Spools the message to disk in the configured spool directory.
   ## The message is saved in a simple format with envelope information
   ## in custom headers and the raw message data following a blank line.
-  ## The filename is generated using a timestamp, process ID, and a sequence
-  ## number to ensure uniqueness
-  let dir =
-    if smtpd.spoolDir.isSome: smtpd.spoolDir.get
-    else: smtpd.defaultSpoolDir()
-  
-  try:
-    # ensure the spool directory exists, creating it if necessary
-    discard existsOrCreateDir(dir)
-  except CatchableError:
-    return ddTempFail
-
+  ## Writes go through the flysystem driver (temp file + rename) so a crash
+  ## mid-write never leaves a partially written message behind.
   inc spoolSeq # increment the spool sequence number for unique filenames
   let tsMs = int64(epochTime() * 1000.0) # current timestamp in milliseconds
   let fileName = $tsMs & "-" & $getpid() & "-" & $spoolSeq & ".eml"
-  let path = dir / fileName # full path to the spooled message file
 
   var payload: string
   payload.add("X-MeowMail-Envelope-From: " & req.mailFrom & "\r\n")
@@ -98,12 +113,13 @@ proc spoolDeliver*(smtpd: SMTPDelivery, req: DeliveryRequest): DeliveryDecision 
   payload.add(req.data)
 
   try:
-    writeFile(path, payload)
-    ddOk
+    {.cast(gcsafe).}:
+      smtpd.spoolStore.write(fileName, payload)
+    okOutcome()
   except CatchableError:
-    ddTempFail
+    okOutcome(ddTempFail)
 
-proc deliverMessage*(smtpd: SMTPDelivery, req: DeliveryRequest): DeliveryDecision =
+proc deliverMessage*(smtpd: SMTPDelivery, req: DeliveryRequest): DeliveryOutcome =
   ## Delivers a message using local Maildir delivery (for local recipients),
   ## a custom delivery provider, or by spooling to disk.
   if smtpd.localStore != nil:
@@ -115,11 +131,11 @@ proc deliverMessage*(smtpd: SMTPDelivery, req: DeliveryRequest): DeliveryDecisio
       if smtpd.localStore.isLocal(rcpt):
         sawLocal = true
         if not smtpd.localStore.deliver(req.mailFrom, rcpt, req.data):
-          return ddTempFail
+          return okOutcome(ddTempFail)
       else:
         remote.rcptTo.add(rcpt)
     if remote.rcptTo.len == 0:
-      return ddOk
+      return okOutcome()
     if smtpd.deliveryProvider != nil:
       return smtpd.deliveryProvider(remote)
     return smtpd.spoolDeliver(remote)
@@ -139,3 +155,5 @@ proc setSpoolDir*(smtpd: var SMTPDelivery, spoolDir: string) =
   smtpd.spoolDir =
     if spoolDir.len > 0: some(spoolDir)
     else: none(string)
+  smtpd.spoolStore = newLocalDriver(
+    (if smtpd.spoolDir.isSome: smtpd.spoolDir.get else: smtpd.defaultSpoolDir()))

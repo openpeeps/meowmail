@@ -9,12 +9,19 @@ import powpow
 import ../smtp/queue
 
 type
+  AdminFlushProc* = proc(): int {.gcsafe.}
+    ## Forces immediate delivery of pending queue entries; returns the number
+    ## attempted. Injected by the caller that owns the delivery provider.
+
   AdminServer* = ref object
     loop*: Loop
     http*: HttpServer
     host*: string
     port*: Port
     queue*: Queue
+    flushProc*: AdminFlushProc
+      ## Optional callback performing a real queue flush. When nil the flush
+      ## endpoint reports the pending count only.
     startTime*: times.Time
 
 proc sendJson(res: HttpResponse, code: HttpCode, payload: JsonNode) =
@@ -60,11 +67,19 @@ proc handleAdminRequest(server: AdminServer, req: HttpRequest, res: HttpResponse
 
   # Queue flush
   if cmd == HttpPost and uri == "/admin/queue/flush":
-    let pending = server.queue.pending()
-    let payload = %*{
-      "status": "ok",
-      "flushed": pending.len,
-    }
+    var payload = %*{"status": "ok"}
+    if server.flushProc != nil:
+      try:
+        payload["flushed"] = %server.flushProc()
+      except CatchableError as e:
+        payload["error"] = %e.msg
+        sendJson(res, Http500, payload)
+        return
+    else:
+      let pending = server.queue.pending()
+      payload["flushed"] = %0
+      payload["pending"] = %pending.len
+      payload["detail"] = %"no delivery provider attached; nothing was attempted"
     sendJson(res, Http200, payload)
     return
 

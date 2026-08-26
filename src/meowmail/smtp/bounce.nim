@@ -83,9 +83,12 @@ proc generateBounce*(originalFrom, originalTo, heloName: string,
   if diag.len > 0:
     body.add("Diagnostic: " & diag & "\r\n")
   body.add("\r\n")
-  body.add("The message will remain in the queue for up to 24 hours and will\r\n")
-  body.add("be retried. After that time, if delivery has not succeeded, a\r\n")
-  body.add("failure notification will be sent to the sender.\r\n")
+  case status
+  of dsnMessageExpired, dsnDelayed:
+    body.add("The message will continue to be retried. If delivery does not\r\n")
+    body.add("succeed, a further failure notification will be sent.\r\n")
+  else:
+    body.add("No further delivery attempts will be made for this message.\r\n")
   body.add("\r\n")
 
   # Part 2: Message/delivery-status (RFC 3461 §2.2)
@@ -99,7 +102,9 @@ proc generateBounce*(originalFrom, originalTo, heloName: string,
   body.add("Final-Recipient: rfc822; " & originalTo & "\r\n")
   body.add("Action: " & (if status in [dsnDelayed]: "delayed" else: "failed") & "\r\n")
   body.add("Status: " & dsnCode(status) & "\r\n")
-  body.add("Remote-MTA: dns; " & originalTo.split("@")[1] & "\r\n")
+  let rcptParts = originalTo.split('@')
+  if rcptParts.len == 2:
+    body.add("Remote-MTA: dns; " & rcptParts[1] & "\r\n")
   body.add("Diagnostic-Code: smtp; " & dsnCode(status) & " " & dsnText(status) & "\r\n")
   body.add("\r\n")
 
@@ -116,17 +121,3 @@ proc generateBounce*(originalFrom, originalTo, heloName: string,
   body.add("--" & boundary & "--\r\n")
 
   (returnPath, body)
-
-proc deliverBounce*(localStore: MaildirStore, envelopeFrom, rcpt, helo: string,
-                    status: DsnStatus, diag: string = ""): bool =
-  ## Generate and deliver a bounce message to the sender's mailbox.
-  let (bounceTo, bounceBody) = generateBounce(envelopeFrom, rcpt, helo, status, diag)
-  if bounceTo.len == 0 or bounceBody.len == 0:
-    return false  # no bounce needed (empty sender or postmaster)
-  # Deliver to the sender's mailbox (if local)
-  if localStore != nil and localStore.isLocal(bounceTo):
-    result = localStore.deliver("MAILER-DAEMON@meowmail.local", bounceTo, bounceBody)
-  else:
-    # For remote senders, the bounce would need to be sent via MX.
-    # For now, spool it. A future improvement would enqueue it.
-    result = false

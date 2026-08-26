@@ -34,6 +34,7 @@ export mxprovider
 const
   MaxCommandLineLen = 510 # 512 including CRLF
   MaxDataLineLen = 998    # 1000 including CRLF
+  MaxMessageBytes* = 52_428_800  # 50 MB SIZE / DATA limit
 
 type
   SMTPCommand* = enum
@@ -70,6 +71,11 @@ type
       # Whether the session is currently in the DATA command state.
     dataLines: seq[string]
       # Accumulates lines of email content during the DATA command.
+    dataBytes: int
+      # Running byte count of the DATA stream (enforced while streaming).
+    dataOverflow: bool
+      # Set when the DATA stream exceeded MaxMessageBytes; further lines are
+      # discarded until the terminating dot so memory stays bounded.
     quitting: bool
       # Whether the client has issued a QUIT command.
     authenticated: bool
@@ -318,6 +324,32 @@ proc extractRcptDomain(rcpt: string): string =
   let at = a.rfind('@')
   if at >= 0: result = a[at + 1 .. ^1].toLowerAscii()
 
+proc splitEnvelopeParams(s: string): tuple[addrPart: string,
+                                            params: seq[tuple[k, v: string]]] =
+  ## Split an envelope argument such as `<a@b> SIZE=100 BODY=8BITMIME` into
+  ## the address token and keyword/value pairs. Quoted local-parts are
+  ## respected when locating the token boundary.
+  var i = 0
+  var inQuotes = false
+  while i < s.len:
+    case s[i]
+    of '"':
+      inQuotes = not inQuotes
+    of ' ', '\t':
+      if not inQuotes: break
+    else:
+      discard
+    inc i
+  result.addrPart = s[0 ..< i].strip()
+  for kv in s[i .. ^1].split(' '):
+    let t = kv.strip()
+    if t.len == 0: continue
+    let eq = t.find('=')
+    if eq > 0:
+      result.params.add((t[0 ..< eq].toUpperAscii(), t[eq + 1 .. ^1]))
+    else:
+      result.params.add((t.toUpperAscii(), ""))
+
 proc isLocalRecipient(server: SMTPServer, rcpt: string): bool =
   ## Whether the recipient's domain is treated as local.
   let dom = extractRcptDomain(rcpt)
@@ -357,13 +389,18 @@ proc smtpReplyAndClose(conn: Connection, code: int, msg: string) =
 
 proc resetTxn(s: SMTPSession) =
   # Reset the transaction state of the session.
+  # Authentication state (authenticated / authUser) survives RSET and
+  # end-of-DATA per RFC 4954; it is only cleared by STARTTLS or disconnect.
   s.mailFrom.setLen(0)
   s.rcptTo.setLen(0)
   s.inData = false
   s.dataLines.setLen(0)
   s.authProgress = apNone
   s.authTempUser.setLen(0)
-  s.authUser.setLen(0)
+
+proc dataOverflow*(s: SMTPSession): bool {.inline.} =
+  ## Whether the current DATA stream exceeded MaxMessageBytes.
+  s.dataOverflow
 
 proc applyAuthDecision(conn: Connection, s: SMTPSession, d: AuthDecision,
                        server: SMTPServer = nil) =
@@ -371,6 +408,8 @@ proc applyAuthDecision(conn: Connection, s: SMTPSession, d: AuthDecision,
   of authOk:
     s.authenticated = true
     s.authUser = s.authTempUser
+    if server != nil and server.rateLimit != nil:
+      server.rateLimit.recordAuthSuccess(conn.getClientIp())
     smtpReply(conn, 235, "Authentication successful")
   of authInvalid:
     smtpReply(conn, 535, "Authentication credentials invalid")
@@ -460,10 +499,28 @@ proc handleStartTls(conn: Connection, server: SMTPServer, s: SMTPSession) =
 proc startBackgroundDelivery(server: SMTPServer, req: DeliveryRequest) {.thread, gcsafe.} =
   # Start a background thread to handle message delivery.
   let delivery: SMTPDelivery = server.delivery
-  let d = delivery.deliverMessage(req)
-  case d
+  let outcome = delivery.deliverMessage(req)
+  case outcome.decision
   of ddOk:
     server.logger.info("[mx] Delivered message from " & req.mailFrom & " to " & req.rcptTo.join(", "))
+    # Partial acceptance: bounce permanently rejected recipients; requeue the
+    # temporarily rejected ones so accepted recipients are not re-delivered.
+    var deferred: seq[string]
+    for f in outcome.failedRcpts:
+      if f.permanent:
+        discard routeBounce(delivery.localStore, server.queue, req.mailFrom,
+                            f.rcpt, req.heloName, dsnFailed,
+                            "rejected by remote host")
+        server.logger.warn("[mx] Bounced rejected recipient " & f.rcpt)
+      else:
+        deferred.add(f.rcpt)
+    if deferred.len > 0 and server.queue != nil and deferred.len < req.rcptTo.len:
+      let entryId = server.queue.enqueue(DeliveryRequest(
+        mailFrom: req.mailFrom, rcptTo: deferred, data: req.data,
+        heloName: req.heloName))
+      if entryId.len > 0:
+        server.logger.info("[queue] Enqueued temp-rejected recipients " & deferred.join(", ") &
+                           " as " & entryId)
   of ddTempFail:
     server.logger.warn("[mx] Temporary failure delivering message from " & req.mailFrom & " to " & req.rcptTo.join(", "))
     if server.queue != nil:
@@ -472,10 +529,11 @@ proc startBackgroundDelivery(server: SMTPServer, req: DeliveryRequest) {.thread,
         server.logger.info("[queue] Enqueued message " & entryId)
   of ddPermFail:
     server.logger.error("[mx] Permanent failure delivering message from " & req.mailFrom & " to " & req.rcptTo.join(", "))
-    # Generate bounce to sender
+    # Generate bounce to the sender (local -> Maildir, remote -> queue)
     for rcpt in req.rcptTo:
-      discard deliverBounce(delivery.localStore, req.mailFrom, rcpt, req.heloName,
-                            dsnFailed, "Permanent delivery failure")
+      discard routeBounce(delivery.localStore, server.queue, req.mailFrom,
+                          rcpt, req.heloName, dsnFailed,
+                          "Permanent delivery failure")
 
 proc handleSmtpLine(conn: Connection, server: SMTPServer, line: string) =
   # This is the main command processing function.
@@ -497,10 +555,15 @@ proc handleSmtpLine(conn: Connection, server: SMTPServer, line: string) =
   if s.inData:
     if line == ".":
       # End of DATA command. Process the message delivery.
+      if s.dataOverflow:
+        # Content was discarded mid-stream to keep memory bounded.
+        smtpReply(conn, 552, "Message size exceeds fixed maximum")
+        resetTxn(s)
+        return
       var msgData = s.dataLines.join("\r\n") & "\r\n"
 
-      # Enforce message size limit (50 MB)
-      if msgData.len > 52428800:
+      # Belt-and-braces: enforce the limit again on the assembled message
+      if msgData.len > MaxMessageBytes:
         smtpReply(conn, 552, "Message size exceeds fixed maximum")
         resetTxn(s)
         return
@@ -513,18 +576,19 @@ proc handleSmtpLine(conn: Connection, server: SMTPServer, line: string) =
             let headerBlock = msgData[0 ..< sep]
             let bodyPart = msgData[sep + 4 .. ^1]
             var headers: seq[Header]
-            for line in headerBlock.split("\r\n"):
-              if line.len == 0: continue
-              if line[0] in {' ', '\t'}:
+            for hline in headerBlock.split("\r\n"):
+              if hline.len == 0: continue
+              if hline[0] in {' ', '\t'}:
                 if headers.len > 0:
-                  headers[^1].value &= " " & line.strip()
+                  headers[^1].value &= " " & hline.strip()
                 continue
-              let colon = line.find(':')
+              let colon = hline.find(':')
               if colon > 0:
-                headers.add((name: line[0 ..< colon], value: line[colon + 1 .. ^1].strip()))
+                headers.add((name: hline[0 ..< colon], value: hline[colon + 1 .. ^1].strip()))
             let clientIp = conn.getClientIp()
             let auth = authenticateMessage(server.spfServer, clientIp, s.heloName,
-                                           headers, bodyPart)
+                                           headers, bodyPart,
+                                           s.mailFrom)
             # Prepend Authentication-Results header
             msgData = auth.renderAuthHeader() & "\r\n" & msgData
         except CatchableError as e:
@@ -544,16 +608,6 @@ proc handleSmtpLine(conn: Connection, server: SMTPServer, line: string) =
         heloName: s.heloName
       )
 
-      # Check per-IP / per-user message quotas
-      let clientIp = conn.getClientIp()
-      if not server.ipMsgLimits.allow(clientIp):
-        smtpReply(conn, 452, "Too many messages, try again later")
-        return
-      if s.authenticated and s.authUser.len > 0:
-        if not server.userMsgLimits.allow("user:" & s.authUser):
-          smtpReply(conn, 452, "Too many messages, try again later")
-          return
-
       globalLogger.info("[smtp] received message: from=" & req.mailFrom & " to=" & req.rcptTo.join(", "))
 
       # Spawn a background thread to handle delivery so that we can respond
@@ -564,11 +618,18 @@ proc handleSmtpLine(conn: Connection, server: SMTPServer, line: string) =
       resetTxn(s)
       return # don't process "." as a normal command
 
-    # collect DATA body lines
-    if line.len > 0 and line[0] == '.':
-      s.dataLines.add(line[1..^1]) # dot-unstuff
+    # Collect DATA body lines. Once the stream exceeds MaxMessageBytes the
+    # buffered content is discarded and remaining lines are ignored until the
+    # terminating dot, so a huge upload cannot exhaust memory.
+    if not s.dataOverflow and s.dataBytes + line.len + 2 <= MaxMessageBytes:
+      if line.len > 0 and line[0] == '.':
+        s.dataLines.add(line[1..^1]) # dot-unstuff
+      else:
+        s.dataLines.add(line)
+      s.dataBytes += line.len + 2
     else:
-      s.dataLines.add(line)
+      s.dataOverflow = true
+      s.dataLines.setLen(0)
     return
 
   let parts = line.split(' ', maxsplit = 1)
@@ -582,13 +643,19 @@ proc handleSmtpLine(conn: Connection, server: SMTPServer, line: string) =
 
   case cmd
   of "HELO":
-    s.greeted = true
-    s.heloName = arg
-    smtpReply(conn, 250, "meowmail.local Hello")
+    if arg.len == 0:
+      smtpReply(conn, 501, "Syntax: HELO <hostname>")
+    else:
+      s.greeted = true
+      s.heloName = arg
+      smtpReply(conn, 250, "meowmail.local Hello")
   of "EHLO":
-    s.greeted = true
-    s.heloName = arg
-    smtpReplyEhloCapabilities(conn, smtpHostname(), s, server)
+    if arg.len == 0:
+      smtpReply(conn, 501, "Syntax: EHLO <hostname>")
+    else:
+      s.greeted = true
+      s.heloName = arg
+      smtpReplyEhloCapabilities(conn, smtpHostname(), s, server)
   of "STARTTLS":
     if s.mailFrom.len > 0 or s.rcptTo.len > 0 or s.inData:
       smtpReply(conn, 503, "Bad sequence of commands")
@@ -613,41 +680,46 @@ proc handleSmtpLine(conn: Connection, server: SMTPServer, line: string) =
         smtpReply(conn, 501, "Syntax: AUTH <mechanism> [initial-response]")
       else:
         let mech = p[0].toUpperAscii()
-        let initial = if p.len > 1: p[1] else: ""
-        case mech
-        of "PLAIN":
-          if initial.len == 0:
-            s.authProgress = apPlain
-            smtpReply(conn, 334, "")
-          else:
-            var decoded = ""
-            if not decodeB64Safe(initial, decoded):
-              smtpReply(conn, 501, "Invalid base64 data")
-            else:
-              let seg = decoded.split('\0')
-              var user = ""
-              var pass = ""
-              if seg.len >= 3:
-                user = seg[^2]
-                pass = seg[^1]
-              elif seg.len == 2:
-                user = seg[0]
-                pass = seg[1]
-              applyAuthDecision(conn, s, validateAuth(server, s, user, pass, "PLAIN"))
-        of "LOGIN":
-          if initial.len > 0:
-            var userDecoded = ""
-            if not decodeB64Safe(initial, userDecoded):
-              smtpReply(conn, 501, "Invalid base64 data")
-            else:
-              s.authTempUser = userDecoded
-              s.authProgress = apLoginPass
-              smtpReply(conn, 334, "UGFzc3dvcmQ6")
-          else:
-            s.authProgress = apLoginUser
-            smtpReply(conn, 334, "VXNlcm5hbWU6")
+        var initial = if p.len > 1: p[1] else: ""
+        if p.len > 2:
+          smtpReply(conn, 501, "Syntax: AUTH <mechanism> [initial-response]")
         else:
-          smtpReply(conn, 504, "Unsupported authentication mechanism")
+          # RFC 4954 §4: a bare "=" is the zero-length initial response.
+          if initial == "=": initial = ""
+          case mech
+          of "PLAIN":
+            if initial.len == 0:
+              s.authProgress = apPlain
+              smtpReply(conn, 334, "")
+            else:
+              var decoded = ""
+              if not decodeB64Safe(initial, decoded):
+                smtpReply(conn, 501, "Invalid base64 data")
+              else:
+                let seg = decoded.split('\0')
+                var user = ""
+                var pass = ""
+                if seg.len >= 3:
+                  user = seg[^2]
+                  pass = seg[^1]
+                elif seg.len == 2:
+                  user = seg[0]
+                  pass = seg[1]
+                applyAuthDecision(conn, s, validateAuth(server, s, user, pass, "PLAIN"), server)
+          of "LOGIN":
+            if initial.len > 0:
+              var userDecoded = ""
+              if not decodeB64Safe(initial, userDecoded):
+                smtpReply(conn, 501, "Invalid base64 data")
+              else:
+                s.authTempUser = userDecoded
+                s.authProgress = apLoginPass
+                smtpReply(conn, 334, "UGFzc3dvcmQ6")
+            else:
+              s.authProgress = apLoginUser
+              smtpReply(conn, 334, "VXNlcm5hbWU6")
+          else:
+            smtpReply(conn, 504, "Unsupported authentication mechanism")
   of "MAIL":
     if server.requireAuth and not s.authenticated:
       smtpReply(conn, 530, "Authentication required")
@@ -656,26 +728,55 @@ proc handleSmtpLine(conn: Connection, server: SMTPServer, line: string) =
     elif not arg.toUpperAscii().startsWith("FROM:"):
       smtpReply(conn, 501, "Syntax: MAIL FROM:<address>")
     else:
-      let fromPart = arg[5..^1].strip()
+      let parsed = splitEnvelopeParams(arg[5 .. ^1].strip())
+      var senderMb: address.Mailbox
       # Validate sender address syntax via RFC 5321 parser
-      if fromPart.len > 0 and fromPart != "<>":
-        let mb = parseMailbox(fromPart)
-        if not mb.hasValidSyntax():
-          smtpReply(conn, 501, "Invalid sender address: " & mb.error)
+      if parsed.addrPart.len > 0 and parsed.addrPart != "<>":
+        senderMb = parseMailbox(parsed.addrPart)
+        if not senderMb.hasValidSyntax():
+          smtpReply(conn, 501, "Invalid sender address: " & senderMb.error)
           return
-      # Parse SIZE parameter (RFC 1870): MAIL FROM:<addr> SIZE=<n>
+        # Optional: verify the sender domain actually exists in DNS
+        if server.settings.checkSenderDomain and senderMb.kind == mkStandard:
+          let dom = extractRcptDomain(parsed.addrPart)
+          if dom.len > 0 and resolveMxHosts(dom, 5).len == 0:
+            smtpReply(conn, 451, "Sender domain cannot be resolved")
+            return
+      # Parse ESMTP parameters (RFC 5321 §4.1.1.1); unknown ones -> 555
       var claimedSize = 0
-      let sizeIdx = fromPart.toUpperAscii.find(" SIZE=")
-      if sizeIdx >= 0:
-        let sizeStr = fromPart[sizeIdx + 6 .. ^1].strip()
-        try:
-          claimedSize = parseInt(sizeStr)
-        except ValueError:
-          discard
-      if claimedSize > 52428800:  # 50 MB limit
-        smtpReply(conn, 552, "Message size exceeds fixed maximum (52428800)")
+      var paramError = false
+      for (key, val) in parsed.params:
+        case key
+        of "SIZE":
+          try:
+            claimedSize = parseInt(val)
+          except ValueError:
+            smtpReply(conn, 501, "Invalid SIZE parameter")
+            paramError = true
+        of "BODY":
+          if val.toUpperAscii() notin ["7BIT", "8BITMIME"]:
+            smtpReply(conn, 555, "Unsupported BODY value")
+            paramError = true
+        else:
+          smtpReply(conn, 555, "Unsupported parameter: " & key)
+          paramError = true
+        if paramError: break
+      if paramError:
         return
-      s.mailFrom = fromPart
+      if claimedSize > MaxMessageBytes:
+        smtpReply(conn, 552, "Message size exceeds fixed maximum (" & $MaxMessageBytes & ")")
+        return
+      # Per-IP / per-user message quotas are checked at transaction start so
+      # over-quota senders are rejected before uploading DATA.
+      let clientIp = conn.getClientIp()
+      if not server.ipMsgLimits.allow(clientIp):
+        smtpReply(conn, 452, "Too many messages, try again later")
+        return
+      if s.authenticated and s.authUser.len > 0:
+        if not server.userMsgLimits.allow("user:" & s.authUser):
+          smtpReply(conn, 452, "Too many messages, try again later")
+          return
+      s.mailFrom = parsed.addrPart
       s.rcptTo.setLen(0)
       smtpReply(conn, 250, "OK")
   of "RCPT":
@@ -686,19 +787,29 @@ proc handleSmtpLine(conn: Connection, server: SMTPServer, line: string) =
     elif s.rcptTo.len >= DefaultSmtpLimits.maxRecipients:
       smtpReply(conn, 552, "Too many recipients")
     else:
-      let rcptAddr = arg[3..^1].strip()
+      let parsed = splitEnvelopeParams(arg[3 .. ^1].strip())
       # Validate recipient address syntax
-      if rcptAddr.len > 0:
-        let mb = parseMailbox(rcptAddr)
+      if parsed.addrPart.len > 0:
+        let mb = parseMailbox(parsed.addrPart)
         if not mb.hasValidSyntax():
           smtpReply(conn, 501, "Invalid recipient address: " & mb.error)
           return
+        # Optional: reject recipients whose domain has no usable mail exchanger
+        if server.settings.checkRcptDomain and mb.kind == mkStandard:
+          let dom = extractRcptDomain(parsed.addrPart)
+          if dom.len > 0 and resolveMxHosts(dom, 5).len == 0:
+            smtpReply(conn, 550, "<" & dom & "> has no mail exchanger")
+            return
+      # No RCPT parameters are supported (RFC 6152 DSN would go here)
+      if parsed.params.len > 0:
+        smtpReply(conn, 555, "Unsupported parameter: " & parsed.params[0].k)
+        return
       if server.settings.sendPolicy == spNoRelay and
-           not isLocalRecipient(server, rcptAddr):
-        server.logger.warn("[smtp] relay denied (spNoRelay) for recipient " & rcptAddr)
+           not isLocalRecipient(server, parsed.addrPart):
+        server.logger.warn("[smtp] relay denied (spNoRelay) for recipient " & parsed.addrPart)
         smtpReply(conn, 554, "Relay access denied")
       else:
-        s.rcptTo.add(rcptAddr)
+        s.rcptTo.add(parsed.addrPart)
         smtpReply(conn, 250, "OK")
   of "DATA":
     if s.rcptTo.len == 0:
@@ -712,6 +823,8 @@ proc handleSmtpLine(conn: Connection, server: SMTPServer, line: string) =
     smtpReply(conn, 250, "OK")
   of "NOOP":
     smtpReply(conn, 250, "OK")
+  of "HELP":
+    smtpReply(conn, 214, "Commands: HELO EHLO STARTTLS AUTH MAIL RCPT DATA RSET NOOP QUIT VRFY")
   of "VRFY", "EXPN":
     smtpReply(conn, 252, "Cannot VRFY/EXPN user")
   of "QUIT":
@@ -873,6 +986,11 @@ proc enableMxDelivery*(server: SMTPServer, cfg = MXProviderConfig()) =
   var mxCfg = cfg
   if mxCfg.heloName.len == 0 or mxCfg.heloName == "localhost":
     mxCfg.heloName = smtpHostname()
+  # Wire DMARC TXT lookup if enforcement is requested but no custom provider.
+  if mxCfg.enforceDmarc and mxCfg.dmarcLookup == nil:
+    mxCfg.dmarcLookup = proc(domain: string): string =
+      let records = resolveTxtRecords("_dmarc." & domain)
+      if records.len > 0: records[0] else: ""
   # Initialize SPF server for inbound verification if not already set
   if server.spfServer == nil:
     let s = SPF_server_new(SPF_DNS_CACHE, 0)
@@ -929,6 +1047,11 @@ proc newSMTPServer*(settings: SMTPSettings): SMTPServer =
                       provider = settings.deliveryProvider)
   # initialize rate limiter
   result.rateLimit = newSmtpRateLimit()
+  # Reset per-minute connection counters periodically so the per-IP
+  # connection-rate limit does not become a permanent block.
+  let self = result
+  discard self.loop.addInterval(60_000) do (id: int):
+    self.rateLimit.cleanup()
 
   # initialize per-IP / per-user message quota limiters (powpow multi-window)
   result.ipMsgLimits = newMultiRateLimiter(

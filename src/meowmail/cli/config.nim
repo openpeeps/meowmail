@@ -54,6 +54,12 @@ type
     userMsgPerHour*: int
     userMsgPerDay*: int
     smtpCommandsLog*: bool
+    logLevel*: string
+    logFormat*: string
+    logToFile*: bool
+    logToConsole*: bool
+    logMaxFileSize*: int
+    logMaxFiles*: int
 
 proc loadConfig*(path: string): MeowMailConfig =
   ## Parse a `meowmail.config.toml` file.
@@ -140,6 +146,12 @@ proc loadConfig*(path: string): MeowMailConfig =
   result.userMsgPerHour = intOf("smtp.limits.user_messages_per_hour")
   result.userMsgPerDay = intOf("smtp.limits.user_messages_per_day")
   result.smtpCommandsLog = boolOf("logging.smtp_commands")
+  result.logLevel = strOf("logging.level", "info")
+  result.logFormat = strOf("logging.format", "text")
+  result.logToFile = boolOf("logging.file", true)
+  result.logToConsole = boolOf("logging.console", true)
+  result.logMaxFileSize = intOf("logging.max_file_size", 10_485_760)
+  result.logMaxFiles = intOf("logging.max_files", 30)
 
 proc toSMTPSettings*(cfg: MeowMailConfig): SMTPSettings =
   ## Convert a parsed config into `SMTPSettings`.

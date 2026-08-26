@@ -9,6 +9,7 @@ import ../imap/[imapserver, mailstore]
 import ../jmap/server as jmapserver
 import ../restapi/admin
 import ../utils/logger
+import std/options as stdopts
 import powpow/net/tls
 import ./config
 
@@ -167,11 +168,18 @@ proc runAdminServer(server: AdminServer) {.thread.} =
 
 var queueDelivery: ptr SMTPDelivery
 var queueIntervalMs = 30_000
-proc queueDeliverProc(req: DeliveryRequest): DeliveryDecision {.gcsafe.} =
+proc queueDeliverProc(req: DeliveryRequest): DeliveryOutcome {.gcsafe.} =
   ## Delivery callback for the background queue runner.
   {.cast(gcsafe).}:
     if queueDelivery != nil:
       result = queueDelivery[].deliverMessage(req)
+
+# Delivery stack used by `meowmail queue flush` (set by the command).
+var flushDelivery: SMTPDelivery = nil
+proc flushDeliverProc(req: DeliveryRequest): DeliveryOutcome {.gcsafe.} =
+  {.cast(gcsafe).}:
+    if flushDelivery != nil:
+      result = flushDelivery.deliverMessage(req)
 
 var queueThread: Thread[Queue]
 proc runQueueRunner(q: Queue) {.thread.} =
@@ -199,11 +207,22 @@ proc startCommand*(v: Values) =
   smtpServerInstance = newSMTPServer(settings = cfg.toSMTPSettings())
   applyAuth(smtpServerInstance, cfg)
 
-  # Initialize TLS if configured
-  if cfg.certifications.isSome:
-    let (cert, key) = cfg.certifications.get()
-    if not smtpServerInstance.setupTlsCtx(cert, key):
-      stderr.writeLine("TLS setup failed: ", cert, " + ", key)
+  # Apply [logging] settings (the logger itself is created by newSMTPServer)
+  block:
+    let lg = smtpServerInstance.logger
+    lg.minLevel = case cfg.logLevel.toLowerAscii()
+                  of "trace": TRACE
+                  of "debug": DEBUG
+                  of "warn", "warning": WARN
+                  of "error": ERROR
+                  of "fatal": FATAL
+                  else: INFO
+    lg.format = if cfg.logFormat.toLowerAscii() == "json": fmtJson else: fmtText
+    lg.logToFile = cfg.logToFile
+    lg.logToConsole = cfg.logToConsole
+    if cfg.logMaxFileSize > 0:
+      lg.maxFileSize = cfg.logMaxFileSize
+      lg.maxFiles = cfg.logMaxFiles
 
   # Load DKIM signing key if configured
   if cfg.dkimEnabled and cfg.dkimKeyFile.len > 0 and cfg.dkimDomain.len > 0:
@@ -273,6 +292,10 @@ proc startCommand*(v: Values) =
     let adminPort = cfg.adminPort
     let adminHost = cfg.adminHost
     var adminSvr = newAdminServer(smtpServerInstance.queue, adminHost, Port(adminPort))
+    adminSvr.flushProc = proc(): int {.gcsafe.} =
+      {.cast(gcsafe).}:
+        result = flushQueue(smtpServerInstance.queue, queueDeliverProc,
+                            smtpServerInstance.delivery.localStore)
     createThread(adminThread, runAdminServer, adminSvr)
 
   joinThreads(thr)
@@ -297,23 +320,29 @@ proc spfCommand*(v: Values) =
     ))
 
 proc dkimCommand*(v: Values) =
-  ## Generate a DKIM record for the specified domain, selector, and public key
-  let dkimPath = v.get("dkim").getStr
+  ## Generate a DKIM DNS TXT record from a key file. The file format is:
+  ## line 1: selector, line 2: domain, remaining lines: PEM private key.
+  let dkimPath = v.get("dkim").getPath.path
   if not fileExists(dkimPath):
     echo "DKIM file not found: ", dkimPath
     return
-  let dkimData = readFile(dkimPath)
-  let lines = dkimData.splitLines()
+  let lines = readFile(dkimPath).splitLines()
   if lines.len < 3:
-    echo "Invalid DKIM file format. Expected selector, domain, and public key."
+    echo "Invalid DKIM file format. Expected selector, domain, and PEM private key."
     return
   let selector = lines[0].strip()
   let domain = lines[1].strip()
+  let pemData = lines[2 .. ^1].join("\n") & "\n"
+  try:
+    let key = newDkimKeyFromPem(domain, selector, pemData)
+    display(key.dkimTxtRecord())
+  except CatchableError as e:
+    echo "Failed to load DKIM key: ", e.msg
 
 proc dmarcCommand*(v: Values) =
   ## Generate a DMARC record for the specified domain,
   ## policy, and reporting options based on the contents of the specified file.
-  let dmarcPath = v.get("dmarc").getStr
+  let dmarcPath = v.get("dmarc").getPath.path
   if not fileExists(dmarcPath):
     echo "DMARC file not found: ", dmarcPath
     return
@@ -370,18 +399,29 @@ proc queueStatsCommand*(v: Values) =
   echo "  Bounced:   ", bounced
 
 proc queueFlushCommand*(v: Values) =
-  ## Force immediate delivery of all pending messages.
+  ## Force immediate delivery of all deferred messages using a delivery stack
+  ## built from the environment (Maildir base) and direct-to-MX delivery.
+  ## Backoff schedules are ignored: every deferred entry is attempted.
   let dir = v.get("queueDir").getStr
   let q = newQueue(dir)
   q.load()
-  let pending = q.pending()
-  if pending.len == 0:
-    echo "No pending messages to flush"
+
+  var delivery = newSMTPDelivery(stdopts.none(string))
+  let base = getEnv("MEOWMAIL_MAILDIR", getCurrentDir() / "maildir")
+  delivery.localStore = newMaildirStore(base, localDomains())
+  var mxCfg = initMXProviderConfig(heloName = smtpHostname())
+  delivery.setProvider(newMXProvider(mxCfg))
+  flushDelivery = delivery
+
+  let attempted = flushQueue(q, flushDeliverProc, delivery.localStore)
+  if attempted == 0:
+    echo "No deferred messages to flush"
     return
-  echo "Flushing ", pending.len, " messages..."
-  for entry in pending:
-    echo "  Delivering ", entry.id, " (from=", entry.mailFrom, " to=", entry.rcptTo.join(","), ")"
-  echo "Done. Messages queued for delivery."
+  echo "Flushing ", attempted, " messages..."
+  let stats2 = q.stats()
+  echo "Done. Attempted ", attempted, " messages (",
+       stats2.deferred, " still deferred, ",
+       stats2.bounced + stats2.delivered, " settled)."
 
 proc queueRetryCommand*(v: Values) =
   ## Requeue a specific message for immediate retry.
@@ -411,11 +451,7 @@ proc queueDeleteCommand*(v: Values) =
   var found = false
   for entry in q.entries:
     if entry.id == id:
-      try:
-        removeFile(entry.path)
-        removeFile(entry.path.changeFileExt(".meta"))
-      except CatchableError:
-        discard
+      q.deleteEntryFiles(entry)
       q.removeEntry(id)
       found = true
       echo "Message ", id, " deleted"
@@ -429,14 +465,17 @@ proc queuePurgeCommand*(v: Values) =
   let q = newQueue(dir)
   q.load()
   var purged = 0
-  var i = q.entries.high
-  while i >= 0:
-    let entry = q.entries[i]
+  # Snapshot the IDs first: removeEntry mutates q.entries while we iterate.
+  var ids: seq[string]
+  for entry in q.entries:
     if entry.status in [qsDelivered, qsBounced, qsFailed]:
-      try:
-        removeFile(entry.path)
-        removeFile(entry.path.changeFileExt(".meta"))
-      except CatchableError:
-        discard
-      q.removeEntry(entry.id)
+      ids.add(entry.id)
+  for id in ids:
+    let entry = q.getEntry(id)
+    if entry.id.len == 0:
+      continue
+    q.deleteEntryFiles(entry)
+    q.removeEntry(id)
+    inc purged
+  echo "Purged ", purged, " messages (", ids.len - purged, " failed to delete)"
     

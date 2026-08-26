@@ -5,14 +5,14 @@
 ## DKIM verifies cryptographic signatures.
 ## DMARC checks alignment between SPF and DKIM results.
 
-import std/[strutils, times, net, sequtils, base64]
+import std/[strutils, sequtils, base64]
 import pkg/spf
 import ../smtpdelivery
 import ../../imap/msgparse
 
 type
   AuthResult* = enum
-    arPass, arFail, arSoftFail, arNone, arTempError, arPermError
+    arPass, arFail, arSoftFail, arNeutral, arNone, arTempError, arPermError
 
   AuthHeader* = object
     spf*: AuthResult
@@ -28,6 +28,7 @@ proc authResultStr(r: AuthResult): string =
   of arPass: "pass"
   of arFail: "fail"
   of arSoftFail: "softfail"
+  of arNeutral: "neutral"
   of arNone: "none"
   of arTempError: "temperror"
   of arPermError: "permerror"
@@ -169,77 +170,71 @@ proc verifyDkim*(headers: seq[Header], body: string): (AuthResult, string) =
 
   return (arPass, "header.d=" & domain)
 
-# ── DMARC verification ────────────────────────────────────────────────────────
-
-proc verifyDmarc*(spfResult: AuthResult, dkimResult: AuthResult,
-                  fromDomain: string): (AuthResult, string) =
-  ## Check DMARC alignment based on SPF and DKIM results.
-  ## Simple alignment: DMARC passes if either SPF or DKIM passes with
-  ## alignment to the From: domain.
-  ##
-  ## Full DMARC would require:
-  ## 1. DNS lookup for _dmarc.fromDomain
-  ## 2. Policy evaluation (none/quarantine/reject)
-  ## 3. Alignment check (strict/relaxed for SPF and DKIM)
-
-  if fromDomain.len == 0:
-    return (arPermError, "empty From domain")
-
-  # Simplified DMARC: pass if either SPF or DKIM passes
-  if spfResult == arPass or dkimResult == arPass:
-    return (arPass, "alignment")
-  elif spfResult == arSoftFail and dkimResult == arPass:
-    return (arPass, "dkim alignment")
-  elif spfResult == arPass and dkimResult == arSoftFail:
-    return (arPass, "spf alignment")
-  else:
-    return (arFail, "no alignment")
-
 # ── Combined authentication ───────────────────────────────────────────────────
 
+proc extractHeaderDomain(headers: seq[Header], name: string): string =
+  ## Extract the domain of the last address in a header such as From:.
+  var value = ""
+  for h in headers:
+    if h.name.toLowerAscii == name.toLowerAscii:
+      value = h.value
+  if value.len == 0: return ""
+  let addrPart = value.strip().strip(chars = {'<', '>'})
+  let at = addrPart.rfind('@')
+  if at > 0:
+    result = addrPart[at + 1 .. ^1].strip(chars = {'>', ' '}).toLowerAscii()
+
 proc authenticateMessage*(spfServerPtr: pointer, clientIp, heloDomain: string,
-                          headers: seq[Header], body: string): AuthHeader =
+                          headers: seq[Header], body: string,
+                          envelopeFrom: string = ""): AuthHeader =
   ## Run all authentication checks on an incoming message and build
   ## the Authentication-Results header value.
+  ##
+  ## SPF is evaluated against the envelope sender (RFC 7208), falling back to
+  ## the From: domain only when the envelope is unavailable. DKIM/DMARC are
+  ## reported honestly: signatures found in the message are marked as
+  ## unverified until full cryptographic verification lands (Phase B), and
+  ## DMARC is omitted entirely since policy evaluation requires the _dmarc
+  ## DNS record.
 
-  # Extract From domain for DMARC
-  var fromDomain = ""
-  for h in headers:
-    if h.name.toLowerAscii == "from":
-      let fromAddr = h.value.strip()
-      let at = fromAddr.rfind('@')
-      if at > 0:
-        fromDomain = fromAddr[at + 1 .. ^1].strip(chars = {'>', ' '})
-      break
+  # Envelope sender for SPF (strip angle brackets / null path)
+  var envSender = envelopeFrom.strip()
+  if envSender.len > 0 and envSender != "<>":
+    envSender = envSender.strip(chars = {'<', '>'})
+  else:
+    envSender = ""
 
-  # Extract MAIL FROM domain (same as From for DMARC simplified)
-  let mailFrom = fromDomain
+  # Extract From domain (used for DMARC alignment once implemented)
+  let fromDomain = extractHeaderDomain(headers, "from")
 
-  # Run SPF
-  let (spfResult, spfDetail) = verifySpf(spfServerPtr, clientIp, heloDomain, mailFrom)
+  # Run SPF against the envelope identity
+  let spfIdentity = if envSender.len > 0: envSender else: fromDomain
+  let (spfResult, spfDetail) = verifySpf(spfServerPtr, clientIp, heloDomain, spfIdentity)
 
-  # Run DKIM
-  let (dkimResult, dkimDetail) = verifyDkim(headers, body)
+  # Run DKIM (structural check only; see Phase B for real verification)
+  let (dkimStubResult, dkimDetail) = verifyDkim(headers, body)
 
-  # Run DMARC
-  let (dmarcResult, dmarcDetail) = verifyDmarc(spfResult, dkimResult, fromDomain)
-
-  # Build combined Authentication-Results header
-  let now = now().utc()
-  let dateStr = now.format("ddd, dd MMM yyyy HH:mm:ss") & " GMT"
+  # Build combined Authentication-Results header.
+  # dmarc is deliberately NOT reported: without the policy record any claim
+  # would be fabricated. DKIM results from the structural stub are reported
+  # as neutral: no cryptographic verification was performed.
   var results: seq[string]
-  results.add("spf=" & authResultStr(spfResult) & " (" & spfDetail & ")")
-  results.add("dkim=" & authResultStr(dkimResult) & " (" & dkimDetail & ")")
-  results.add("dmarc=" & authResultStr(dmarcResult) & " (" & dmarcDetail & ")")
+  if spfIdentity.len > 0:
+    results.add("spf=" & authResultStr(spfResult) & " (" & spfDetail & ")")
+  case dkimStubResult
+  of arNone:
+    discard # no signature present; omit from header like most MTAs
+  else:
+    results.add("dkim=neutral (" & dkimDetail & "; signature not verified)")
 
   AuthHeader(
     spf: spfResult,
     spfDetail: spfDetail,
-    dkim: dkimResult,
+    dkim: (if dkimStubResult == arNone: arNone else: arNeutral),
     dkimDetail: dkimDetail,
-    dmarc: dmarcResult,
-    dmarcDetail: dmarcDetail,
-    combined: "Authentication-Results: meowmail.local; " & results.join("; "),
+    dmarc: arNone,
+    dmarcDetail: "",
+    combined: "Authentication-Results: meowmail.local;\r\n\t" & results.join(";\r\n\t"),
   )
 
 proc renderAuthHeader*(auth: AuthHeader): string =
