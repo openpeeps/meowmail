@@ -1,0 +1,36 @@
+nimTitle	mailstore	meowmail/imap/mailstore.html	module meowmail/imap/mailstore		0
+nim	mfDraft	meowmail/imap/mailstore.html#mfDraft	MailFlag.mfDraft		24
+nim	mfFlagged	meowmail/imap/mailstore.html#mfFlagged	MailFlag.mfFlagged		24
+nim	mfAnswered	meowmail/imap/mailstore.html#mfAnswered	MailFlag.mfAnswered		24
+nim	mfSeen	meowmail/imap/mailstore.html#mfSeen	MailFlag.mfSeen		24
+nim	mfDeleted	meowmail/imap/mailstore.html#mfDeleted	MailFlag.mfDeleted		24
+nim	MailFlag	meowmail/imap/mailstore.html#MailFlag	enum MailFlag		24
+nim	MailMessage	meowmail/imap/mailstore.html#MailMessage	type MailMessage		31
+nim	Mailbox	meowmail/imap/mailstore.html#Mailbox	type Mailbox		47
+nim	MaildirStore	meowmail/imap/mailstore.html#MaildirStore	type MaildirStore		56
+nim	newMaildirStore	meowmail/imap/mailstore.html#newMaildirStore,string,seq[string]	proc newMaildirStore(base: string; localDomains: seq[string] = @[]): MaildirStore		63
+nim	userMaildirPath	meowmail/imap/mailstore.html#userMaildirPath,MaildirStore,string	proc userMaildirPath(store: MaildirStore; user: string): string		69
+nim	ensureUserMaildir	meowmail/imap/mailstore.html#ensureUserMaildir,MaildirStore,string	proc ensureUserMaildir(store: MaildirStore; user: string): bool		111
+nim	loadSubscriptions	meowmail/imap/mailstore.html#loadSubscriptions,MaildirStore,string	proc loadSubscriptions(store: MaildirStore; user: string): seq[string]		121
+nim	saveSubscriptions	meowmail/imap/mailstore.html#saveSubscriptions,MaildirStore,string,seq[string]	proc saveSubscriptions(store: MaildirStore; user: string; subs: seq[string])		130
+nim	keyOf	meowmail/imap/mailstore.html#keyOf,string	proc keyOf(fileName: string): string		141
+nim	flagSetToImap	meowmail/imap/mailstore.html#flagSetToImap,set[MailFlag]	proc flagSetToImap(flags: set[MailFlag]): string		207
+nim	flagToMailFlag	meowmail/imap/mailstore.html#flagToMailFlag,string	proc flagToMailFlag(s: string): set[MailFlag]		221
+nim	openMailbox	meowmail/imap/mailstore.html#openMailbox,MaildirStore,string,string	proc openMailbox(store: MaildirStore; user, name: string): Mailbox		254
+nim	loadMessageData	meowmail/imap/mailstore.html#loadMessageData,Mailbox,MailMessage	proc loadMessageData(mb: Mailbox; msg: MailMessage): string		304
+nim	findMessageByUid	meowmail/imap/mailstore.html#findMessageByUid,Mailbox,uint32	proc findMessageByUid(mb: Mailbox; uid: uint32): MailMessage		311
+nim	seqSetToUids	meowmail/imap/mailstore.html#seqSetToUids,Mailbox,string	proc seqSetToUids(mb: Mailbox; spec: string): seq[uint32]		316
+nim	uidSetToUids	meowmail/imap/mailstore.html#uidSetToUids,Mailbox,string	proc uidSetToUids(mb: Mailbox; spec: string): seq[uint32]		350
+nim	updateFlags	meowmail/imap/mailstore.html#updateFlags,Mailbox,MailMessage,set[MailFlag]	proc updateFlags(mb: Mailbox; msg: MailMessage; flags: set[MailFlag])		392
+nim	expungeMessage	meowmail/imap/mailstore.html#expungeMessage,Mailbox,MailMessage	proc expungeMessage(mb: Mailbox; msg: MailMessage)		410
+nim	persistUidChanges	meowmail/imap/mailstore.html#persistUidChanges,Mailbox	proc persistUidChanges(mb: Mailbox)		421
+nim	matchesImapPattern	meowmail/imap/mailstore.html#matchesImapPattern,string,string	proc matchesImapPattern(name, pattern: string): bool		431
+nim	listMailboxes	meowmail/imap/mailstore.html#listMailboxes,MaildirStore,string	proc listMailboxes(store: MaildirStore; user: string): seq[string]		460
+nim	mailboxExists	meowmail/imap/mailstore.html#mailboxExists,MaildirStore,string,string	proc mailboxExists(store: MaildirStore; user, name: string): bool		478
+nim	createMailbox	meowmail/imap/mailstore.html#createMailbox,MaildirStore,string,string	proc createMailbox(store: MaildirStore; user, name: string): bool		481
+nim	deleteMailbox	meowmail/imap/mailstore.html#deleteMailbox,MaildirStore,string,string	proc deleteMailbox(store: MaildirStore; user, name: string): bool		499
+nim	renameMailbox	meowmail/imap/mailstore.html#renameMailbox,MaildirStore,string,string,string	proc renameMailbox(store: MaildirStore; user, fromName, toName: string): bool		521
+nim	extractUser	meowmail/imap/mailstore.html#extractUser,string	proc extractUser(rcpt: string): string		539
+nim	isLocal	meowmail/imap/mailstore.html#isLocal,MaildirStore,string	proc isLocal(store: MaildirStore; rcpt: string): bool		570
+nim	appendMessage	meowmail/imap/mailstore.html#appendMessage,MaildirStore,string,string,set[MailFlag],string	proc appendMessage(store: MaildirStore; user, mailbox: string; flags: set[MailFlag];\n              data: string; internalDate: times.Time = default(Time)): tuple[\n    ok: bool, uid, uidvalidity: uint32]		580
+nim	deliver	meowmail/imap/mailstore.html#deliver,MaildirStore,string,string,string	proc deliver(store: MaildirStore; mailFrom, rcpt, data: string): bool		620

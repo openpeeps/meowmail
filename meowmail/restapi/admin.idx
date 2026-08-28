@@ -1,0 +1,5 @@
+nimTitle	admin	meowmail/restapi/admin.html	module meowmail/restapi/admin		0
+nim	AdminFlushProc	meowmail/restapi/admin.html#AdminFlushProc	type AdminFlushProc		12
+nim	AdminServer	meowmail/restapi/admin.html#AdminServer	type AdminServer		16
+nim	newAdminServer	meowmail/restapi/admin.html#newAdminServer,Queue,string,Port	proc newAdminServer(queue: Queue; host = "127.0.0.1"; port: Port = Port(8081)): AdminServer		127
+nim	start	meowmail/restapi/admin.html#start,AdminServer	proc start(server: AdminServer)		144

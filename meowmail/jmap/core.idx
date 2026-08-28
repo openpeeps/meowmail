@@ -1,0 +1,8 @@
+nimTitle	core	meowmail/jmap/core.html	module meowmail/jmap/core		0
+nim	JMAPContext	meowmail/jmap/core.html#JMAPContext	type JMAPContext		12
+nim	newJMAPContext	meowmail/jmap/core.html#newJMAPContext,MaildirStore,string	proc newJMAPContext(store: MaildirStore; username: string): JMAPContext		20
+nim	bumpState	meowmail/jmap/core.html#bumpState,JMAPContext	proc bumpState(ctx: JMAPContext)		29
+nim	buildCoreCapability	meowmail/jmap/core.html#buildCoreCapability	proc buildCoreCapability(): JsonNode		37
+nim	buildSession	meowmail/jmap/core.html#buildSession,JMAPContext,string,int	proc buildSession(ctx: JMAPContext; host: string; port: int): JsonNode		49
+nim	handleCoreEcho	meowmail/jmap/core.html#handleCoreEcho,JsonNode,string	proc handleCoreEcho(args: JsonNode; callId: string): seq[JsonNode]		86
+nim	handleMethod	meowmail/jmap/core.html#handleMethod,JMAPContext,string,JsonNode,string	proc handleMethod(ctx: JMAPContext; methodName: string; args: JsonNode;\n             callId: string): seq[JsonNode]		95

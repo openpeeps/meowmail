@@ -1,0 +1,34 @@
+nimTitle	types	meowmail/jmap/types.html	module meowmail/jmap/types		0
+nim	JMAPRequest	meowmail/jmap/types.html#JMAPRequest	object JMAPRequest		13
+nim	JMAPResponse	meowmail/jmap/types.html#JMAPResponse	object JMAPResponse		18
+nim	errServerUnavailable	meowmail/jmap/types.html#errServerUnavailable	JMAPErrorType.errServerUnavailable		25
+nim	errServerFail	meowmail/jmap/types.html#errServerFail	JMAPErrorType.errServerFail		25
+nim	errServerPartialFail	meowmail/jmap/types.html#errServerPartialFail	JMAPErrorType.errServerPartialFail		25
+nim	errUnknownMethod	meowmail/jmap/types.html#errUnknownMethod	JMAPErrorType.errUnknownMethod		25
+nim	errInvalidArguments	meowmail/jmap/types.html#errInvalidArguments	JMAPErrorType.errInvalidArguments		25
+nim	errInvalidResultReference	meowmail/jmap/types.html#errInvalidResultReference	JMAPErrorType.errInvalidResultReference		25
+nim	errForbidden	meowmail/jmap/types.html#errForbidden	JMAPErrorType.errForbidden		25
+nim	errAccountNotFound	meowmail/jmap/types.html#errAccountNotFound	JMAPErrorType.errAccountNotFound		25
+nim	errAccountNotSupportedByMethod	meowmail/jmap/types.html#errAccountNotSupportedByMethod	JMAPErrorType.errAccountNotSupportedByMethod		25
+nim	errAccountReadOnly	meowmail/jmap/types.html#errAccountReadOnly	JMAPErrorType.errAccountReadOnly		25
+nim	errNotFound	meowmail/jmap/types.html#errNotFound	JMAPErrorType.errNotFound		25
+nim	errAlreadyExists	meowmail/jmap/types.html#errAlreadyExists	JMAPErrorType.errAlreadyExists		25
+nim	errOverQuota	meowmail/jmap/types.html#errOverQuota	JMAPErrorType.errOverQuota		25
+nim	errRateLimit	meowmail/jmap/types.html#errRateLimit	JMAPErrorType.errRateLimit		25
+nim	errSyntaxError	meowmail/jmap/types.html#errSyntaxError	JMAPErrorType.errSyntaxError		25
+nim	errRequestTooLarge	meowmail/jmap/types.html#errRequestTooLarge	JMAPErrorType.errRequestTooLarge		25
+nim	errInvalidType	meowmail/jmap/types.html#errInvalidType	JMAPErrorType.errInvalidType		25
+nim	errTooManyObjects	meowmail/jmap/types.html#errTooManyObjects	JMAPErrorType.errTooManyObjects		25
+nim	errValueDoesNotExist	meowmail/jmap/types.html#errValueDoesNotExist	JMAPErrorType.errValueDoesNotExist		25
+nim	JMAPErrorType	meowmail/jmap/types.html#JMAPErrorType	enum JMAPErrorType		25
+nim	JMAPError	meowmail/jmap/types.html#JMAPError	object JMAPError		46
+nim	JMAPSession	meowmail/jmap/types.html#JMAPSession	object JMAPSession		53
+nim	JMAPAccount	meowmail/jmap/types.html#JMAPAccount	object JMAPAccount		64
+nim	CoreCapability	meowmail/jmap/types.html#CoreCapability	object CoreCapability		72
+nim	Core_echoArgs	meowmail/jmap/types.html#Core_echoArgs	object Core_echoArgs		84
+nim	Mailbox_getArgs	meowmail/jmap/types.html#Mailbox_getArgs	object Mailbox_getArgs		91
+nim	Mailbox_getResponse	meowmail/jmap/types.html#Mailbox_getResponse	object Mailbox_getResponse		96
+nim	newJMAPError	meowmail/jmap/types.html#newJMAPError,JMAPErrorType,string	proc newJMAPError(errType: JMAPErrorType; desc: string = ""): seq[JsonNode]		104
+nim	newJMAPErrorResponse	meowmail/jmap/types.html#newJMAPErrorResponse,string,JMAPErrorType,string	proc newJMAPErrorResponse(callId: string; errType: JMAPErrorType; desc: string = ""): seq[\n    JsonNode]		113
+nim	newJMAPOkResponse	meowmail/jmap/types.html#newJMAPOkResponse,string,JsonNode,string	proc newJMAPOkResponse(methodName: string; payload: JsonNode; callId: string): seq[\n    JsonNode]		122
+nim	newJMAPRequestLevelError	meowmail/jmap/types.html#newJMAPRequestLevelError,string,int,string	proc newJMAPRequestLevelError(errType: string; status: int; detail: string): JsonNode		127

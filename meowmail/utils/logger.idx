@@ -1,0 +1,33 @@
+nimTitle	logger	meowmail/utils/logger.html	module meowmail/utils/logger		0
+nim	OTHER	meowmail/utils/logger.html#OTHER	LogLevel.OTHER		22
+nim	TRACE	meowmail/utils/logger.html#TRACE	LogLevel.TRACE		22
+nim	INFO	meowmail/utils/logger.html#INFO	LogLevel.INFO		22
+nim	DEBUG	meowmail/utils/logger.html#DEBUG	LogLevel.DEBUG		22
+nim	WARN	meowmail/utils/logger.html#WARN	LogLevel.WARN		22
+nim	ERROR	meowmail/utils/logger.html#ERROR	LogLevel.ERROR		22
+nim	FATAL	meowmail/utils/logger.html#FATAL	LogLevel.FATAL		22
+nim	LogLevel	meowmail/utils/logger.html#LogLevel	enum LogLevel		22
+nim	fmtText	meowmail/utils/logger.html#fmtText	LogFormat.fmtText		23
+nim	fmtJson	meowmail/utils/logger.html#fmtJson	LogFormat.fmtJson		23
+nim	LogFormat	meowmail/utils/logger.html#LogFormat	enum LogFormat		23
+nim	Logger	meowmail/utils/logger.html#Logger	type Logger		24
+nim	`$`	meowmail/utils/logger.html#$,LogLevel	proc `$`(lvl: LogLevel): string		45
+nim	newLogger	meowmail/utils/logger.html#newLogger,string,int,int	proc newLogger(logsFolder = getTempDir(); namespace = "Logger";\n          defaultLogLevel = OTHER; logToFile = true; logToConsole = false;\n          exitOnError = false; filePrefix = initTimeFormat("YYYY-MM-dd");\n          minLevel = OTHER; format = fmtText; maxFileSize = 0; maxFiles = 0): Logger		83
+nim	start	meowmail/utils/logger.html#start,Logger	proc start(self: var Logger)		114
+nim	InstantiationInfo	meowmail/utils/logger.html#InstantiationInfo	tuple InstantiationInfo		131
+nim	log	meowmail/utils/logger.html#log.t,Logger,LogLevel,string	template log(self: Logger; level: LogLevel; message: string; autoNewLine = true;\n    someInfo = none(InstantiationInfo))		133
+nim	log	meowmail/utils/logger.html#log.t,Logger,string	template log(self: Logger; message = ""; autoNewLine = true)		223
+nim	other	meowmail/utils/logger.html#other.t,Logger,string	template other(self: Logger; message = ""; autoNewLine = true)		224
+nim	trace	meowmail/utils/logger.html#trace.t,Logger,string	template trace(self: Logger; message = ""; autoNewLine = true)		225
+nim	info	meowmail/utils/logger.html#info.t,Logger,string	template info(self: Logger; message = ""; autoNewLine = true)		226
+nim	debug	meowmail/utils/logger.html#debug.t,Logger,string	template debug(self: Logger; message = ""; autoNewLine = true)		227
+nim	warn	meowmail/utils/logger.html#warn.t,Logger,string	template warn(self: Logger; message = ""; autoNewLine = true)		228
+nim	error	meowmail/utils/logger.html#error.t,Logger,string	template error(self: Logger; message = ""; autoNewLine = true)		229
+nim	fatal	meowmail/utils/logger.html#fatal.t,Logger,string	template fatal(self: Logger; message = ""; autoNewLine = true)		230
+nim	header	meowmail/utils/logger.html#header,Logger,string	proc header(self: Logger; message: string)		233
+nim	finish	meowmail/utils/logger.html#finish,Logger	proc finish(self: var Logger)		239
+nim	logsFolder	meowmail/utils/logger.html#logsFolder,Logger	proc logsFolder(self: Logger): string		242
+nim	logsFolder=	meowmail/utils/logger.html#logsFolder=,Logger,string	proc logsFolder=(self: var Logger; newLogsFolder: string)		245
+nim	logitGlobal	meowmail/utils/logger.html#logitGlobal	var logitGlobal		252
+nim	setGlobalLogger	meowmail/utils/logger.html#setGlobalLogger,Logger	proc setGlobalLogger(logger: Logger)		258
+nimgrp	log	meowmail/utils/logger.html#log-templates-all	template		133

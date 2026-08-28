@@ -1,0 +1,4 @@
+nimTitle	emails	meowmail/jmap/emails.html	module meowmail/jmap/emails		0
+nim	handleEmailGet	meowmail/jmap/emails.html#handleEmailGet,MaildirStore,string,string,JsonNode,string	proc handleEmailGet(store: MaildirStore; user: string; state: string; args: JsonNode;\n               callId: string): seq[JsonNode]		129
+nim	handleEmailSet	meowmail/jmap/emails.html#handleEmailSet,MaildirStore,string,string,JsonNode,string	proc handleEmailSet(store: MaildirStore; user: string; state: string; args: JsonNode;\n               callId: string): seq[JsonNode]		188
+nim	handleEmailQuery	meowmail/jmap/emails.html#handleEmailQuery,MaildirStore,string,string,JsonNode,string	proc handleEmailQuery(store: MaildirStore; user: string; state: string;\n                 args: JsonNode; callId: string): seq[JsonNode]		373

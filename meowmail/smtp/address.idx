@@ -1,0 +1,14 @@
+nimTitle	address	meowmail/smtp/address.html	module meowmail/smtp/address		0
+nim	MaxLocalPartLen	meowmail/smtp/address.html#MaxLocalPartLen	const MaxLocalPartLen		19
+nim	MaxDomainLen	meowmail/smtp/address.html#MaxDomainLen	const MaxDomainLen		20
+nim	MaxPathLen	meowmail/smtp/address.html#MaxPathLen	const MaxPathLen		21
+nim	mkNull	meowmail/smtp/address.html#mkNull	MailboxKind.mkNull		24
+nim	mkLocal	meowmail/smtp/address.html#mkLocal	MailboxKind.mkLocal		24
+nim	mkStandard	meowmail/smtp/address.html#mkStandard	MailboxKind.mkStandard		24
+nim	mkLiteral	meowmail/smtp/address.html#mkLiteral	MailboxKind.mkLiteral		24
+nim	MailboxKind	meowmail/smtp/address.html#MailboxKind	enum MailboxKind		24
+nim	Mailbox	meowmail/smtp/address.html#Mailbox	object Mailbox		30
+nim	parseMailbox	meowmail/smtp/address.html#parseMailbox,string	proc parseMailbox(s: string): Mailbox		159
+nim	isNullSender	meowmail/smtp/address.html#isNullSender,Mailbox	proc isNullSender(m: Mailbox): bool		280
+nim	hasValidSyntax	meowmail/smtp/address.html#hasValidSyntax,Mailbox	proc hasValidSyntax(m: Mailbox): bool		283
+nim	isDomainValid	meowmail/smtp/address.html#isDomainValid,Mailbox	proc isDomainValid(m: Mailbox): bool		286

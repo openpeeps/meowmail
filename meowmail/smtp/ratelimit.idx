@@ -1,0 +1,28 @@
+nimTitle	ratelimit	meowmail/smtp/ratelimit.html	module meowmail/smtp/ratelimit		0
+nim	SmtpRateLimit	meowmail/smtp/ratelimit.html#SmtpRateLimit	type SmtpRateLimit		10
+nim	ConnectionLimiter	meowmail/smtp/ratelimit.html#ConnectionLimiter	type ConnectionLimiter		15
+nim	AuthLimiter	meowmail/smtp/ratelimit.html#AuthLimiter	type AuthLimiter		22
+nim	SmtpLimits	meowmail/smtp/ratelimit.html#SmtpLimits	object SmtpLimits		29
+nim	DefaultSmtpLimits	meowmail/smtp/ratelimit.html#DefaultSmtpLimits	const DefaultSmtpLimits		40
+nim	newConnectionLimiter	meowmail/smtp/ratelimit.html#newConnectionLimiter,int,int	proc newConnectionLimiter(maxConcurrent = 20; maxPerMinute = 60): ConnectionLimiter		52
+nim	allowConnection	meowmail/smtp/ratelimit.html#allowConnection,ConnectionLimiter,string	proc allowConnection(limiter: ConnectionLimiter; ip: string): bool		61
+nim	trackConnect	meowmail/smtp/ratelimit.html#trackConnect,ConnectionLimiter,string	proc trackConnect(limiter: ConnectionLimiter; ip: string)		72
+nim	trackDisconnect	meowmail/smtp/ratelimit.html#trackDisconnect,ConnectionLimiter,string	proc trackDisconnect(limiter: ConnectionLimiter; ip: string)		78
+nim	cleanup	meowmail/smtp/ratelimit.html#cleanup,ConnectionLimiter	proc cleanup(limiter: ConnectionLimiter)		87
+nim	newAuthLimiter	meowmail/smtp/ratelimit.html#newAuthLimiter,int,int	proc newAuthLimiter(maxFailed = 5; lockoutMs = 300000): AuthLimiter		93
+nim	isLockedOut	meowmail/smtp/ratelimit.html#isLockedOut,AuthLimiter,string	proc isLockedOut(limiter: AuthLimiter; ip: string): bool		102
+nim	recordFailure	meowmail/smtp/ratelimit.html#recordFailure,AuthLimiter,string	proc recordFailure(limiter: AuthLimiter; ip: string)		114
+nim	recordSuccess	meowmail/smtp/ratelimit.html#recordSuccess,AuthLimiter,string	proc recordSuccess(limiter: AuthLimiter; ip: string)		128
+nim	newSmtpRateLimit	meowmail/smtp/ratelimit.html#newSmtpRateLimit,SmtpLimits	proc newSmtpRateLimit(limits: SmtpLimits = DefaultSmtpLimits): SmtpRateLimit		136
+nim	allowConnection	meowmail/smtp/ratelimit.html#allowConnection,SmtpRateLimit,string	proc allowConnection(rl: SmtpRateLimit; ip: string): bool		144
+nim	trackConnect	meowmail/smtp/ratelimit.html#trackConnect,SmtpRateLimit,string	proc trackConnect(rl: SmtpRateLimit; ip: string)		147
+nim	trackDisconnect	meowmail/smtp/ratelimit.html#trackDisconnect,SmtpRateLimit,string	proc trackDisconnect(rl: SmtpRateLimit; ip: string)		150
+nim	isLockedOut	meowmail/smtp/ratelimit.html#isLockedOut,SmtpRateLimit,string	proc isLockedOut(rl: SmtpRateLimit; ip: string): bool		153
+nim	recordAuthFailure	meowmail/smtp/ratelimit.html#recordAuthFailure,SmtpRateLimit,string	proc recordAuthFailure(rl: SmtpRateLimit; ip: string)		156
+nim	recordAuthSuccess	meowmail/smtp/ratelimit.html#recordAuthSuccess,SmtpRateLimit,string	proc recordAuthSuccess(rl: SmtpRateLimit; ip: string)		159
+nim	cleanup	meowmail/smtp/ratelimit.html#cleanup,SmtpRateLimit	proc cleanup(rl: SmtpRateLimit)		162
+nimgrp	trackdisconnect	meowmail/smtp/ratelimit.html#trackDisconnect-procs-all	proc		78
+nimgrp	cleanup	meowmail/smtp/ratelimit.html#cleanup-procs-all	proc		87
+nimgrp	trackconnect	meowmail/smtp/ratelimit.html#trackConnect-procs-all	proc		72
+nimgrp	islockedout	meowmail/smtp/ratelimit.html#isLockedOut-procs-all	proc		102
+nimgrp	allowconnection	meowmail/smtp/ratelimit.html#allowConnection-procs-all	proc		61

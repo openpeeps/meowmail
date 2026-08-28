@@ -1,0 +1,5 @@
+nimTitle	config	meowmail/cli/config.html	module meowmail/cli/config		0
+nim	MeowMailConfig	meowmail/cli/config.html#MeowMailConfig	object MeowMailConfig		15
+nim	loadConfig	meowmail/cli/config.html#loadConfig,string	proc loadConfig(path: string): MeowMailConfig		64
+nim	toSMTPSettings	meowmail/cli/config.html#toSMTPSettings,MeowMailConfig	proc toSMTPSettings(cfg: MeowMailConfig): SMTPSettings		156
+nim	applyAuth	meowmail/cli/config.html#applyAuth,SMTPServer,MeowMailConfig	proc applyAuth(server: SMTPServer; cfg: MeowMailConfig)		184

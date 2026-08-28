@@ -1,0 +1,13 @@
+nimTitle	smtpauth	meowmail/smtp/smtpauth.html	module meowmail/smtp/smtpauth		0
+nim	apNone	meowmail/smtp/smtpauth.html#apNone	AuthProgress.apNone		16
+nim	apPlain	meowmail/smtp/smtpauth.html#apPlain	AuthProgress.apPlain		16
+nim	apLoginUser	meowmail/smtp/smtpauth.html#apLoginUser	AuthProgress.apLoginUser		16
+nim	apLoginPass	meowmail/smtp/smtpauth.html#apLoginPass	AuthProgress.apLoginPass		16
+nim	AuthProgress	meowmail/smtp/smtpauth.html#AuthProgress	enum AuthProgress		16
+nim	authInvalid	meowmail/smtp/smtpauth.html#authInvalid	AuthDecision.authInvalid		22
+nim	authOk	meowmail/smtp/smtpauth.html#authOk	AuthDecision.authOk		22
+nim	authFailure	meowmail/smtp/smtpauth.html#authFailure	AuthDecision.authFailure		22
+nim	AuthDecision	meowmail/smtp/smtpauth.html#AuthDecision	enum AuthDecision		22
+nim	AuthRequest	meowmail/smtp/smtpauth.html#AuthRequest	object AuthRequest		27
+nim	AuthProvider	meowmail/smtp/smtpauth.html#AuthProvider	type AuthProvider		40
+nim	newHTTPAuthProvider	meowmail/smtp/smtpauth.html#newHTTPAuthProvider,string,string,int	proc newHTTPAuthProvider(url: string; bearerToken = ""; timeoutMs = 1200): AuthProvider		43

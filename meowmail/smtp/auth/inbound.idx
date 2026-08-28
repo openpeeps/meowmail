@@ -1,0 +1,14 @@
+nimTitle	inbound	meowmail/smtp/auth/inbound.html	module meowmail/smtp/auth/inbound		0
+nim	arPass	meowmail/smtp/auth/inbound.html#arPass	AuthResult.arPass		14
+nim	arFail	meowmail/smtp/auth/inbound.html#arFail	AuthResult.arFail		14
+nim	arSoftFail	meowmail/smtp/auth/inbound.html#arSoftFail	AuthResult.arSoftFail		14
+nim	arNeutral	meowmail/smtp/auth/inbound.html#arNeutral	AuthResult.arNeutral		14
+nim	arNone	meowmail/smtp/auth/inbound.html#arNone	AuthResult.arNone		14
+nim	arTempError	meowmail/smtp/auth/inbound.html#arTempError	AuthResult.arTempError		14
+nim	arPermError	meowmail/smtp/auth/inbound.html#arPermError	AuthResult.arPermError		14
+nim	AuthResult	meowmail/smtp/auth/inbound.html#AuthResult	enum AuthResult		14
+nim	AuthHeader	meowmail/smtp/auth/inbound.html#AuthHeader	object AuthHeader		17
+nim	verifySpf	meowmail/smtp/auth/inbound.html#verifySpf,pointer,string,string,string	proc verifySpf(spfServerPtr: pointer; clientIp, heloDomain, mailFrom: string): (\n    AuthResult, string)		38
+nim	verifyDkim	meowmail/smtp/auth/inbound.html#verifyDkim,seq[Header],string	proc verifyDkim(headers: seq[Header]; body: string): (AuthResult, string)		104
+nim	authenticateMessage	meowmail/smtp/auth/inbound.html#authenticateMessage,pointer,string,string,seq[Header],string,string	proc authenticateMessage(spfServerPtr: pointer; clientIp, heloDomain: string;\n                    headers: seq[Header]; body: string;\n                    envelopeFrom: string = ""): AuthHeader		187
+nim	renderAuthHeader	meowmail/smtp/auth/inbound.html#renderAuthHeader,AuthHeader	proc renderAuthHeader(auth: AuthHeader): string		240

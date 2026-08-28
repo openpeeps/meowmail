@@ -16,289 +16,1602 @@
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4QQQEwksSS9ZWwAAAk1JREFUWMPtll2ITVEUx39nn/O7Y5qR8f05wtCUUr6ZIS++8pEnkZInPImneaCQ5METNdOkeFBKUhMPRIkHKfEuUZSUlGlKPN2TrgfncpvmnntnmlEyq1Z7t89/rf9a6+y99oZxGZf/XeIq61EdtgKXgdXA0xrYAvBjOIF1AI9zvjcC74BSpndrJPkBWDScTF8Aa4E3wDlgHbASaANmVqlcCnwHvgDvgVfAJ+AikAAvgfVZwLnSVZHZaOuKoQi3ZOMi4NkYkpe1p4J7A8BpYAD49hfIy/oqG0+hLomiKP2L5L+1ubn5115S+3OAn4EnwBlgMzCjyt6ZAnQCJ4A7wOs88iRJHvw50HoujuPBoCKwHWiosy8MdfZnAdcHk8dxXFJ3VQbQlCTJvRBCGdRbD4M6uc5glpY3eAihpN5S5w12diSEcCCEcKUO4ljdr15T76ur1FDDLIQQ3qv71EdDOe3Kxj3leRXyk+pxdWnFWod6Wt2bY3de3aSuUHcPBVimHs7mK9WrmeOF6lR1o9qnzskh2ar2qm1qizpfXaPeVGdlmGN5pb09qMxz1Xb1kLqgzn1RyH7JUXW52lr5e/Kqi9qpto7V1atuUzfnARrV7jEib1T76gG2qxdGmXyiekkt1GswPTtek0aBfJp6YySGBfWg2tPQ0FAYgf1stUfdmdcjarbYJEniKIq6gY/Aw+zWHAC+p2labGpqiorFYgGYCEzN7oQdQClN07O1/EfDyGgC0ALMBdYAi4FyK+4H3gLPsxfR1zRNi+NP7nH5J+QntnXe5B5mpfQAAAAASUVORK5CYII=">
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="nimdoc.out.css?v=2.2.8">
+<link rel="stylesheet" type="text/css" href="nimdoc.out.css?v=2.2.10">
 
 <!-- JS -->
-<script type="text/javascript" src="dochack.js?v=2.2.8"></script>
+<script type="text/javascript" src="dochack.js?v=2.2.10"></script>
 </head>
 <body>
   <div class="document" id="documentId">
+    <input type="checkbox" id="nav-toggle" hidden>
+    <label for="nav-toggle" id="nav-burger">&#9776;</label>
+    <label for="nav-toggle" id="nav-overlay"></label>
     <div class="container">
       <h1 class="title">Index</h1>
-      Modules: <a href="index.html">meowmail</a>, <a href="meowmail/imapserver.html">meowmail/imapserver</a>, <a href="meowmail/mxprovider.html">meowmail/mxprovider</a>, <a href="meowmail/smtpauth.html">meowmail/smtpauth</a>, <a href="meowmail/smtpdelivery.html">meowmail/smtpdelivery</a>, <a href="meowmail/smtpserver.html">meowmail/smtpserver</a>.<br/><p /><h2>API symbols</h2>
-<dl><dt><a name="apLoginPass" href="#apLoginPass"><span>apLoginPass:</span></a></dt><dd><ul class="simple">
+      Modules: <a href="index.html">meowmail</a>, <a href="meowmail/cli/commands.html">meowmail/cli/commands</a>, <a href="meowmail/cli/config.html">meowmail/cli/config</a>, <a href="meowmail/imap/imapserver.html">meowmail/imap/imapserver</a>, <a href="meowmail/imap/mailstore.html">meowmail/imap/mailstore</a>, <a href="meowmail/imap/msgparse.html">meowmail/imap/msgparse</a>, <a href="meowmail/jmap/core.html">meowmail/jmap/core</a>, <a href="meowmail/jmap/emails.html">meowmail/jmap/emails</a>, <a href="meowmail/jmap/mailboxes.html">meowmail/jmap/mailboxes</a>, <a href="meowmail/jmap/server.html">meowmail/jmap/server</a>, <a href="meowmail/jmap/submissions.html">meowmail/jmap/submissions</a>, <a href="meowmail/jmap/types.html">meowmail/jmap/types</a>, <a href="meowmail/restapi/admin.html">meowmail/restapi/admin</a>, <a href="meowmail/smtp/address.html">meowmail/smtp/address</a>, <a href="meowmail/smtp/auth/dmarc_preflight.html">meowmail/smtp/auth/dmarc_preflight</a>, <a href="meowmail/smtp/auth/inbound.html">meowmail/smtp/auth/inbound</a>, <a href="meowmail/smtp/auth/spf_preflight.html">meowmail/smtp/auth/spf_preflight</a>, <a href="meowmail/smtp/bounce.html">meowmail/smtp/bounce</a>, <a href="meowmail/smtp/dkim.html">meowmail/smtp/dkim</a>, <a href="meowmail/smtp/mxprovider.html">meowmail/smtp/mxprovider</a>, <a href="meowmail/smtp/queue.html">meowmail/smtp/queue</a>, <a href="meowmail/smtp/ratelimit.html">meowmail/smtp/ratelimit</a>, <a href="meowmail/smtp/smtpauth.html">meowmail/smtp/smtpauth</a>, <a href="meowmail/smtp/smtpdelivery.html">meowmail/smtp/smtpdelivery</a>, <a href="meowmail/smtp/smtpserver.html">meowmail/smtp/smtpserver</a>, <a href="meowmail/utils/logger.html">meowmail/utils/logger</a>, <a href="meowmail/utils/records_generator.html">meowmail/utils/records_generator</a>.<br/><p /><h2>API symbols</h2>
+<dl><dt><a name="%60%24%60" href="#%60%24%60"><span>`$`:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpauth: AuthProgress.apLoginPass" href="meowmail/smtpauth.html#apLoginPass">smtpauth: AuthProgress.apLoginPass</a></li>
+          data-doc-search-tag="logger: proc `$`(lvl: LogLevel): string" href="meowmail/utils/logger.html#%24%2CLogLevel">logger: proc `$`(lvl: LogLevel): string</a></li>
+          </ul></dd>
+<dt><a name="AdminFlushProc" href="#AdminFlushProc"><span>AdminFlushProc:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="admin: type AdminFlushProc" href="meowmail/restapi/admin.html#AdminFlushProc">admin: type AdminFlushProc</a></li>
+          </ul></dd>
+<dt><a name="AdminServer" href="#AdminServer"><span>AdminServer:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="admin: type AdminServer" href="meowmail/restapi/admin.html#AdminServer">admin: type AdminServer</a></li>
+          </ul></dd>
+<dt><a name="allowConnection" href="#allowConnection"><span>allowConnection:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="ratelimit: proc allowConnection(limiter: ConnectionLimiter; ip: string): bool" href="meowmail/smtp/ratelimit.html#allowConnection%2CConnectionLimiter%2Cstring">ratelimit: proc allowConnection(limiter: ConnectionLimiter; ip: string): bool</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="ratelimit: proc allowConnection(rl: SmtpRateLimit; ip: string): bool" href="meowmail/smtp/ratelimit.html#allowConnection%2CSmtpRateLimit%2Cstring">ratelimit: proc allowConnection(rl: SmtpRateLimit; ip: string): bool</a></li>
+          </ul></dd>
+<dt><a name="apLoginPass" href="#apLoginPass"><span>apLoginPass:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="smtpauth: AuthProgress.apLoginPass" href="meowmail/smtp/smtpauth.html#apLoginPass">smtpauth: AuthProgress.apLoginPass</a></li>
           </ul></dd>
 <dt><a name="apLoginUser" href="#apLoginUser"><span>apLoginUser:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpauth: AuthProgress.apLoginUser" href="meowmail/smtpauth.html#apLoginUser">smtpauth: AuthProgress.apLoginUser</a></li>
+          data-doc-search-tag="smtpauth: AuthProgress.apLoginUser" href="meowmail/smtp/smtpauth.html#apLoginUser">smtpauth: AuthProgress.apLoginUser</a></li>
           </ul></dd>
 <dt><a name="apNone" href="#apNone"><span>apNone:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpauth: AuthProgress.apNone" href="meowmail/smtpauth.html#apNone">smtpauth: AuthProgress.apNone</a></li>
+          data-doc-search-tag="smtpauth: AuthProgress.apNone" href="meowmail/smtp/smtpauth.html#apNone">smtpauth: AuthProgress.apNone</a></li>
+          </ul></dd>
+<dt><a name="appendMessage" href="#appendMessage"><span>appendMessage:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: proc appendMessage(store: MaildirStore; user, mailbox: string; flags: set[MailFlag];
+              data: string; internalDate: times.Time = default(Time)): tuple[
+    ok: bool, uid, uidvalidity: uint32]" href="meowmail/imap/mailstore.html#appendMessage%2CMaildirStore%2Cstring%2Cstring%2Cset%5BMailFlag%5D%2Cstring">mailstore: proc appendMessage(store: MaildirStore; user, mailbox: string; flags: set[MailFlag];
+              data: string; internalDate: times.Time = default(Time)): tuple[
+    ok: bool, uid, uidvalidity: uint32]</a></li>
           </ul></dd>
 <dt><a name="apPlain" href="#apPlain"><span>apPlain:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpauth: AuthProgress.apPlain" href="meowmail/smtpauth.html#apPlain">smtpauth: AuthProgress.apPlain</a></li>
+          data-doc-search-tag="smtpauth: AuthProgress.apPlain" href="meowmail/smtp/smtpauth.html#apPlain">smtpauth: AuthProgress.apPlain</a></li>
+          </ul></dd>
+<dt><a name="applyAuth" href="#applyAuth"><span>applyAuth:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="config: proc applyAuth(server: SMTPServer; cfg: MeowMailConfig)" href="meowmail/cli/config.html#applyAuth%2CSMTPServer%2CMeowMailConfig">config: proc applyAuth(server: SMTPServer; cfg: MeowMailConfig)</a></li>
+          </ul></dd>
+<dt><a name="arFail" href="#arFail"><span>arFail:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="inbound: AuthResult.arFail" href="meowmail/smtp/auth/inbound.html#arFail">inbound: AuthResult.arFail</a></li>
+          </ul></dd>
+<dt><a name="arNeutral" href="#arNeutral"><span>arNeutral:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="inbound: AuthResult.arNeutral" href="meowmail/smtp/auth/inbound.html#arNeutral">inbound: AuthResult.arNeutral</a></li>
+          </ul></dd>
+<dt><a name="arNone" href="#arNone"><span>arNone:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="inbound: AuthResult.arNone" href="meowmail/smtp/auth/inbound.html#arNone">inbound: AuthResult.arNone</a></li>
+          </ul></dd>
+<dt><a name="arPass" href="#arPass"><span>arPass:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="inbound: AuthResult.arPass" href="meowmail/smtp/auth/inbound.html#arPass">inbound: AuthResult.arPass</a></li>
+          </ul></dd>
+<dt><a name="arPermError" href="#arPermError"><span>arPermError:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="inbound: AuthResult.arPermError" href="meowmail/smtp/auth/inbound.html#arPermError">inbound: AuthResult.arPermError</a></li>
+          </ul></dd>
+<dt><a name="arSoftFail" href="#arSoftFail"><span>arSoftFail:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="inbound: AuthResult.arSoftFail" href="meowmail/smtp/auth/inbound.html#arSoftFail">inbound: AuthResult.arSoftFail</a></li>
+          </ul></dd>
+<dt><a name="arTempError" href="#arTempError"><span>arTempError:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="inbound: AuthResult.arTempError" href="meowmail/smtp/auth/inbound.html#arTempError">inbound: AuthResult.arTempError</a></li>
+          </ul></dd>
+<dt><a name="attemptEntry" href="#attemptEntry"><span>attemptEntry:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="queue: proc attemptEntry(queue: Queue; entryId: string; deliverProc: proc (
+    req: DeliveryRequest): DeliveryOutcome {.gcsafe.}; localStore: MaildirStore): bool" href="meowmail/smtp/queue.html#attemptEntry%2CQueue%2Cstring%2Cproc%28DeliveryRequest%29%2CMaildirStore">queue: proc attemptEntry(queue: Queue; entryId: string; deliverProc: proc (
+    req: DeliveryRequest): DeliveryOutcome {.gcsafe.}; localStore: MaildirStore): bool</a></li>
           </ul></dd>
 <dt><a name="AUTH" href="#AUTH"><span>AUTH:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpserver: SMTPCommand.AUTH" href="meowmail/smtpserver.html#AUTH">smtpserver: SMTPCommand.AUTH</a></li>
+          data-doc-search-tag="smtpserver: SMTPCommand.AUTH" href="meowmail/smtp/smtpserver.html#AUTH">smtpserver: SMTPCommand.AUTH</a></li>
           </ul></dd>
 <dt><a name="AuthDecision" href="#AuthDecision"><span>AuthDecision:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpauth: enum AuthDecision" href="meowmail/smtpauth.html#AuthDecision">smtpauth: enum AuthDecision</a></li>
+          data-doc-search-tag="smtpauth: enum AuthDecision" href="meowmail/smtp/smtpauth.html#AuthDecision">smtpauth: enum AuthDecision</a></li>
+          </ul></dd>
+<dt><a name="authenticateMessage" href="#authenticateMessage"><span>authenticateMessage:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="inbound: proc authenticateMessage(spfServerPtr: pointer; clientIp, heloDomain: string;
+                    headers: seq[Header]; body: string;
+                    envelopeFrom: string = &quot;&quot;): AuthHeader" href="meowmail/smtp/auth/inbound.html#authenticateMessage%2Cpointer%2Cstring%2Cstring%2Cseq%5BHeader%5D%2Cstring%2Cstring">inbound: proc authenticateMessage(spfServerPtr: pointer; clientIp, heloDomain: string;
+                    headers: seq[Header]; body: string;
+                    envelopeFrom: string = &quot;&quot;): AuthHeader</a></li>
           </ul></dd>
 <dt><a name="authFailure" href="#authFailure"><span>authFailure:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpauth: AuthDecision.authFailure" href="meowmail/smtpauth.html#authFailure">smtpauth: AuthDecision.authFailure</a></li>
+          data-doc-search-tag="smtpauth: AuthDecision.authFailure" href="meowmail/smtp/smtpauth.html#authFailure">smtpauth: AuthDecision.authFailure</a></li>
+          </ul></dd>
+<dt><a name="AuthHeader" href="#AuthHeader"><span>AuthHeader:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="inbound: object AuthHeader" href="meowmail/smtp/auth/inbound.html#AuthHeader">inbound: object AuthHeader</a></li>
           </ul></dd>
 <dt><a name="authInvalid" href="#authInvalid"><span>authInvalid:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpauth: AuthDecision.authInvalid" href="meowmail/smtpauth.html#authInvalid">smtpauth: AuthDecision.authInvalid</a></li>
+          data-doc-search-tag="smtpauth: AuthDecision.authInvalid" href="meowmail/smtp/smtpauth.html#authInvalid">smtpauth: AuthDecision.authInvalid</a></li>
+          </ul></dd>
+<dt><a name="AuthLimiter" href="#AuthLimiter"><span>AuthLimiter:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="ratelimit: type AuthLimiter" href="meowmail/smtp/ratelimit.html#AuthLimiter">ratelimit: type AuthLimiter</a></li>
           </ul></dd>
 <dt><a name="authOk" href="#authOk"><span>authOk:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpauth: AuthDecision.authOk" href="meowmail/smtpauth.html#authOk">smtpauth: AuthDecision.authOk</a></li>
+          data-doc-search-tag="smtpauth: AuthDecision.authOk" href="meowmail/smtp/smtpauth.html#authOk">smtpauth: AuthDecision.authOk</a></li>
           </ul></dd>
 <dt><a name="AuthProgress" href="#AuthProgress"><span>AuthProgress:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpauth: enum AuthProgress" href="meowmail/smtpauth.html#AuthProgress">smtpauth: enum AuthProgress</a></li>
+          data-doc-search-tag="smtpauth: enum AuthProgress" href="meowmail/smtp/smtpauth.html#AuthProgress">smtpauth: enum AuthProgress</a></li>
           </ul></dd>
 <dt><a name="AuthProvider" href="#AuthProvider"><span>AuthProvider:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpauth: type AuthProvider" href="meowmail/smtpauth.html#AuthProvider">smtpauth: type AuthProvider</a></li>
+          data-doc-search-tag="smtpauth: type AuthProvider" href="meowmail/smtp/smtpauth.html#AuthProvider">smtpauth: type AuthProvider</a></li>
           </ul></dd>
 <dt><a name="AuthRequest" href="#AuthRequest"><span>AuthRequest:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpauth: object AuthRequest" href="meowmail/smtpauth.html#AuthRequest">smtpauth: object AuthRequest</a></li>
+          data-doc-search-tag="smtpauth: object AuthRequest" href="meowmail/smtp/smtpauth.html#AuthRequest">smtpauth: object AuthRequest</a></li>
+          </ul></dd>
+<dt><a name="AuthResult" href="#AuthResult"><span>AuthResult:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="inbound: enum AuthResult" href="meowmail/smtp/auth/inbound.html#AuthResult">inbound: enum AuthResult</a></li>
           </ul></dd>
 <dt><a name="bindListener465" href="#bindListener465"><span>bindListener465:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpserver: proc bindListener465(server: SMTPServer; port: Port = Port(465))" href="meowmail/smtpserver.html#bindListener465%2CSMTPServer%2CPort">smtpserver: proc bindListener465(server: SMTPServer; port: Port = Port(465))</a></li>
+          data-doc-search-tag="smtpserver: proc bindListener465(server: SMTPServer; port: Port = Port(465))" href="meowmail/smtp/smtpserver.html#bindListener465%2CSMTPServer%2CPort">smtpserver: proc bindListener465(server: SMTPServer; port: Port = Port(465))</a></li>
           </ul></dd>
 <dt><a name="bindListener587" href="#bindListener587"><span>bindListener587:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpserver: proc bindListener587(server: SMTPServer; port: Port = Port(587))" href="meowmail/smtpserver.html#bindListener587%2CSMTPServer%2CPort">smtpserver: proc bindListener587(server: SMTPServer; port: Port = Port(587))</a></li>
+          data-doc-search-tag="smtpserver: proc bindListener587(server: SMTPServer; port: Port = Port(587))" href="meowmail/smtp/smtpserver.html#bindListener587%2CSMTPServer%2CPort">smtpserver: proc bindListener587(server: SMTPServer; port: Port = Port(587))</a></li>
           </ul></dd>
-<dt><a name="cmdCapability" href="#cmdCapability"><span>cmdCapability:</span></a></dt><dd><ul class="simple">
+<dt><a name="buildCoreCapability" href="#buildCoreCapability"><span>buildCoreCapability:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="imapserver: IMAPCommand.cmdCapability" href="meowmail/imapserver.html#cmdCapability">imapserver: IMAPCommand.cmdCapability</a></li>
+          data-doc-search-tag="core: proc buildCoreCapability(): JsonNode" href="meowmail/jmap/core.html#buildCoreCapability">core: proc buildCoreCapability(): JsonNode</a></li>
           </ul></dd>
-<dt><a name="cmdLogin" href="#cmdLogin"><span>cmdLogin:</span></a></dt><dd><ul class="simple">
+<dt><a name="buildDkimTxt" href="#buildDkimTxt"><span>buildDkimTxt:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="imapserver: IMAPCommand.cmdLogin" href="meowmail/imapserver.html#cmdLogin">imapserver: IMAPCommand.cmdLogin</a></li>
+          data-doc-search-tag="records_generator: proc buildDkimTxt(publicKeyB64: string; keyType = &quot;rsa&quot;;
+             hashAlgos: seq[string] = @[&quot;sha256&quot;]; serviceType = &quot;email&quot;;
+             notes = &quot;&quot;): string" href="meowmail/utils/records_generator.html#buildDkimTxt%2Cstring%2Cstring%2Cseq%5Bstring%5D%2Cstring%2Cstring">records_generator: proc buildDkimTxt(publicKeyB64: string; keyType = &quot;rsa&quot;;
+             hashAlgos: seq[string] = @[&quot;sha256&quot;]; serviceType = &quot;email&quot;;
+             notes = &quot;&quot;): string</a></li>
           </ul></dd>
-<dt><a name="cmdLogout" href="#cmdLogout"><span>cmdLogout:</span></a></dt><dd><ul class="simple">
+<dt><a name="buildDmarcTxt" href="#buildDmarcTxt"><span>buildDmarcTxt:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="imapserver: IMAPCommand.cmdLogout" href="meowmail/imapserver.html#cmdLogout">imapserver: IMAPCommand.cmdLogout</a></li>
+          data-doc-search-tag="records_generator: proc buildDmarcTxt(policy: DmarcPolicy; rua: seq[string] = @[];
+              ruf: seq[string] = @[]; pct = 100; adkim = &quot;r&quot;; aspf = &quot;r&quot;;
+              sp: Option[DmarcPolicy] = none(DmarcPolicy); fo = &quot;0&quot;;
+              rf = &quot;afrf&quot;; ri = 86400): string" href="meowmail/utils/records_generator.html#buildDmarcTxt%2CDmarcPolicy%2Cseq%5Bstring%5D%2Cseq%5Bstring%5D%2Cint%2Cstring%2Cstring%2COption%5BDmarcPolicy%5D%2Cstring%2Cstring%2Cint">records_generator: proc buildDmarcTxt(policy: DmarcPolicy; rua: seq[string] = @[];
+              ruf: seq[string] = @[]; pct = 100; adkim = &quot;r&quot;; aspf = &quot;r&quot;;
+              sp: Option[DmarcPolicy] = none(DmarcPolicy); fo = &quot;0&quot;;
+              rf = &quot;afrf&quot;; ri = 86400): string</a></li>
           </ul></dd>
-<dt><a name="cmdNoop" href="#cmdNoop"><span>cmdNoop:</span></a></dt><dd><ul class="simple">
+<dt><a name="buildSession" href="#buildSession"><span>buildSession:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="imapserver: IMAPCommand.cmdNoop" href="meowmail/imapserver.html#cmdNoop">imapserver: IMAPCommand.cmdNoop</a></li>
+          data-doc-search-tag="core: proc buildSession(ctx: JMAPContext; host: string; port: int): JsonNode" href="meowmail/jmap/core.html#buildSession%2CJMAPContext%2Cstring%2Cint">core: proc buildSession(ctx: JMAPContext; host: string; port: int): JsonNode</a></li>
           </ul></dd>
-<dt><a name="cmdSelect" href="#cmdSelect"><span>cmdSelect:</span></a></dt><dd><ul class="simple">
+<dt><a name="buildSpfTxt" href="#buildSpfTxt"><span>buildSpfTxt:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="imapserver: IMAPCommand.cmdSelect" href="meowmail/imapserver.html#cmdSelect">imapserver: IMAPCommand.cmdSelect</a></li>
+          data-doc-search-tag="records_generator: proc buildSpfTxt(ip4: seq[string] = @[]; ip6: seq[string] = @[];
+            includes: seq[string] = @[]; mx = true; a = false;
+            existsRules: seq[string] = @[]; redirect: string = &quot;&quot;;
+            allQualifier = &quot;~all&quot;): string" href="meowmail/utils/records_generator.html#buildSpfTxt%2Cseq%5Bstring%5D%2Cseq%5Bstring%5D%2Cseq%5Bstring%5D%2Cseq%5Bstring%5D%2Cstring%2Cstring">records_generator: proc buildSpfTxt(ip4: seq[string] = @[]; ip6: seq[string] = @[];
+            includes: seq[string] = @[]; mx = true; a = false;
+            existsRules: seq[string] = @[]; redirect: string = &quot;&quot;;
+            allQualifier = &quot;~all&quot;): string</a></li>
           </ul></dd>
-<dt><a name="cmdUnknown" href="#cmdUnknown"><span>cmdUnknown:</span></a></dt><dd><ul class="simple">
+<dt><a name="bumpState" href="#bumpState"><span>bumpState:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="imapserver: IMAPCommand.cmdUnknown" href="meowmail/imapserver.html#cmdUnknown">imapserver: IMAPCommand.cmdUnknown</a></li>
+          data-doc-search-tag="core: proc bumpState(ctx: JMAPContext)" href="meowmail/jmap/core.html#bumpState%2CJMAPContext">core: proc bumpState(ctx: JMAPContext)</a></li>
+          </ul></dd>
+<dt><a name="canonHeaderSimple" href="#canonHeaderSimple"><span>canonHeaderSimple:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="dkim: proc canonHeaderSimple(field: RawHeaderField): string" href="meowmail/smtp/dkim.html#canonHeaderSimple%2CRawHeaderField">dkim: proc canonHeaderSimple(field: RawHeaderField): string</a></li>
+          </ul></dd>
+<dt><a name="cleanup" href="#cleanup"><span>cleanup:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="ratelimit: proc cleanup(limiter: ConnectionLimiter)" href="meowmail/smtp/ratelimit.html#cleanup%2CConnectionLimiter">ratelimit: proc cleanup(limiter: ConnectionLimiter)</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="ratelimit: proc cleanup(rl: SmtpRateLimit)" href="meowmail/smtp/ratelimit.html#cleanup%2CSmtpRateLimit">ratelimit: proc cleanup(rl: SmtpRateLimit)</a></li>
+          </ul></dd>
+<dt><a name="ConnectionLimiter" href="#ConnectionLimiter"><span>ConnectionLimiter:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="ratelimit: type ConnectionLimiter" href="meowmail/smtp/ratelimit.html#ConnectionLimiter">ratelimit: type ConnectionLimiter</a></li>
+          </ul></dd>
+<dt><a name="CoreCapability" href="#CoreCapability"><span>CoreCapability:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: object CoreCapability" href="meowmail/jmap/types.html#CoreCapability">types: object CoreCapability</a></li>
+          </ul></dd>
+<dt><a name="Core_echoArgs" href="#Core_echoArgs"><span>Core_echoArgs:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: object Core_echoArgs" href="meowmail/jmap/types.html#Core_echoArgs">types: object Core_echoArgs</a></li>
+          </ul></dd>
+<dt><a name="createMailbox" href="#createMailbox"><span>createMailbox:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: proc createMailbox(store: MaildirStore; user, name: string): bool" href="meowmail/imap/mailstore.html#createMailbox%2CMaildirStore%2Cstring%2Cstring">mailstore: proc createMailbox(store: MaildirStore; user, name: string): bool</a></li>
           </ul></dd>
 <dt><a name="DATA" href="#DATA"><span>DATA:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpserver: SMTPCommand.DATA" href="meowmail/smtpserver.html#DATA">smtpserver: SMTPCommand.DATA</a></li>
+          data-doc-search-tag="smtpserver: SMTPCommand.DATA" href="meowmail/smtp/smtpserver.html#DATA">smtpserver: SMTPCommand.DATA</a></li>
+          </ul></dd>
+<dt><a name="dataOverflow" href="#dataOverflow"><span>dataOverflow:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="smtpserver: proc dataOverflow(s: SMTPSession): bool" href="meowmail/smtp/smtpserver.html#dataOverflow%2CSMTPSession">smtpserver: proc dataOverflow(s: SMTPSession): bool</a></li>
           </ul></dd>
 <dt><a name="ddOk" href="#ddOk"><span>ddOk:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpdelivery: DeliveryDecision.ddOk" href="meowmail/smtpdelivery.html#ddOk">smtpdelivery: DeliveryDecision.ddOk</a></li>
+          data-doc-search-tag="smtpdelivery: DeliveryDecision.ddOk" href="meowmail/smtp/smtpdelivery.html#ddOk">smtpdelivery: DeliveryDecision.ddOk</a></li>
           </ul></dd>
 <dt><a name="ddPermFail" href="#ddPermFail"><span>ddPermFail:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpdelivery: DeliveryDecision.ddPermFail" href="meowmail/smtpdelivery.html#ddPermFail">smtpdelivery: DeliveryDecision.ddPermFail</a></li>
+          data-doc-search-tag="smtpdelivery: DeliveryDecision.ddPermFail" href="meowmail/smtp/smtpdelivery.html#ddPermFail">smtpdelivery: DeliveryDecision.ddPermFail</a></li>
           </ul></dd>
 <dt><a name="ddTempFail" href="#ddTempFail"><span>ddTempFail:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpdelivery: DeliveryDecision.ddTempFail" href="meowmail/smtpdelivery.html#ddTempFail">smtpdelivery: DeliveryDecision.ddTempFail</a></li>
+          data-doc-search-tag="smtpdelivery: DeliveryDecision.ddTempFail" href="meowmail/smtp/smtpdelivery.html#ddTempFail">smtpdelivery: DeliveryDecision.ddTempFail</a></li>
+          </ul></dd>
+<dt><a name="DEBUG" href="#DEBUG"><span>DEBUG:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="logger: LogLevel.DEBUG" href="meowmail/utils/logger.html#DEBUG">logger: LogLevel.DEBUG</a></li>
+          </ul></dd>
+<dt><a name="debug" href="#debug"><span>debug:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="logger: template debug(self: Logger; message = &quot;&quot;; autoNewLine = true)" href="meowmail/utils/logger.html#debug.t%2CLogger%2Cstring">logger: template debug(self: Logger; message = &quot;&quot;; autoNewLine = true)</a></li>
+          </ul></dd>
+<dt><a name="decodeMimeWords" href="#decodeMimeWords"><span>decodeMimeWords:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="msgparse: proc decodeMimeWords(s: string): string" href="meowmail/imap/msgparse.html#decodeMimeWords%2Cstring">msgparse: proc decodeMimeWords(s: string): string</a></li>
+          </ul></dd>
+<dt><a name="DefaultSignHeaders" href="#DefaultSignHeaders"><span>DefaultSignHeaders:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="dkim: const DefaultSignHeaders" href="meowmail/smtp/dkim.html#DefaultSignHeaders">dkim: const DefaultSignHeaders</a></li>
+          </ul></dd>
+<dt><a name="DefaultSmtpLimits" href="#DefaultSmtpLimits"><span>DefaultSmtpLimits:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="ratelimit: const DefaultSmtpLimits" href="meowmail/smtp/ratelimit.html#DefaultSmtpLimits">ratelimit: const DefaultSmtpLimits</a></li>
           </ul></dd>
 <dt><a name="defaultSpoolDir" href="#defaultSpoolDir"><span>defaultSpoolDir:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpdelivery: proc defaultSpoolDir(smtpd: SMTPDelivery): string" href="meowmail/smtpdelivery.html#defaultSpoolDir%2CSMTPDelivery">smtpdelivery: proc defaultSpoolDir(smtpd: SMTPDelivery): string</a></li>
+          data-doc-search-tag="smtpdelivery: proc defaultSpoolDir(smtpd: SMTPDelivery): string" href="meowmail/smtp/smtpdelivery.html#defaultSpoolDir%2CSMTPDelivery">smtpdelivery: proc defaultSpoolDir(smtpd: SMTPDelivery): string</a></li>
+          </ul></dd>
+<dt><a name="deleteEntryFiles" href="#deleteEntryFiles"><span>deleteEntryFiles:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="queue: proc deleteEntryFiles(queue: Queue; entry: QueueEntry)" href="meowmail/smtp/queue.html#deleteEntryFiles%2CQueue%2CQueueEntry">queue: proc deleteEntryFiles(queue: Queue; entry: QueueEntry)</a></li>
+          </ul></dd>
+<dt><a name="deleteMailbox" href="#deleteMailbox"><span>deleteMailbox:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: proc deleteMailbox(store: MaildirStore; user, name: string): bool" href="meowmail/imap/mailstore.html#deleteMailbox%2CMaildirStore%2Cstring%2Cstring">mailstore: proc deleteMailbox(store: MaildirStore; user, name: string): bool</a></li>
+          </ul></dd>
+<dt><a name="deliver" href="#deliver"><span>deliver:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: proc deliver(store: MaildirStore; mailFrom, rcpt, data: string): bool" href="meowmail/imap/mailstore.html#deliver%2CMaildirStore%2Cstring%2Cstring%2Cstring">mailstore: proc deliver(store: MaildirStore; mailFrom, rcpt, data: string): bool</a></li>
           </ul></dd>
 <dt><a name="deliverMessage" href="#deliverMessage"><span>deliverMessage:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpdelivery: proc deliverMessage(smtpd: SMTPDelivery; req: DeliveryRequest): DeliveryDecision" href="meowmail/smtpdelivery.html#deliverMessage%2CSMTPDelivery%2CDeliveryRequest">smtpdelivery: proc deliverMessage(smtpd: SMTPDelivery; req: DeliveryRequest): DeliveryDecision</a></li>
+          data-doc-search-tag="smtpdelivery: proc deliverMessage(smtpd: SMTPDelivery; req: DeliveryRequest): DeliveryOutcome" href="meowmail/smtp/smtpdelivery.html#deliverMessage%2CSMTPDelivery%2CDeliveryRequest">smtpdelivery: proc deliverMessage(smtpd: SMTPDelivery; req: DeliveryRequest): DeliveryOutcome</a></li>
           </ul></dd>
 <dt><a name="DeliveryDecision" href="#DeliveryDecision"><span>DeliveryDecision:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpdelivery: enum DeliveryDecision" href="meowmail/smtpdelivery.html#DeliveryDecision">smtpdelivery: enum DeliveryDecision</a></li>
+          data-doc-search-tag="smtpdelivery: enum DeliveryDecision" href="meowmail/smtp/smtpdelivery.html#DeliveryDecision">smtpdelivery: enum DeliveryDecision</a></li>
+          </ul></dd>
+<dt><a name="DeliveryOutcome" href="#DeliveryOutcome"><span>DeliveryOutcome:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="smtpdelivery: object DeliveryOutcome" href="meowmail/smtp/smtpdelivery.html#DeliveryOutcome">smtpdelivery: object DeliveryOutcome</a></li>
           </ul></dd>
 <dt><a name="DeliveryProvider" href="#DeliveryProvider"><span>DeliveryProvider:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpdelivery: type DeliveryProvider" href="meowmail/smtpdelivery.html#DeliveryProvider">smtpdelivery: type DeliveryProvider</a></li>
+          data-doc-search-tag="smtpdelivery: type DeliveryProvider" href="meowmail/smtp/smtpdelivery.html#DeliveryProvider">smtpdelivery: type DeliveryProvider</a></li>
           </ul></dd>
 <dt><a name="DeliveryRequest" href="#DeliveryRequest"><span>DeliveryRequest:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpdelivery: object DeliveryRequest" href="meowmail/smtpdelivery.html#DeliveryRequest">smtpdelivery: object DeliveryRequest</a></li>
+          data-doc-search-tag="smtpdelivery: object DeliveryRequest" href="meowmail/smtp/smtpdelivery.html#DeliveryRequest">smtpdelivery: object DeliveryRequest</a></li>
+          </ul></dd>
+<dt><a name="destroy" href="#destroy"><span>destroy:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="dkim: proc destroy(key: DkimKey)" href="meowmail/smtp/dkim.html#destroy%2CDkimKey">dkim: proc destroy(key: DkimKey)</a></li>
+          </ul></dd>
+<dt><a name="dkimCommand" href="#dkimCommand"><span>dkimCommand:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="commands: proc dkimCommand(v: Values)" href="meowmail/cli/commands.html#dkimCommand%2CValues">commands: proc dkimCommand(v: Values)</a></li>
+          </ul></dd>
+<dt><a name="DkimKey" href="#DkimKey"><span>DkimKey:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="dkim: type DkimKey" href="meowmail/smtp/dkim.html#DkimKey">dkim: type DkimKey</a></li>
+          </ul></dd>
+<dt><a name="dkimRecordName" href="#dkimRecordName"><span>dkimRecordName:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="records_generator: proc dkimRecordName(selector, domain: string): string" href="meowmail/utils/records_generator.html#dkimRecordName%2Cstring%2Cstring">records_generator: proc dkimRecordName(selector, domain: string): string</a></li>
+          </ul></dd>
+<dt><a name="DkimSignature" href="#DkimSignature"><span>DkimSignature:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="dkim: object DkimSignature" href="meowmail/smtp/dkim.html#DkimSignature">dkim: object DkimSignature</a></li>
+          </ul></dd>
+<dt><a name="dkimTxtRecord" href="#dkimTxtRecord"><span>dkimTxtRecord:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="dkim: proc dkimTxtRecord(key: DkimKey): string" href="meowmail/smtp/dkim.html#dkimTxtRecord%2CDkimKey">dkim: proc dkimTxtRecord(key: DkimKey): string</a></li>
+          </ul></dd>
+<dt><a name="dmarcCommand" href="#dmarcCommand"><span>dmarcCommand:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="commands: proc dmarcCommand(v: Values)" href="meowmail/cli/commands.html#dmarcCommand%2CValues">commands: proc dmarcCommand(v: Values)</a></li>
+          </ul></dd>
+<dt><a name="DmarcPolicy" href="#DmarcPolicy"><span>DmarcPolicy:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="records_generator: enum DmarcPolicy" href="meowmail/utils/records_generator.html#DmarcPolicy">records_generator: enum DmarcPolicy</a></li>
+          </ul></dd>
+<dt><a name="DmarcRecordLookup" href="#DmarcRecordLookup"><span>DmarcRecordLookup:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mxprovider: type DmarcRecordLookup" href="meowmail/smtp/mxprovider.html#DmarcRecordLookup">mxprovider: type DmarcRecordLookup</a></li>
+          </ul></dd>
+<dt><a name="dpNone" href="#dpNone"><span>dpNone:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="records_generator: DmarcPolicy.dpNone" href="meowmail/utils/records_generator.html#dpNone">records_generator: DmarcPolicy.dpNone</a></li>
+          </ul></dd>
+<dt><a name="dpQuarantine" href="#dpQuarantine"><span>dpQuarantine:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="records_generator: DmarcPolicy.dpQuarantine" href="meowmail/utils/records_generator.html#dpQuarantine">records_generator: DmarcPolicy.dpQuarantine</a></li>
+          </ul></dd>
+<dt><a name="dpReject" href="#dpReject"><span>dpReject:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="records_generator: DmarcPolicy.dpReject" href="meowmail/utils/records_generator.html#dpReject">records_generator: DmarcPolicy.dpReject</a></li>
+          </ul></dd>
+<dt><a name="dsnBadDestination" href="#dsnBadDestination"><span>dsnBadDestination:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="bounce: DsnStatus.dsnBadDestination" href="meowmail/smtp/bounce.html#dsnBadDestination">bounce: DsnStatus.dsnBadDestination</a></li>
+          </ul></dd>
+<dt><a name="dsnDelayed" href="#dsnDelayed"><span>dsnDelayed:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="bounce: DsnStatus.dsnDelayed" href="meowmail/smtp/bounce.html#dsnDelayed">bounce: DsnStatus.dsnDelayed</a></li>
+          </ul></dd>
+<dt><a name="dsnDelivered" href="#dsnDelivered"><span>dsnDelivered:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="bounce: DsnStatus.dsnDelivered" href="meowmail/smtp/bounce.html#dsnDelivered">bounce: DsnStatus.dsnDelivered</a></li>
+          </ul></dd>
+<dt><a name="dsnFailed" href="#dsnFailed"><span>dsnFailed:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="bounce: DsnStatus.dsnFailed" href="meowmail/smtp/bounce.html#dsnFailed">bounce: DsnStatus.dsnFailed</a></li>
+          </ul></dd>
+<dt><a name="dsnMailboxFull" href="#dsnMailboxFull"><span>dsnMailboxFull:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="bounce: DsnStatus.dsnMailboxFull" href="meowmail/smtp/bounce.html#dsnMailboxFull">bounce: DsnStatus.dsnMailboxFull</a></li>
+          </ul></dd>
+<dt><a name="dsnMessageExpired" href="#dsnMessageExpired"><span>dsnMessageExpired:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="bounce: DsnStatus.dsnMessageExpired" href="meowmail/smtp/bounce.html#dsnMessageExpired">bounce: DsnStatus.dsnMessageExpired</a></li>
+          </ul></dd>
+<dt><a name="dsnRejected" href="#dsnRejected"><span>dsnRejected:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="bounce: DsnStatus.dsnRejected" href="meowmail/smtp/bounce.html#dsnRejected">bounce: DsnStatus.dsnRejected</a></li>
+          </ul></dd>
+<dt><a name="DsnStatus" href="#DsnStatus"><span>DsnStatus:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="bounce: enum DsnStatus" href="meowmail/smtp/bounce.html#DsnStatus">bounce: enum DsnStatus</a></li>
           </ul></dd>
 <dt><a name="EHLO" href="#EHLO"><span>EHLO:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpserver: SMTPCommand.EHLO" href="meowmail/smtpserver.html#EHLO">smtpserver: SMTPCommand.EHLO</a></li>
+          data-doc-search-tag="smtpserver: SMTPCommand.EHLO" href="meowmail/smtp/smtpserver.html#EHLO">smtpserver: SMTPCommand.EHLO</a></li>
           </ul></dd>
 <dt><a name="enableMxDelivery" href="#enableMxDelivery"><span>enableMxDelivery:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpserver: proc enableMxDelivery(server: SMTPServer; cfg = MXProviderConfig())" href="meowmail/smtpserver.html#enableMxDelivery%2CSMTPServer">smtpserver: proc enableMxDelivery(server: SMTPServer; cfg = MXProviderConfig())</a></li>
+          data-doc-search-tag="smtpserver: proc enableMxDelivery(server: SMTPServer; cfg = MXProviderConfig())" href="meowmail/smtp/smtpserver.html#enableMxDelivery%2CSMTPServer">smtpserver: proc enableMxDelivery(server: SMTPServer; cfg = MXProviderConfig())</a></li>
+          </ul></dd>
+<dt><a name="enqueue" href="#enqueue"><span>enqueue:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="queue: proc enqueue(queue: Queue; req: DeliveryRequest): string" href="meowmail/smtp/queue.html#enqueue%2CQueue%2CDeliveryRequest">queue: proc enqueue(queue: Queue; req: DeliveryRequest): string</a></li>
+          </ul></dd>
+<dt><a name="ensureUserMaildir" href="#ensureUserMaildir"><span>ensureUserMaildir:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: proc ensureUserMaildir(store: MaildirStore; user: string): bool" href="meowmail/imap/mailstore.html#ensureUserMaildir%2CMaildirStore%2Cstring">mailstore: proc ensureUserMaildir(store: MaildirStore; user: string): bool</a></li>
+          </ul></dd>
+<dt><a name="Envelope" href="#Envelope"><span>Envelope:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="msgparse: object Envelope" href="meowmail/imap/msgparse.html#Envelope">msgparse: object Envelope</a></li>
+          </ul></dd>
+<dt><a name="EnvelopeAddress" href="#EnvelopeAddress"><span>EnvelopeAddress:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="msgparse: object EnvelopeAddress" href="meowmail/imap/msgparse.html#EnvelopeAddress">msgparse: object EnvelopeAddress</a></li>
+          </ul></dd>
+<dt><a name="errAccountNotFound" href="#errAccountNotFound"><span>errAccountNotFound:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: JMAPErrorType.errAccountNotFound" href="meowmail/jmap/types.html#errAccountNotFound">types: JMAPErrorType.errAccountNotFound</a></li>
+          </ul></dd>
+<dt><a name="errAccountNotSupportedByMethod" href="#errAccountNotSupportedByMethod"><span>errAccountNotSupportedByMethod:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: JMAPErrorType.errAccountNotSupportedByMethod" href="meowmail/jmap/types.html#errAccountNotSupportedByMethod">types: JMAPErrorType.errAccountNotSupportedByMethod</a></li>
+          </ul></dd>
+<dt><a name="errAccountReadOnly" href="#errAccountReadOnly"><span>errAccountReadOnly:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: JMAPErrorType.errAccountReadOnly" href="meowmail/jmap/types.html#errAccountReadOnly">types: JMAPErrorType.errAccountReadOnly</a></li>
+          </ul></dd>
+<dt><a name="errAlreadyExists" href="#errAlreadyExists"><span>errAlreadyExists:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: JMAPErrorType.errAlreadyExists" href="meowmail/jmap/types.html#errAlreadyExists">types: JMAPErrorType.errAlreadyExists</a></li>
+          </ul></dd>
+<dt><a name="errForbidden" href="#errForbidden"><span>errForbidden:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: JMAPErrorType.errForbidden" href="meowmail/jmap/types.html#errForbidden">types: JMAPErrorType.errForbidden</a></li>
+          </ul></dd>
+<dt><a name="errInvalidArguments" href="#errInvalidArguments"><span>errInvalidArguments:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: JMAPErrorType.errInvalidArguments" href="meowmail/jmap/types.html#errInvalidArguments">types: JMAPErrorType.errInvalidArguments</a></li>
+          </ul></dd>
+<dt><a name="errInvalidResultReference" href="#errInvalidResultReference"><span>errInvalidResultReference:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: JMAPErrorType.errInvalidResultReference" href="meowmail/jmap/types.html#errInvalidResultReference">types: JMAPErrorType.errInvalidResultReference</a></li>
+          </ul></dd>
+<dt><a name="errInvalidType" href="#errInvalidType"><span>errInvalidType:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: JMAPErrorType.errInvalidType" href="meowmail/jmap/types.html#errInvalidType">types: JMAPErrorType.errInvalidType</a></li>
+          </ul></dd>
+<dt><a name="errNotFound" href="#errNotFound"><span>errNotFound:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: JMAPErrorType.errNotFound" href="meowmail/jmap/types.html#errNotFound">types: JMAPErrorType.errNotFound</a></li>
+          </ul></dd>
+<dt><a name="ERROR" href="#ERROR"><span>ERROR:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="logger: LogLevel.ERROR" href="meowmail/utils/logger.html#ERROR">logger: LogLevel.ERROR</a></li>
+          </ul></dd>
+<dt><a name="error" href="#error"><span>error:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="logger: template error(self: Logger; message = &quot;&quot;; autoNewLine = true)" href="meowmail/utils/logger.html#error.t%2CLogger%2Cstring">logger: template error(self: Logger; message = &quot;&quot;; autoNewLine = true)</a></li>
+          </ul></dd>
+<dt><a name="errOverQuota" href="#errOverQuota"><span>errOverQuota:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: JMAPErrorType.errOverQuota" href="meowmail/jmap/types.html#errOverQuota">types: JMAPErrorType.errOverQuota</a></li>
+          </ul></dd>
+<dt><a name="errRateLimit" href="#errRateLimit"><span>errRateLimit:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: JMAPErrorType.errRateLimit" href="meowmail/jmap/types.html#errRateLimit">types: JMAPErrorType.errRateLimit</a></li>
+          </ul></dd>
+<dt><a name="errRequestTooLarge" href="#errRequestTooLarge"><span>errRequestTooLarge:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: JMAPErrorType.errRequestTooLarge" href="meowmail/jmap/types.html#errRequestTooLarge">types: JMAPErrorType.errRequestTooLarge</a></li>
+          </ul></dd>
+<dt><a name="errServerFail" href="#errServerFail"><span>errServerFail:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: JMAPErrorType.errServerFail" href="meowmail/jmap/types.html#errServerFail">types: JMAPErrorType.errServerFail</a></li>
+          </ul></dd>
+<dt><a name="errServerPartialFail" href="#errServerPartialFail"><span>errServerPartialFail:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: JMAPErrorType.errServerPartialFail" href="meowmail/jmap/types.html#errServerPartialFail">types: JMAPErrorType.errServerPartialFail</a></li>
+          </ul></dd>
+<dt><a name="errServerUnavailable" href="#errServerUnavailable"><span>errServerUnavailable:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: JMAPErrorType.errServerUnavailable" href="meowmail/jmap/types.html#errServerUnavailable">types: JMAPErrorType.errServerUnavailable</a></li>
+          </ul></dd>
+<dt><a name="errSyntaxError" href="#errSyntaxError"><span>errSyntaxError:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: JMAPErrorType.errSyntaxError" href="meowmail/jmap/types.html#errSyntaxError">types: JMAPErrorType.errSyntaxError</a></li>
+          </ul></dd>
+<dt><a name="errTooManyObjects" href="#errTooManyObjects"><span>errTooManyObjects:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: JMAPErrorType.errTooManyObjects" href="meowmail/jmap/types.html#errTooManyObjects">types: JMAPErrorType.errTooManyObjects</a></li>
+          </ul></dd>
+<dt><a name="errUnknownMethod" href="#errUnknownMethod"><span>errUnknownMethod:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: JMAPErrorType.errUnknownMethod" href="meowmail/jmap/types.html#errUnknownMethod">types: JMAPErrorType.errUnknownMethod</a></li>
+          </ul></dd>
+<dt><a name="errValueDoesNotExist" href="#errValueDoesNotExist"><span>errValueDoesNotExist:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: JMAPErrorType.errValueDoesNotExist" href="meowmail/jmap/types.html#errValueDoesNotExist">types: JMAPErrorType.errValueDoesNotExist</a></li>
           </ul></dd>
 <dt><a name="EXPN" href="#EXPN"><span>EXPN:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpserver: SMTPCommand.EXPN" href="meowmail/smtpserver.html#EXPN">smtpserver: SMTPCommand.EXPN</a></li>
+          data-doc-search-tag="smtpserver: SMTPCommand.EXPN" href="meowmail/smtp/smtpserver.html#EXPN">smtpserver: SMTPCommand.EXPN</a></li>
+          </ul></dd>
+<dt><a name="expungeMessage" href="#expungeMessage"><span>expungeMessage:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: proc expungeMessage(mb: Mailbox; msg: MailMessage)" href="meowmail/imap/mailstore.html#expungeMessage%2CMailbox%2CMailMessage">mailstore: proc expungeMessage(mb: Mailbox; msg: MailMessage)</a></li>
+          </ul></dd>
+<dt><a name="extractUser" href="#extractUser"><span>extractUser:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: proc extractUser(rcpt: string): string" href="meowmail/imap/mailstore.html#extractUser%2Cstring">mailstore: proc extractUser(rcpt: string): string</a></li>
+          </ul></dd>
+<dt><a name="FATAL" href="#FATAL"><span>FATAL:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="logger: LogLevel.FATAL" href="meowmail/utils/logger.html#FATAL">logger: LogLevel.FATAL</a></li>
+          </ul></dd>
+<dt><a name="fatal" href="#fatal"><span>fatal:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="logger: template fatal(self: Logger; message = &quot;&quot;; autoNewLine = true)" href="meowmail/utils/logger.html#fatal.t%2CLogger%2Cstring">logger: template fatal(self: Logger; message = &quot;&quot;; autoNewLine = true)</a></li>
+          </ul></dd>
+<dt><a name="findMessageByUid" href="#findMessageByUid"><span>findMessageByUid:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: proc findMessageByUid(mb: Mailbox; uid: uint32): MailMessage" href="meowmail/imap/mailstore.html#findMessageByUid%2CMailbox%2Cuint32">mailstore: proc findMessageByUid(mb: Mailbox; uid: uint32): MailMessage</a></li>
+          </ul></dd>
+<dt><a name="finish" href="#finish"><span>finish:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="logger: proc finish(self: var Logger)" href="meowmail/utils/logger.html#finish%2CLogger">logger: proc finish(self: var Logger)</a></li>
+          </ul></dd>
+<dt><a name="flagSetToImap" href="#flagSetToImap"><span>flagSetToImap:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: proc flagSetToImap(flags: set[MailFlag]): string" href="meowmail/imap/mailstore.html#flagSetToImap%2Cset%5BMailFlag%5D">mailstore: proc flagSetToImap(flags: set[MailFlag]): string</a></li>
+          </ul></dd>
+<dt><a name="flagToMailFlag" href="#flagToMailFlag"><span>flagToMailFlag:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: proc flagToMailFlag(s: string): set[MailFlag]" href="meowmail/imap/mailstore.html#flagToMailFlag%2Cstring">mailstore: proc flagToMailFlag(s: string): set[MailFlag]</a></li>
+          </ul></dd>
+<dt><a name="flushQueue" href="#flushQueue"><span>flushQueue:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="queue: proc flushQueue(queue: Queue;
+           deliverProc: proc (req: DeliveryRequest): DeliveryOutcome {.gcsafe.};
+           localStore: MaildirStore = nil): int" href="meowmail/smtp/queue.html#flushQueue%2CQueue%2Cproc%28DeliveryRequest%29%2CMaildirStore">queue: proc flushQueue(queue: Queue;
+           deliverProc: proc (req: DeliveryRequest): DeliveryOutcome {.gcsafe.};
+           localStore: MaildirStore = nil): int</a></li>
+          </ul></dd>
+<dt><a name="fmtJson" href="#fmtJson"><span>fmtJson:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="logger: LogFormat.fmtJson" href="meowmail/utils/logger.html#fmtJson">logger: LogFormat.fmtJson</a></li>
+          </ul></dd>
+<dt><a name="fmtText" href="#fmtText"><span>fmtText:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="logger: LogFormat.fmtText" href="meowmail/utils/logger.html#fmtText">logger: LogFormat.fmtText</a></li>
+          </ul></dd>
+<dt><a name="generateBounce" href="#generateBounce"><span>generateBounce:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="bounce: proc generateBounce(originalFrom, originalTo, heloName: string; status: DsnStatus;
+               diag: string = &quot;&quot;): (string, string)" href="meowmail/smtp/bounce.html#generateBounce%2Cstring%2Cstring%2Cstring%2CDsnStatus%2Cstring">bounce: proc generateBounce(originalFrom, originalTo, heloName: string; status: DsnStatus;
+               diag: string = &quot;&quot;): (string, string)</a></li>
+          </ul></dd>
+<dt><a name="getAllHeaders" href="#getAllHeaders"><span>getAllHeaders:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="msgparse: proc getAllHeaders(headers: seq[Header]; name: string): seq[string]" href="meowmail/imap/msgparse.html#getAllHeaders%2Cseq%5BHeader%5D%2Cstring">msgparse: proc getAllHeaders(headers: seq[Header]; name: string): seq[string]</a></li>
+          </ul></dd>
+<dt><a name="getEntry" href="#getEntry"><span>getEntry:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="queue: proc getEntry(queue: Queue; entryId: string): QueueEntry" href="meowmail/smtp/queue.html#getEntry%2CQueue%2Cstring">queue: proc getEntry(queue: Queue; entryId: string): QueueEntry</a></li>
+          </ul></dd>
+<dt><a name="getHeader" href="#getHeader"><span>getHeader:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="msgparse: proc getHeader(headers: seq[Header]; name: string): string" href="meowmail/imap/msgparse.html#getHeader%2Cseq%5BHeader%5D%2Cstring">msgparse: proc getHeader(headers: seq[Header]; name: string): string</a></li>
+          </ul></dd>
+<dt><a name="handleCoreEcho" href="#handleCoreEcho"><span>handleCoreEcho:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="core: proc handleCoreEcho(args: JsonNode; callId: string): seq[JsonNode]" href="meowmail/jmap/core.html#handleCoreEcho%2CJsonNode%2Cstring">core: proc handleCoreEcho(args: JsonNode; callId: string): seq[JsonNode]</a></li>
+          </ul></dd>
+<dt><a name="handleEmailGet" href="#handleEmailGet"><span>handleEmailGet:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="emails: proc handleEmailGet(store: MaildirStore; user: string; state: string; args: JsonNode;
+               callId: string): seq[JsonNode]" href="meowmail/jmap/emails.html#handleEmailGet%2CMaildirStore%2Cstring%2Cstring%2CJsonNode%2Cstring">emails: proc handleEmailGet(store: MaildirStore; user: string; state: string; args: JsonNode;
+               callId: string): seq[JsonNode]</a></li>
+          </ul></dd>
+<dt><a name="handleEmailQuery" href="#handleEmailQuery"><span>handleEmailQuery:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="emails: proc handleEmailQuery(store: MaildirStore; user: string; state: string;
+                 args: JsonNode; callId: string): seq[JsonNode]" href="meowmail/jmap/emails.html#handleEmailQuery%2CMaildirStore%2Cstring%2Cstring%2CJsonNode%2Cstring">emails: proc handleEmailQuery(store: MaildirStore; user: string; state: string;
+                 args: JsonNode; callId: string): seq[JsonNode]</a></li>
+          </ul></dd>
+<dt><a name="handleEmailSet" href="#handleEmailSet"><span>handleEmailSet:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="emails: proc handleEmailSet(store: MaildirStore; user: string; state: string; args: JsonNode;
+               callId: string): seq[JsonNode]" href="meowmail/jmap/emails.html#handleEmailSet%2CMaildirStore%2Cstring%2Cstring%2CJsonNode%2Cstring">emails: proc handleEmailSet(store: MaildirStore; user: string; state: string; args: JsonNode;
+               callId: string): seq[JsonNode]</a></li>
+          </ul></dd>
+<dt><a name="handleEmailSubmissionSet" href="#handleEmailSubmissionSet"><span>handleEmailSubmissionSet:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="submissions: proc handleEmailSubmissionSet(username: string; state: string; args: JsonNode;
+                         callId: string): seq[JsonNode]" href="meowmail/jmap/submissions.html#handleEmailSubmissionSet%2Cstring%2Cstring%2CJsonNode%2Cstring">submissions: proc handleEmailSubmissionSet(username: string; state: string; args: JsonNode;
+                         callId: string): seq[JsonNode]</a></li>
+          </ul></dd>
+<dt><a name="handleIdentityGet" href="#handleIdentityGet"><span>handleIdentityGet:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="submissions: proc handleIdentityGet(username: string; args: JsonNode; callId: string): seq[
+    JsonNode]" href="meowmail/jmap/submissions.html#handleIdentityGet%2Cstring%2CJsonNode%2Cstring">submissions: proc handleIdentityGet(username: string; args: JsonNode; callId: string): seq[
+    JsonNode]</a></li>
+          </ul></dd>
+<dt><a name="handleMailboxGet" href="#handleMailboxGet"><span>handleMailboxGet:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailboxes: proc handleMailboxGet(store: MaildirStore; user: string; state: string;
+                 args: JsonNode; callId: string): seq[JsonNode]" href="meowmail/jmap/mailboxes.html#handleMailboxGet%2CMaildirStore%2Cstring%2Cstring%2CJsonNode%2Cstring">mailboxes: proc handleMailboxGet(store: MaildirStore; user: string; state: string;
+                 args: JsonNode; callId: string): seq[JsonNode]</a></li>
+          </ul></dd>
+<dt><a name="handleMailboxQuery" href="#handleMailboxQuery"><span>handleMailboxQuery:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailboxes: proc handleMailboxQuery(store: MaildirStore; user: string; state: string;
+                   args: JsonNode; callId: string): seq[JsonNode]" href="meowmail/jmap/mailboxes.html#handleMailboxQuery%2CMaildirStore%2Cstring%2Cstring%2CJsonNode%2Cstring">mailboxes: proc handleMailboxQuery(store: MaildirStore; user: string; state: string;
+                   args: JsonNode; callId: string): seq[JsonNode]</a></li>
+          </ul></dd>
+<dt><a name="handleMailboxSet" href="#handleMailboxSet"><span>handleMailboxSet:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailboxes: proc handleMailboxSet(store: MaildirStore; user: string; state: string;
+                 args: JsonNode; callId: string): seq[JsonNode]" href="meowmail/jmap/mailboxes.html#handleMailboxSet%2CMaildirStore%2Cstring%2Cstring%2CJsonNode%2Cstring">mailboxes: proc handleMailboxSet(store: MaildirStore; user: string; state: string;
+                 args: JsonNode; callId: string): seq[JsonNode]</a></li>
+          </ul></dd>
+<dt><a name="handleMethod" href="#handleMethod"><span>handleMethod:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="core: proc handleMethod(ctx: JMAPContext; methodName: string; args: JsonNode;
+             callId: string): seq[JsonNode]" href="meowmail/jmap/core.html#handleMethod%2CJMAPContext%2Cstring%2CJsonNode%2Cstring">core: proc handleMethod(ctx: JMAPContext; methodName: string; args: JsonNode;
+             callId: string): seq[JsonNode]</a></li>
+          </ul></dd>
+<dt><a name="hasValidSyntax" href="#hasValidSyntax"><span>hasValidSyntax:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="address: proc hasValidSyntax(m: Mailbox): bool" href="meowmail/smtp/address.html#hasValidSyntax%2CMailbox">address: proc hasValidSyntax(m: Mailbox): bool</a></li>
+          </ul></dd>
+<dt><a name="Header" href="#Header"><span>Header:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="msgparse: tuple Header" href="meowmail/imap/msgparse.html#Header">msgparse: tuple Header</a></li>
+          </ul></dd>
+<dt><a name="header" href="#header"><span>header:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="logger: proc header(self: Logger; message: string)" href="meowmail/utils/logger.html#header%2CLogger%2Cstring">logger: proc header(self: Logger; message: string)</a></li>
+          </ul></dd>
+<dt><a name="headerSearchText" href="#headerSearchText"><span>headerSearchText:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="msgparse: proc headerSearchText(parsed: ParsedMessage): string" href="meowmail/imap/msgparse.html#headerSearchText%2CParsedMessage">msgparse: proc headerSearchText(parsed: ParsedMessage): string</a></li>
           </ul></dd>
 <dt><a name="HELO" href="#HELO"><span>HELO:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpserver: SMTPCommand.HELO" href="meowmail/smtpserver.html#HELO">smtpserver: SMTPCommand.HELO</a></li>
+          data-doc-search-tag="smtpserver: SMTPCommand.HELO" href="meowmail/smtp/smtpserver.html#HELO">smtpserver: SMTPCommand.HELO</a></li>
           </ul></dd>
 <dt><a name="HELP" href="#HELP"><span>HELP:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpserver: SMTPCommand.HELP" href="meowmail/smtpserver.html#HELP">smtpserver: SMTPCommand.HELP</a></li>
-          </ul></dd>
-<dt><a name="IMAPCommand" href="#IMAPCommand"><span>IMAPCommand:</span></a></dt><dd><ul class="simple">
-<li><a class="reference external"
-          data-doc-search-tag="imapserver: enum IMAPCommand" href="meowmail/imapserver.html#IMAPCommand">imapserver: enum IMAPCommand</a></li>
+          data-doc-search-tag="smtpserver: SMTPCommand.HELP" href="meowmail/smtp/smtpserver.html#HELP">smtpserver: SMTPCommand.HELP</a></li>
           </ul></dd>
 <dt><a name="IMAPServer" href="#IMAPServer"><span>IMAPServer:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="imapserver: type IMAPServer" href="meowmail/imapserver.html#IMAPServer">imapserver: type IMAPServer</a></li>
+          data-doc-search-tag="imapserver: type IMAPServer" href="meowmail/imap/imapserver.html#IMAPServer">imapserver: type IMAPServer</a></li>
           </ul></dd>
 <dt><a name="IMAPSession" href="#IMAPSession"><span>IMAPSession:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="imapserver: type IMAPSession" href="meowmail/imapserver.html#IMAPSession">imapserver: type IMAPSession</a></li>
+          data-doc-search-tag="imapserver: type IMAPSession" href="meowmail/imap/imapserver.html#IMAPSession">imapserver: type IMAPSession</a></li>
+          </ul></dd>
+<dt><a name="ImapState" href="#ImapState"><span>ImapState:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: enum ImapState" href="meowmail/imap/imapserver.html#ImapState">imapserver: enum ImapState</a></li>
+          </ul></dd>
+<dt><a name="INFO" href="#INFO"><span>INFO:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="logger: LogLevel.INFO" href="meowmail/utils/logger.html#INFO">logger: LogLevel.INFO</a></li>
+          </ul></dd>
+<dt><a name="info" href="#info"><span>info:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="logger: template info(self: Logger; message = &quot;&quot;; autoNewLine = true)" href="meowmail/utils/logger.html#info.t%2CLogger%2Cstring">logger: template info(self: Logger; message = &quot;&quot;; autoNewLine = true)</a></li>
+          </ul></dd>
+<dt><a name="initCommand" href="#initCommand"><span>initCommand:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="commands: proc initCommand(v: Values)" href="meowmail/cli/commands.html#initCommand%2CValues">commands: proc initCommand(v: Values)</a></li>
           </ul></dd>
 <dt><a name="initMXProviderConfig" href="#initMXProviderConfig"><span>initMXProviderConfig:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="mxprovider: proc initMXProviderConfig(heloName: string; connectTimeoutMs: int = 7000;
                      commandTimeoutMs: int = 10000;
                      requireStartTls: bool = false;
-                     maxMxHostsPerDomain: int = 5; debug: bool = false): MXProviderConfig" href="meowmail/mxprovider.html#initMXProviderConfig%2Cstring%2Cint%2Cint%2Cbool%2Cint%2Cbool">mxprovider: proc initMXProviderConfig(heloName: string; connectTimeoutMs: int = 7000;
+                     maxMxHostsPerDomain: int = 5; debug: bool = false;
+                     enforceSpf: bool = false; spfServer: pointer = nil;
+                     spfClientIp: string = &quot;127.0.0.1&quot;;
+                     spfHeloDomain: string = &quot;localhost&quot;;
+                     enforceDmarc: bool = false;
+                     dmarcLookup: DmarcRecordLookup = nil): MXProviderConfig" href="meowmail/smtp/mxprovider.html#initMXProviderConfig%2Cstring%2Cint%2Cint%2Cbool%2Cint%2Cbool%2Cbool%2Cpointer%2Cstring%2Cstring%2Cbool%2CDmarcRecordLookup">mxprovider: proc initMXProviderConfig(heloName: string; connectTimeoutMs: int = 7000;
                      commandTimeoutMs: int = 10000;
                      requireStartTls: bool = false;
-                     maxMxHostsPerDomain: int = 5; debug: bool = false): MXProviderConfig</a></li>
+                     maxMxHostsPerDomain: int = 5; debug: bool = false;
+                     enforceSpf: bool = false; spfServer: pointer = nil;
+                     spfClientIp: string = &quot;127.0.0.1&quot;;
+                     spfHeloDomain: string = &quot;localhost&quot;;
+                     enforceDmarc: bool = false;
+                     dmarcLookup: DmarcRecordLookup = nil): MXProviderConfig</a></li>
+          </ul></dd>
+<dt><a name="InstantiationInfo" href="#InstantiationInfo"><span>InstantiationInfo:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="logger: tuple InstantiationInfo" href="meowmail/utils/logger.html#InstantiationInfo">logger: tuple InstantiationInfo</a></li>
+          </ul></dd>
+<dt><a name="isDomainValid" href="#isDomainValid"><span>isDomainValid:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="address: proc isDomainValid(m: Mailbox): bool" href="meowmail/smtp/address.html#isDomainValid%2CMailbox">address: proc isDomainValid(m: Mailbox): bool</a></li>
+          </ul></dd>
+<dt><a name="isLocal" href="#isLocal"><span>isLocal:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: proc isLocal(store: MaildirStore; rcpt: string): bool" href="meowmail/imap/mailstore.html#isLocal%2CMaildirStore%2Cstring">mailstore: proc isLocal(store: MaildirStore; rcpt: string): bool</a></li>
+          </ul></dd>
+<dt><a name="isLockedOut" href="#isLockedOut"><span>isLockedOut:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="ratelimit: proc isLockedOut(limiter: AuthLimiter; ip: string): bool" href="meowmail/smtp/ratelimit.html#isLockedOut%2CAuthLimiter%2Cstring">ratelimit: proc isLockedOut(limiter: AuthLimiter; ip: string): bool</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="ratelimit: proc isLockedOut(rl: SmtpRateLimit; ip: string): bool" href="meowmail/smtp/ratelimit.html#isLockedOut%2CSmtpRateLimit%2Cstring">ratelimit: proc isLockedOut(rl: SmtpRateLimit; ip: string): bool</a></li>
+          </ul></dd>
+<dt><a name="isNullSender" href="#isNullSender"><span>isNullSender:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="address: proc isNullSender(m: Mailbox): bool" href="meowmail/smtp/address.html#isNullSender%2CMailbox">address: proc isNullSender(m: Mailbox): bool</a></li>
+          </ul></dd>
+<dt><a name="isOk" href="#isOk"><span>isOk:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="smtpdelivery: proc isOk(o: DeliveryOutcome): bool" href="meowmail/smtp/smtpdelivery.html#isOk%2CDeliveryOutcome">smtpdelivery: proc isOk(o: DeliveryOutcome): bool</a></li>
+          </ul></dd>
+<dt><a name="JMAPAccount" href="#JMAPAccount"><span>JMAPAccount:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: object JMAPAccount" href="meowmail/jmap/types.html#JMAPAccount">types: object JMAPAccount</a></li>
+          </ul></dd>
+<dt><a name="JMAPContext" href="#JMAPContext"><span>JMAPContext:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="core: type JMAPContext" href="meowmail/jmap/core.html#JMAPContext">core: type JMAPContext</a></li>
+          </ul></dd>
+<dt><a name="JMAPError" href="#JMAPError"><span>JMAPError:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: object JMAPError" href="meowmail/jmap/types.html#JMAPError">types: object JMAPError</a></li>
+          </ul></dd>
+<dt><a name="JMAPErrorType" href="#JMAPErrorType"><span>JMAPErrorType:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: enum JMAPErrorType" href="meowmail/jmap/types.html#JMAPErrorType">types: enum JMAPErrorType</a></li>
+          </ul></dd>
+<dt><a name="JMAPRequest" href="#JMAPRequest"><span>JMAPRequest:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: object JMAPRequest" href="meowmail/jmap/types.html#JMAPRequest">types: object JMAPRequest</a></li>
+          </ul></dd>
+<dt><a name="JMAPResponse" href="#JMAPResponse"><span>JMAPResponse:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: object JMAPResponse" href="meowmail/jmap/types.html#JMAPResponse">types: object JMAPResponse</a></li>
+          </ul></dd>
+<dt><a name="JMAPServer" href="#JMAPServer"><span>JMAPServer:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="server: type JMAPServer" href="meowmail/jmap/server.html#JMAPServer">server: type JMAPServer</a></li>
+          </ul></dd>
+<dt><a name="JMAPSession" href="#JMAPSession"><span>JMAPSession:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: object JMAPSession" href="meowmail/jmap/types.html#JMAPSession">types: object JMAPSession</a></li>
+          </ul></dd>
+<dt><a name="keyOf" href="#keyOf"><span>keyOf:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: proc keyOf(fileName: string): string" href="meowmail/imap/mailstore.html#keyOf%2Cstring">mailstore: proc keyOf(fileName: string): string</a></li>
+          </ul></dd>
+<dt><a name="listMailboxes" href="#listMailboxes"><span>listMailboxes:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: proc listMailboxes(store: MaildirStore; user: string): seq[string]" href="meowmail/imap/mailstore.html#listMailboxes%2CMaildirStore%2Cstring">mailstore: proc listMailboxes(store: MaildirStore; user: string): seq[string]</a></li>
+          </ul></dd>
+<dt><a name="load" href="#load"><span>load:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="queue: proc load(queue: Queue)" href="meowmail/smtp/queue.html#load%2CQueue">queue: proc load(queue: Queue)</a></li>
+          </ul></dd>
+<dt><a name="loadConfig" href="#loadConfig"><span>loadConfig:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="config: proc loadConfig(path: string): MeowMailConfig" href="meowmail/cli/config.html#loadConfig%2Cstring">config: proc loadConfig(path: string): MeowMailConfig</a></li>
+          </ul></dd>
+<dt><a name="loadMessageData" href="#loadMessageData"><span>loadMessageData:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: proc loadMessageData(mb: Mailbox; msg: MailMessage): string" href="meowmail/imap/mailstore.html#loadMessageData%2CMailbox%2CMailMessage">mailstore: proc loadMessageData(mb: Mailbox; msg: MailMessage): string</a></li>
+          </ul></dd>
+<dt><a name="loadSubscriptions" href="#loadSubscriptions"><span>loadSubscriptions:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: proc loadSubscriptions(store: MaildirStore; user: string): seq[string]" href="meowmail/imap/mailstore.html#loadSubscriptions%2CMaildirStore%2Cstring">mailstore: proc loadSubscriptions(store: MaildirStore; user: string): seq[string]</a></li>
+          </ul></dd>
+<dt><a name="log" href="#log"><span>log:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="logger: template log(self: Logger; level: LogLevel; message: string; autoNewLine = true;
+    someInfo = none(InstantiationInfo))" href="meowmail/utils/logger.html#log.t%2CLogger%2CLogLevel%2Cstring">logger: template log(self: Logger; level: LogLevel; message: string; autoNewLine = true;
+    someInfo = none(InstantiationInfo))</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="logger: template log(self: Logger; message = &quot;&quot;; autoNewLine = true)" href="meowmail/utils/logger.html#log.t%2CLogger%2Cstring">logger: template log(self: Logger; message = &quot;&quot;; autoNewLine = true)</a></li>
+          </ul></dd>
+<dt><a name="LogFormat" href="#LogFormat"><span>LogFormat:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="logger: enum LogFormat" href="meowmail/utils/logger.html#LogFormat">logger: enum LogFormat</a></li>
+          </ul></dd>
+<dt><a name="Logger" href="#Logger"><span>Logger:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="logger: type Logger" href="meowmail/utils/logger.html#Logger">logger: type Logger</a></li>
+          </ul></dd>
+<dt><a name="logitGlobal" href="#logitGlobal"><span>logitGlobal:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="logger: var logitGlobal" href="meowmail/utils/logger.html#logitGlobal">logger: var logitGlobal</a></li>
+          </ul></dd>
+<dt><a name="LogLevel" href="#LogLevel"><span>LogLevel:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="logger: enum LogLevel" href="meowmail/utils/logger.html#LogLevel">logger: enum LogLevel</a></li>
+          </ul></dd>
+<dt><a name="logsFolder" href="#logsFolder"><span>logsFolder:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="logger: proc logsFolder(self: Logger): string" href="meowmail/utils/logger.html#logsFolder%2CLogger">logger: proc logsFolder(self: Logger): string</a></li>
+          </ul></dd>
+<dt><a name="logsFolder%3D" href="#logsFolder%3D"><span>logsFolder=:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="logger: proc logsFolder=(self: var Logger; newLogsFolder: string)" href="meowmail/utils/logger.html#logsFolder%3D%2CLogger%2Cstring">logger: proc logsFolder=(self: var Logger; newLogsFolder: string)</a></li>
           </ul></dd>
 <dt><a name="MAIL" href="#MAIL"><span>MAIL:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpserver: SMTPCommand.MAIL" href="meowmail/smtpserver.html#MAIL">smtpserver: SMTPCommand.MAIL</a></li>
+          data-doc-search-tag="smtpserver: SMTPCommand.MAIL" href="meowmail/smtp/smtpserver.html#MAIL">smtpserver: SMTPCommand.MAIL</a></li>
+          </ul></dd>
+<dt><a name="Mailbox" href="#Mailbox"><span>Mailbox:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: type Mailbox" href="meowmail/imap/mailstore.html#Mailbox">mailstore: type Mailbox</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="address: object Mailbox" href="meowmail/smtp/address.html#Mailbox">address: object Mailbox</a></li>
+          </ul></dd>
+<dt><a name="mailboxExists" href="#mailboxExists"><span>mailboxExists:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: proc mailboxExists(store: MaildirStore; user, name: string): bool" href="meowmail/imap/mailstore.html#mailboxExists%2CMaildirStore%2Cstring%2Cstring">mailstore: proc mailboxExists(store: MaildirStore; user, name: string): bool</a></li>
+          </ul></dd>
+<dt><a name="Mailbox_getArgs" href="#Mailbox_getArgs"><span>Mailbox_getArgs:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: object Mailbox_getArgs" href="meowmail/jmap/types.html#Mailbox_getArgs">types: object Mailbox_getArgs</a></li>
+          </ul></dd>
+<dt><a name="Mailbox_getResponse" href="#Mailbox_getResponse"><span>Mailbox_getResponse:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: object Mailbox_getResponse" href="meowmail/jmap/types.html#Mailbox_getResponse">types: object Mailbox_getResponse</a></li>
+          </ul></dd>
+<dt><a name="MailboxKind" href="#MailboxKind"><span>MailboxKind:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="address: enum MailboxKind" href="meowmail/smtp/address.html#MailboxKind">address: enum MailboxKind</a></li>
+          </ul></dd>
+<dt><a name="MaildirStore" href="#MaildirStore"><span>MaildirStore:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: type MaildirStore" href="meowmail/imap/mailstore.html#MaildirStore">mailstore: type MaildirStore</a></li>
+          </ul></dd>
+<dt><a name="MailFlag" href="#MailFlag"><span>MailFlag:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: enum MailFlag" href="meowmail/imap/mailstore.html#MailFlag">mailstore: enum MailFlag</a></li>
+          </ul></dd>
+<dt><a name="MailMessage" href="#MailMessage"><span>MailMessage:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: type MailMessage" href="meowmail/imap/mailstore.html#MailMessage">mailstore: type MailMessage</a></li>
+          </ul></dd>
+<dt><a name="markDelivered" href="#markDelivered"><span>markDelivered:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="queue: proc markDelivered(queue: Queue; entryId: string)" href="meowmail/smtp/queue.html#markDelivered%2CQueue%2Cstring">queue: proc markDelivered(queue: Queue; entryId: string)</a></li>
+          </ul></dd>
+<dt><a name="markFailed" href="#markFailed"><span>markFailed:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="queue: proc markFailed(queue: Queue; entryId: string; errorMsg: string)" href="meowmail/smtp/queue.html#markFailed%2CQueue%2Cstring%2Cstring">queue: proc markFailed(queue: Queue; entryId: string; errorMsg: string)</a></li>
+          </ul></dd>
+<dt><a name="matchesImapPattern" href="#matchesImapPattern"><span>matchesImapPattern:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: proc matchesImapPattern(name, pattern: string): bool" href="meowmail/imap/mailstore.html#matchesImapPattern%2Cstring%2Cstring">mailstore: proc matchesImapPattern(name, pattern: string): bool</a></li>
+          </ul></dd>
+<dt><a name="MaxDomainLen" href="#MaxDomainLen"><span>MaxDomainLen:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="address: const MaxDomainLen" href="meowmail/smtp/address.html#MaxDomainLen">address: const MaxDomainLen</a></li>
+          </ul></dd>
+<dt><a name="MaxLocalPartLen" href="#MaxLocalPartLen"><span>MaxLocalPartLen:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="address: const MaxLocalPartLen" href="meowmail/smtp/address.html#MaxLocalPartLen">address: const MaxLocalPartLen</a></li>
+          </ul></dd>
+<dt><a name="MaxMessageBytes" href="#MaxMessageBytes"><span>MaxMessageBytes:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="smtpserver: const MaxMessageBytes" href="meowmail/smtp/smtpserver.html#MaxMessageBytes">smtpserver: const MaxMessageBytes</a></li>
+          </ul></dd>
+<dt><a name="MaxPathLen" href="#MaxPathLen"><span>MaxPathLen:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="address: const MaxPathLen" href="meowmail/smtp/address.html#MaxPathLen">address: const MaxPathLen</a></li>
+          </ul></dd>
+<dt><a name="MeowMailConfig" href="#MeowMailConfig"><span>MeowMailConfig:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="config: object MeowMailConfig" href="meowmail/cli/config.html#MeowMailConfig">config: object MeowMailConfig</a></li>
+          </ul></dd>
+<dt><a name="mfAnswered" href="#mfAnswered"><span>mfAnswered:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: MailFlag.mfAnswered" href="meowmail/imap/mailstore.html#mfAnswered">mailstore: MailFlag.mfAnswered</a></li>
+          </ul></dd>
+<dt><a name="mfDeleted" href="#mfDeleted"><span>mfDeleted:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: MailFlag.mfDeleted" href="meowmail/imap/mailstore.html#mfDeleted">mailstore: MailFlag.mfDeleted</a></li>
+          </ul></dd>
+<dt><a name="mfDraft" href="#mfDraft"><span>mfDraft:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: MailFlag.mfDraft" href="meowmail/imap/mailstore.html#mfDraft">mailstore: MailFlag.mfDraft</a></li>
+          </ul></dd>
+<dt><a name="mfFlagged" href="#mfFlagged"><span>mfFlagged:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: MailFlag.mfFlagged" href="meowmail/imap/mailstore.html#mfFlagged">mailstore: MailFlag.mfFlagged</a></li>
+          </ul></dd>
+<dt><a name="mfSeen" href="#mfSeen"><span>mfSeen:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: MailFlag.mfSeen" href="meowmail/imap/mailstore.html#mfSeen">mailstore: MailFlag.mfSeen</a></li>
+          </ul></dd>
+<dt><a name="MimePart" href="#MimePart"><span>MimePart:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="msgparse: type MimePart" href="meowmail/imap/msgparse.html#MimePart">msgparse: type MimePart</a></li>
+          </ul></dd>
+<dt><a name="mkLiteral" href="#mkLiteral"><span>mkLiteral:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="address: MailboxKind.mkLiteral" href="meowmail/smtp/address.html#mkLiteral">address: MailboxKind.mkLiteral</a></li>
+          </ul></dd>
+<dt><a name="mkLocal" href="#mkLocal"><span>mkLocal:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="address: MailboxKind.mkLocal" href="meowmail/smtp/address.html#mkLocal">address: MailboxKind.mkLocal</a></li>
+          </ul></dd>
+<dt><a name="mkNull" href="#mkNull"><span>mkNull:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="address: MailboxKind.mkNull" href="meowmail/smtp/address.html#mkNull">address: MailboxKind.mkNull</a></li>
+          </ul></dd>
+<dt><a name="mkStandard" href="#mkStandard"><span>mkStandard:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="address: MailboxKind.mkStandard" href="meowmail/smtp/address.html#mkStandard">address: MailboxKind.mkStandard</a></li>
           </ul></dd>
 <dt><a name="MXHost" href="#MXHost"><span>MXHost:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="mxprovider: object MXHost" href="meowmail/mxprovider.html#MXHost">mxprovider: object MXHost</a></li>
+          data-doc-search-tag="mxprovider: object MXHost" href="meowmail/smtp/mxprovider.html#MXHost">mxprovider: object MXHost</a></li>
           </ul></dd>
 <dt><a name="MXProviderConfig" href="#MXProviderConfig"><span>MXProviderConfig:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="mxprovider: object MXProviderConfig" href="meowmail/mxprovider.html#MXProviderConfig">mxprovider: object MXProviderConfig</a></li>
+          data-doc-search-tag="mxprovider: object MXProviderConfig" href="meowmail/smtp/mxprovider.html#MXProviderConfig">mxprovider: object MXProviderConfig</a></li>
+          </ul></dd>
+<dt><a name="newAdminServer" href="#newAdminServer"><span>newAdminServer:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="admin: proc newAdminServer(queue: Queue; host = &quot;127.0.0.1&quot;; port: Port = Port(8081)): AdminServer" href="meowmail/restapi/admin.html#newAdminServer%2CQueue%2Cstring%2CPort">admin: proc newAdminServer(queue: Queue; host = &quot;127.0.0.1&quot;; port: Port = Port(8081)): AdminServer</a></li>
+          </ul></dd>
+<dt><a name="newAuthLimiter" href="#newAuthLimiter"><span>newAuthLimiter:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="ratelimit: proc newAuthLimiter(maxFailed = 5; lockoutMs = 300000): AuthLimiter" href="meowmail/smtp/ratelimit.html#newAuthLimiter%2Cint%2Cint">ratelimit: proc newAuthLimiter(maxFailed = 5; lockoutMs = 300000): AuthLimiter</a></li>
+          </ul></dd>
+<dt><a name="newConnectionLimiter" href="#newConnectionLimiter"><span>newConnectionLimiter:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="ratelimit: proc newConnectionLimiter(maxConcurrent = 20; maxPerMinute = 60): ConnectionLimiter" href="meowmail/smtp/ratelimit.html#newConnectionLimiter%2Cint%2Cint">ratelimit: proc newConnectionLimiter(maxConcurrent = 20; maxPerMinute = 60): ConnectionLimiter</a></li>
+          </ul></dd>
+<dt><a name="newDkimKey" href="#newDkimKey"><span>newDkimKey:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="dkim: proc newDkimKey(domain, selector, pemKeyFile: string): DkimKey" href="meowmail/smtp/dkim.html#newDkimKey%2Cstring%2Cstring%2Cstring">dkim: proc newDkimKey(domain, selector, pemKeyFile: string): DkimKey</a></li>
+          </ul></dd>
+<dt><a name="newDkimKeyFromPem" href="#newDkimKeyFromPem"><span>newDkimKeyFromPem:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="dkim: proc newDkimKeyFromPem(domain, selector, pemData: string): DkimKey" href="meowmail/smtp/dkim.html#newDkimKeyFromPem%2Cstring%2Cstring%2Cstring">dkim: proc newDkimKeyFromPem(domain, selector, pemData: string): DkimKey</a></li>
           </ul></dd>
 <dt><a name="newHTTPAuthProvider" href="#newHTTPAuthProvider"><span>newHTTPAuthProvider:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpauth: proc newHTTPAuthProvider(url: string; bearerToken = &quot;&quot;; timeoutMs = 1200): AuthProvider" href="meowmail/smtpauth.html#newHTTPAuthProvider%2Cstring%2Cstring%2Cint">smtpauth: proc newHTTPAuthProvider(url: string; bearerToken = &quot;&quot;; timeoutMs = 1200): AuthProvider</a></li>
+          data-doc-search-tag="smtpauth: proc newHTTPAuthProvider(url: string; bearerToken = &quot;&quot;; timeoutMs = 1200): AuthProvider" href="meowmail/smtp/smtpauth.html#newHTTPAuthProvider%2Cstring%2Cstring%2Cint">smtpauth: proc newHTTPAuthProvider(url: string; bearerToken = &quot;&quot;; timeoutMs = 1200): AuthProvider</a></li>
           </ul></dd>
 <dt><a name="newIMAPServer" href="#newIMAPServer"><span>newIMAPServer:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="imapserver: proc newIMAPServer(port: Port = Port(143)): IMAPServer" href="meowmail/imapserver.html#newIMAPServer%2CPort">imapserver: proc newIMAPServer(port: Port = Port(143)): IMAPServer</a></li>
+          data-doc-search-tag="imapserver: proc newIMAPServer(port: Port = Port(143); store: MaildirStore = nil;
+              tlsCtx: SslContext = nil): IMAPServer" href="meowmail/imap/imapserver.html#newIMAPServer%2CPort%2CMaildirStore%2CSslContext">imapserver: proc newIMAPServer(port: Port = Port(143); store: MaildirStore = nil;
+              tlsCtx: SslContext = nil): IMAPServer</a></li>
+          </ul></dd>
+<dt><a name="newJMAPContext" href="#newJMAPContext"><span>newJMAPContext:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="core: proc newJMAPContext(store: MaildirStore; username: string): JMAPContext" href="meowmail/jmap/core.html#newJMAPContext%2CMaildirStore%2Cstring">core: proc newJMAPContext(store: MaildirStore; username: string): JMAPContext</a></li>
+          </ul></dd>
+<dt><a name="newJMAPError" href="#newJMAPError"><span>newJMAPError:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: proc newJMAPError(errType: JMAPErrorType; desc: string = &quot;&quot;): seq[JsonNode]" href="meowmail/jmap/types.html#newJMAPError%2CJMAPErrorType%2Cstring">types: proc newJMAPError(errType: JMAPErrorType; desc: string = &quot;&quot;): seq[JsonNode]</a></li>
+          </ul></dd>
+<dt><a name="newJMAPErrorResponse" href="#newJMAPErrorResponse"><span>newJMAPErrorResponse:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: proc newJMAPErrorResponse(callId: string; errType: JMAPErrorType; desc: string = &quot;&quot;): seq[
+    JsonNode]" href="meowmail/jmap/types.html#newJMAPErrorResponse%2Cstring%2CJMAPErrorType%2Cstring">types: proc newJMAPErrorResponse(callId: string; errType: JMAPErrorType; desc: string = &quot;&quot;): seq[
+    JsonNode]</a></li>
+          </ul></dd>
+<dt><a name="newJMAPOkResponse" href="#newJMAPOkResponse"><span>newJMAPOkResponse:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: proc newJMAPOkResponse(methodName: string; payload: JsonNode; callId: string): seq[
+    JsonNode]" href="meowmail/jmap/types.html#newJMAPOkResponse%2Cstring%2CJsonNode%2Cstring">types: proc newJMAPOkResponse(methodName: string; payload: JsonNode; callId: string): seq[
+    JsonNode]</a></li>
+          </ul></dd>
+<dt><a name="newJMAPRequestLevelError" href="#newJMAPRequestLevelError"><span>newJMAPRequestLevelError:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="types: proc newJMAPRequestLevelError(errType: string; status: int; detail: string): JsonNode" href="meowmail/jmap/types.html#newJMAPRequestLevelError%2Cstring%2Cint%2Cstring">types: proc newJMAPRequestLevelError(errType: string; status: int; detail: string): JsonNode</a></li>
+          </ul></dd>
+<dt><a name="newJMAPServer" href="#newJMAPServer"><span>newJMAPServer:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="server: proc newJMAPServer(store: MaildirStore; username: string; host = &quot;0.0.0.0&quot;;
+              port: Port = Port(8080); tlsCtx: SslContext = nil): JMAPServer" href="meowmail/jmap/server.html#newJMAPServer%2CMaildirStore%2Cstring%2Cstring%2CPort%2CSslContext">server: proc newJMAPServer(store: MaildirStore; username: string; host = &quot;0.0.0.0&quot;;
+              port: Port = Port(8080); tlsCtx: SslContext = nil): JMAPServer</a></li>
+          </ul></dd>
+<dt><a name="newLogger" href="#newLogger"><span>newLogger:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="logger: proc newLogger(logsFolder = getTempDir(); namespace = &quot;Logger&quot;;
+          defaultLogLevel = OTHER; logToFile = true; logToConsole = false;
+          exitOnError = false; filePrefix = initTimeFormat(&quot;YYYY-MM-dd&quot;);
+          minLevel = OTHER; format = fmtText; maxFileSize = 0; maxFiles = 0): Logger" href="meowmail/utils/logger.html#newLogger%2Cstring%2Cint%2Cint">logger: proc newLogger(logsFolder = getTempDir(); namespace = &quot;Logger&quot;;
+          defaultLogLevel = OTHER; logToFile = true; logToConsole = false;
+          exitOnError = false; filePrefix = initTimeFormat(&quot;YYYY-MM-dd&quot;);
+          minLevel = OTHER; format = fmtText; maxFileSize = 0; maxFiles = 0): Logger</a></li>
+          </ul></dd>
+<dt><a name="newMaildirStore" href="#newMaildirStore"><span>newMaildirStore:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: proc newMaildirStore(base: string; localDomains: seq[string] = @[]): MaildirStore" href="meowmail/imap/mailstore.html#newMaildirStore%2Cstring%2Cseq%5Bstring%5D">mailstore: proc newMaildirStore(base: string; localDomains: seq[string] = @[]): MaildirStore</a></li>
           </ul></dd>
 <dt><a name="newMXProvider" href="#newMXProvider"><span>newMXProvider:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="mxprovider: proc newMXProvider(cfg = MXProviderConfig()): DeliveryProvider" href="meowmail/mxprovider.html#newMXProvider">mxprovider: proc newMXProvider(cfg = MXProviderConfig()): DeliveryProvider</a></li>
+          data-doc-search-tag="mxprovider: proc newMXProvider(cfg = MXProviderConfig(); performSpfPreflight = true;
+              performDmarcPreflight = true): DeliveryProvider" href="meowmail/smtp/mxprovider.html#newMXProvider">mxprovider: proc newMXProvider(cfg = MXProviderConfig(); performSpfPreflight = true;
+              performDmarcPreflight = true): DeliveryProvider</a></li>
+          </ul></dd>
+<dt><a name="newQueue" href="#newQueue"><span>newQueue:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="queue: proc newQueue(dir: string; maxRetries = 20; baseDelay = 300; maxDelay = 86400): Queue" href="meowmail/smtp/queue.html#newQueue%2Cstring%2Cint%2Cint%2Cint">queue: proc newQueue(dir: string; maxRetries = 20; baseDelay = 300; maxDelay = 86400): Queue</a></li>
           </ul></dd>
 <dt><a name="newSMTPDelivery" href="#newSMTPDelivery"><span>newSMTPDelivery:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpdelivery: proc newSMTPDelivery(spoolDir: Option[string]; provider: DeliveryProvider = nil): SMTPDelivery" href="meowmail/smtpdelivery.html#newSMTPDelivery%2COption%5Bstring%5D%2CDeliveryProvider">smtpdelivery: proc newSMTPDelivery(spoolDir: Option[string]; provider: DeliveryProvider = nil): SMTPDelivery</a></li>
+          data-doc-search-tag="smtpdelivery: proc newSMTPDelivery(spoolDir: Option[string]; provider: DeliveryProvider = nil;
+                localStore: MaildirStore = nil): SMTPDelivery" href="meowmail/smtp/smtpdelivery.html#newSMTPDelivery%2COption%5Bstring%5D%2CDeliveryProvider%2CMaildirStore">smtpdelivery: proc newSMTPDelivery(spoolDir: Option[string]; provider: DeliveryProvider = nil;
+                localStore: MaildirStore = nil): SMTPDelivery</a></li>
+          </ul></dd>
+<dt><a name="newSmtpRateLimit" href="#newSmtpRateLimit"><span>newSmtpRateLimit:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="ratelimit: proc newSmtpRateLimit(limits: SmtpLimits = DefaultSmtpLimits): SmtpRateLimit" href="meowmail/smtp/ratelimit.html#newSmtpRateLimit%2CSmtpLimits">ratelimit: proc newSmtpRateLimit(limits: SmtpLimits = DefaultSmtpLimits): SmtpRateLimit</a></li>
           </ul></dd>
 <dt><a name="newSMTPServer" href="#newSMTPServer"><span>newSMTPServer:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpserver: proc newSMTPServer(settings: SMTPSettings): SMTPServer" href="meowmail/smtpserver.html#newSMTPServer%2CSMTPSettings">smtpserver: proc newSMTPServer(settings: SMTPSettings): SMTPServer</a></li>
+          data-doc-search-tag="smtpserver: proc newSMTPServer(settings: SMTPSettings): SMTPServer" href="meowmail/smtp/smtpserver.html#newSMTPServer%2CSMTPSettings">smtpserver: proc newSMTPServer(settings: SMTPSettings): SMTPServer</a></li>
           </ul></dd>
 <dt><a name="NOOP" href="#NOOP"><span>NOOP:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpserver: SMTPCommand.NOOP" href="meowmail/smtpserver.html#NOOP">smtpserver: SMTPCommand.NOOP</a></li>
+          data-doc-search-tag="smtpserver: SMTPCommand.NOOP" href="meowmail/smtp/smtpserver.html#NOOP">smtpserver: SMTPCommand.NOOP</a></li>
+          </ul></dd>
+<dt><a name="normalizePemPublicKeyToB64" href="#normalizePemPublicKeyToB64"><span>normalizePemPublicKeyToB64:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="records_generator: proc normalizePemPublicKeyToB64(pem: string): string" href="meowmail/utils/records_generator.html#normalizePemPublicKeyToB64%2Cstring">records_generator: proc normalizePemPublicKeyToB64(pem: string): string</a></li>
+          </ul></dd>
+<dt><a name="okOutcome" href="#okOutcome"><span>okOutcome:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="smtpdelivery: proc okOutcome(decision = ddOk; failed: seq[RcptFailure] = @[]): DeliveryOutcome" href="meowmail/smtp/smtpdelivery.html#okOutcome%2Cseq%5BRcptFailure%5D">smtpdelivery: proc okOutcome(decision = ddOk; failed: seq[RcptFailure] = @[]): DeliveryOutcome</a></li>
+          </ul></dd>
+<dt><a name="openMailbox" href="#openMailbox"><span>openMailbox:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: proc openMailbox(store: MaildirStore; user, name: string): Mailbox" href="meowmail/imap/mailstore.html#openMailbox%2CMaildirStore%2Cstring%2Cstring">mailstore: proc openMailbox(store: MaildirStore; user, name: string): Mailbox</a></li>
           </ul></dd>
 <dt><a name="opensslLastError" href="#opensslLastError"><span>opensslLastError:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpserver: proc opensslLastError(): string" href="meowmail/smtpserver.html#opensslLastError">smtpserver: proc opensslLastError(): string</a></li>
+          data-doc-search-tag="smtpserver: proc opensslLastError(): string" href="meowmail/smtp/smtpserver.html#opensslLastError">smtpserver: proc opensslLastError(): string</a></li>
+          </ul></dd>
+<dt><a name="OTHER" href="#OTHER"><span>OTHER:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="logger: LogLevel.OTHER" href="meowmail/utils/logger.html#OTHER">logger: LogLevel.OTHER</a></li>
+          </ul></dd>
+<dt><a name="other" href="#other"><span>other:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="logger: template other(self: Logger; message = &quot;&quot;; autoNewLine = true)" href="meowmail/utils/logger.html#other.t%2CLogger%2Cstring">logger: template other(self: Logger; message = &quot;&quot;; autoNewLine = true)</a></li>
+          </ul></dd>
+<dt><a name="parseAddressList" href="#parseAddressList"><span>parseAddressList:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="msgparse: proc parseAddressList(s: string): seq[EnvelopeAddress]" href="meowmail/imap/msgparse.html#parseAddressList%2Cstring">msgparse: proc parseAddressList(s: string): seq[EnvelopeAddress]</a></li>
+          </ul></dd>
+<dt><a name="parseDateStr" href="#parseDateStr"><span>parseDateStr:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="msgparse: proc parseDateStr(s: string): Time" href="meowmail/imap/msgparse.html#parseDateStr%2Cstring">msgparse: proc parseDateStr(s: string): Time</a></li>
+          </ul></dd>
+<dt><a name="ParsedMessage" href="#ParsedMessage"><span>ParsedMessage:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="msgparse: type ParsedMessage" href="meowmail/imap/msgparse.html#ParsedMessage">msgparse: type ParsedMessage</a></li>
+          </ul></dd>
+<dt><a name="parseMailbox" href="#parseMailbox"><span>parseMailbox:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="address: proc parseMailbox(s: string): Mailbox" href="meowmail/smtp/address.html#parseMailbox%2Cstring">address: proc parseMailbox(s: string): Mailbox</a></li>
+          </ul></dd>
+<dt><a name="parseMessage" href="#parseMessage"><span>parseMessage:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="msgparse: proc parseMessage(raw: string): ParsedMessage" href="meowmail/imap/msgparse.html#parseMessage%2Cstring">msgparse: proc parseMessage(raw: string): ParsedMessage</a></li>
+          </ul></dd>
+<dt><a name="pending" href="#pending"><span>pending:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="queue: proc pending(queue: Queue): seq[QueueEntry]" href="meowmail/smtp/queue.html#pending%2CQueue">queue: proc pending(queue: Queue): seq[QueueEntry]</a></li>
+          </ul></dd>
+<dt><a name="persistUidChanges" href="#persistUidChanges"><span>persistUidChanges:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: proc persistUidChanges(mb: Mailbox)" href="meowmail/imap/mailstore.html#persistUidChanges%2CMailbox">mailstore: proc persistUidChanges(mb: Mailbox)</a></li>
+          </ul></dd>
+<dt><a name="publicKeyDer" href="#publicKeyDer"><span>publicKeyDer:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="dkim: proc publicKeyDer(key: DkimKey): string" href="meowmail/smtp/dkim.html#publicKeyDer%2CDkimKey">dkim: proc publicKeyDer(key: DkimKey): string</a></li>
+          </ul></dd>
+<dt><a name="qsActive" href="#qsActive"><span>qsActive:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="queue: QueueStatus.qsActive" href="meowmail/smtp/queue.html#qsActive">queue: QueueStatus.qsActive</a></li>
+          </ul></dd>
+<dt><a name="qsBounced" href="#qsBounced"><span>qsBounced:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="queue: QueueStatus.qsBounced" href="meowmail/smtp/queue.html#qsBounced">queue: QueueStatus.qsBounced</a></li>
+          </ul></dd>
+<dt><a name="qsDeferred" href="#qsDeferred"><span>qsDeferred:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="queue: QueueStatus.qsDeferred" href="meowmail/smtp/queue.html#qsDeferred">queue: QueueStatus.qsDeferred</a></li>
+          </ul></dd>
+<dt><a name="qsDelivered" href="#qsDelivered"><span>qsDelivered:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="queue: QueueStatus.qsDelivered" href="meowmail/smtp/queue.html#qsDelivered">queue: QueueStatus.qsDelivered</a></li>
+          </ul></dd>
+<dt><a name="qsFailed" href="#qsFailed"><span>qsFailed:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="queue: QueueStatus.qsFailed" href="meowmail/smtp/queue.html#qsFailed">queue: QueueStatus.qsFailed</a></li>
+          </ul></dd>
+<dt><a name="Queue" href="#Queue"><span>Queue:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="queue: type Queue" href="meowmail/smtp/queue.html#Queue">queue: type Queue</a></li>
+          </ul></dd>
+<dt><a name="queueDeleteCommand" href="#queueDeleteCommand"><span>queueDeleteCommand:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="commands: proc queueDeleteCommand(v: Values)" href="meowmail/cli/commands.html#queueDeleteCommand%2CValues">commands: proc queueDeleteCommand(v: Values)</a></li>
+          </ul></dd>
+<dt><a name="QueueEntry" href="#QueueEntry"><span>QueueEntry:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="queue: object QueueEntry" href="meowmail/smtp/queue.html#QueueEntry">queue: object QueueEntry</a></li>
+          </ul></dd>
+<dt><a name="queueFlushCommand" href="#queueFlushCommand"><span>queueFlushCommand:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="commands: proc queueFlushCommand(v: Values)" href="meowmail/cli/commands.html#queueFlushCommand%2CValues">commands: proc queueFlushCommand(v: Values)</a></li>
+          </ul></dd>
+<dt><a name="queueListCommand" href="#queueListCommand"><span>queueListCommand:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="commands: proc queueListCommand(v: Values)" href="meowmail/cli/commands.html#queueListCommand%2CValues">commands: proc queueListCommand(v: Values)</a></li>
+          </ul></dd>
+<dt><a name="queuePurgeCommand" href="#queuePurgeCommand"><span>queuePurgeCommand:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="commands: proc queuePurgeCommand(v: Values)" href="meowmail/cli/commands.html#queuePurgeCommand%2CValues">commands: proc queuePurgeCommand(v: Values)</a></li>
+          </ul></dd>
+<dt><a name="queueRetryCommand" href="#queueRetryCommand"><span>queueRetryCommand:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="commands: proc queueRetryCommand(v: Values)" href="meowmail/cli/commands.html#queueRetryCommand%2CValues">commands: proc queueRetryCommand(v: Values)</a></li>
+          </ul></dd>
+<dt><a name="queueStatsCommand" href="#queueStatsCommand"><span>queueStatsCommand:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="commands: proc queueStatsCommand(v: Values)" href="meowmail/cli/commands.html#queueStatsCommand%2CValues">commands: proc queueStatsCommand(v: Values)</a></li>
+          </ul></dd>
+<dt><a name="QueueStatus" href="#QueueStatus"><span>QueueStatus:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="queue: enum QueueStatus" href="meowmail/smtp/queue.html#QueueStatus">queue: enum QueueStatus</a></li>
           </ul></dd>
 <dt><a name="QUIT" href="#QUIT"><span>QUIT:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpserver: SMTPCommand.QUIT" href="meowmail/smtpserver.html#QUIT">smtpserver: SMTPCommand.QUIT</a></li>
+          data-doc-search-tag="smtpserver: SMTPCommand.QUIT" href="meowmail/smtp/smtpserver.html#QUIT">smtpserver: SMTPCommand.QUIT</a></li>
           </ul></dd>
 <dt><a name="RCPT" href="#RCPT"><span>RCPT:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpserver: SMTPCommand.RCPT" href="meowmail/smtpserver.html#RCPT">smtpserver: SMTPCommand.RCPT</a></li>
+          data-doc-search-tag="smtpserver: SMTPCommand.RCPT" href="meowmail/smtp/smtpserver.html#RCPT">smtpserver: SMTPCommand.RCPT</a></li>
+          </ul></dd>
+<dt><a name="RcptFailure" href="#RcptFailure"><span>RcptFailure:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="smtpdelivery: object RcptFailure" href="meowmail/smtp/smtpdelivery.html#RcptFailure">smtpdelivery: object RcptFailure</a></li>
+          </ul></dd>
+<dt><a name="recordAuthFailure" href="#recordAuthFailure"><span>recordAuthFailure:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="ratelimit: proc recordAuthFailure(rl: SmtpRateLimit; ip: string)" href="meowmail/smtp/ratelimit.html#recordAuthFailure%2CSmtpRateLimit%2Cstring">ratelimit: proc recordAuthFailure(rl: SmtpRateLimit; ip: string)</a></li>
+          </ul></dd>
+<dt><a name="recordAuthSuccess" href="#recordAuthSuccess"><span>recordAuthSuccess:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="ratelimit: proc recordAuthSuccess(rl: SmtpRateLimit; ip: string)" href="meowmail/smtp/ratelimit.html#recordAuthSuccess%2CSmtpRateLimit%2Cstring">ratelimit: proc recordAuthSuccess(rl: SmtpRateLimit; ip: string)</a></li>
+          </ul></dd>
+<dt><a name="recordFailure" href="#recordFailure"><span>recordFailure:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="ratelimit: proc recordFailure(limiter: AuthLimiter; ip: string)" href="meowmail/smtp/ratelimit.html#recordFailure%2CAuthLimiter%2Cstring">ratelimit: proc recordFailure(limiter: AuthLimiter; ip: string)</a></li>
+          </ul></dd>
+<dt><a name="recordSuccess" href="#recordSuccess"><span>recordSuccess:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="ratelimit: proc recordSuccess(limiter: AuthLimiter; ip: string)" href="meowmail/smtp/ratelimit.html#recordSuccess%2CAuthLimiter%2Cstring">ratelimit: proc recordSuccess(limiter: AuthLimiter; ip: string)</a></li>
+          </ul></dd>
+<dt><a name="relaxedCanonBody" href="#relaxedCanonBody"><span>relaxedCanonBody:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="dkim: proc relaxedCanonBody(body: string): string" href="meowmail/smtp/dkim.html#relaxedCanonBody%2Cstring">dkim: proc relaxedCanonBody(body: string): string</a></li>
+          </ul></dd>
+<dt><a name="relaxedHeaderValue" href="#relaxedHeaderValue"><span>relaxedHeaderValue:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="dkim: proc relaxedHeaderValue(field: RawHeaderField): string" href="meowmail/smtp/dkim.html#relaxedHeaderValue%2CRawHeaderField">dkim: proc relaxedHeaderValue(field: RawHeaderField): string</a></li>
+          </ul></dd>
+<dt><a name="relaxWsp" href="#relaxWsp"><span>relaxWsp:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="dkim: proc relaxWsp(s: string): string" href="meowmail/smtp/dkim.html#relaxWsp%2Cstring">dkim: proc relaxWsp(s: string): string</a></li>
+          </ul></dd>
+<dt><a name="removeEntry" href="#removeEntry"><span>removeEntry:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="queue: proc removeEntry(queue: Queue; entryId: string)" href="meowmail/smtp/queue.html#removeEntry%2CQueue%2Cstring">queue: proc removeEntry(queue: Queue; entryId: string)</a></li>
+          </ul></dd>
+<dt><a name="renameMailbox" href="#renameMailbox"><span>renameMailbox:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: proc renameMailbox(store: MaildirStore; user, fromName, toName: string): bool" href="meowmail/imap/mailstore.html#renameMailbox%2CMaildirStore%2Cstring%2Cstring%2Cstring">mailstore: proc renameMailbox(store: MaildirStore; user, fromName, toName: string): bool</a></li>
+          </ul></dd>
+<dt><a name="renderAuthHeader" href="#renderAuthHeader"><span>renderAuthHeader:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="inbound: proc renderAuthHeader(auth: AuthHeader): string" href="meowmail/smtp/auth/inbound.html#renderAuthHeader%2CAuthHeader">inbound: proc renderAuthHeader(auth: AuthHeader): string</a></li>
+          </ul></dd>
+<dt><a name="renderBodyStructure" href="#renderBodyStructure"><span>renderBodyStructure:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="msgparse: proc renderBodyStructure(part: MimePart; extensions: bool): string" href="meowmail/imap/msgparse.html#renderBodyStructure%2CMimePart%2Cbool">msgparse: proc renderBodyStructure(part: MimePart; extensions: bool): string</a></li>
+          </ul></dd>
+<dt><a name="renderEnvelope" href="#renderEnvelope"><span>renderEnvelope:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="msgparse: proc renderEnvelope(env: Envelope): string" href="meowmail/imap/msgparse.html#renderEnvelope%2CEnvelope">msgparse: proc renderEnvelope(env: Envelope): string</a></li>
           </ul></dd>
 <dt><a name="resolveMxHosts" href="#resolveMxHosts"><span>resolveMxHosts:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="mxprovider: proc resolveMxHosts(domain: string; maxHosts = 5): seq[MXHost]" href="meowmail/mxprovider.html#resolveMxHosts%2Cstring%2Cint">mxprovider: proc resolveMxHosts(domain: string; maxHosts = 5): seq[MXHost]</a></li>
+          data-doc-search-tag="mxprovider: proc resolveMxHosts(domain: string; maxHosts = 5): seq[MXHost]" href="meowmail/smtp/mxprovider.html#resolveMxHosts%2Cstring%2Cint">mxprovider: proc resolveMxHosts(domain: string; maxHosts = 5): seq[MXHost]</a></li>
+          </ul></dd>
+<dt><a name="resolveTxtRecords" href="#resolveTxtRecords"><span>resolveTxtRecords:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mxprovider: proc resolveTxtRecords(hostname: string): seq[string]" href="meowmail/smtp/mxprovider.html#resolveTxtRecords%2Cstring">mxprovider: proc resolveTxtRecords(hostname: string): seq[string]</a></li>
+          </ul></dd>
+<dt><a name="routeBounce" href="#routeBounce"><span>routeBounce:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="queue: proc routeBounce(localStore: MaildirStore; q: Queue;
+            envelopeFrom, rcpt, helo: string; status: DsnStatus;
+            diag: string = &quot;&quot;): bool" href="meowmail/smtp/queue.html#routeBounce%2CMaildirStore%2CQueue%2Cstring%2Cstring%2Cstring%2CDsnStatus%2Cstring">queue: proc routeBounce(localStore: MaildirStore; q: Queue;
+            envelopeFrom, rcpt, helo: string; status: DsnStatus;
+            diag: string = &quot;&quot;): bool</a></li>
           </ul></dd>
 <dt><a name="RSET" href="#RSET"><span>RSET:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpserver: SMTPCommand.RSET" href="meowmail/smtpserver.html#RSET">smtpserver: SMTPCommand.RSET</a></li>
+          data-doc-search-tag="smtpserver: SMTPCommand.RSET" href="meowmail/smtp/smtpserver.html#RSET">smtpserver: SMTPCommand.RSET</a></li>
+          </ul></dd>
+<dt><a name="runDmarcPreflight" href="#runDmarcPreflight"><span>runDmarcPreflight:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="dmarc_preflight: proc runDmarcPreflight(enforce: bool; fromDomain: string; record: string): DeliveryDecision" href="meowmail/smtp/auth/dmarc_preflight.html#runDmarcPreflight%2Cbool%2Cstring%2Cstring">dmarc_preflight: proc runDmarcPreflight(enforce: bool; fromDomain: string; record: string): DeliveryDecision</a></li>
+          </ul></dd>
+<dt><a name="runQueue" href="#runQueue"><span>runQueue:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="queue: proc runQueue(queue: Queue;
+         deliverProc: proc (req: DeliveryRequest): DeliveryOutcome {.gcsafe.};
+         intervalMs: int = 30000; localStore: MaildirStore = nil)" href="meowmail/smtp/queue.html#runQueue%2CQueue%2Cproc%28DeliveryRequest%29%2Cint%2CMaildirStore">queue: proc runQueue(queue: Queue;
+         deliverProc: proc (req: DeliveryRequest): DeliveryOutcome {.gcsafe.};
+         intervalMs: int = 30000; localStore: MaildirStore = nil)</a></li>
+          </ul></dd>
+<dt><a name="runSpfPreflight" href="#runSpfPreflight"><span>runSpfPreflight:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="spf_preflight: proc runSpfPreflight(enforce: bool; spfServerPtr: pointer; spfClientIp: string;
+                spfHeloDomain: string; mailFrom: string): DeliveryDecision" href="meowmail/smtp/auth/spf_preflight.html#runSpfPreflight%2Cbool%2Cpointer%2Cstring%2Cstring%2Cstring">spf_preflight: proc runSpfPreflight(enforce: bool; spfServerPtr: pointer; spfClientIp: string;
+                spfHeloDomain: string; mailFrom: string): DeliveryDecision</a></li>
+          </ul></dd>
+<dt><a name="saveMeta" href="#saveMeta"><span>saveMeta:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="queue: proc saveMeta(queue: Queue; entry: QueueEntry)" href="meowmail/smtp/queue.html#saveMeta%2CQueue%2CQueueEntry">queue: proc saveMeta(queue: Queue; entry: QueueEntry)</a></li>
+          </ul></dd>
+<dt><a name="saveSubscriptions" href="#saveSubscriptions"><span>saveSubscriptions:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: proc saveSubscriptions(store: MaildirStore; user: string; subs: seq[string])" href="meowmail/imap/mailstore.html#saveSubscriptions%2CMaildirStore%2Cstring%2Cseq%5Bstring%5D">mailstore: proc saveSubscriptions(store: MaildirStore; user: string; subs: seq[string])</a></li>
+          </ul></dd>
+<dt><a name="SearchKey" href="#SearchKey"><span>SearchKey:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: enum SearchKey" href="meowmail/imap/imapserver.html#SearchKey">imapserver: enum SearchKey</a></li>
+          </ul></dd>
+<dt><a name="SearchNode" href="#SearchNode"><span>SearchNode:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: type SearchNode" href="meowmail/imap/imapserver.html#SearchNode">imapserver: type SearchNode</a></li>
+          </ul></dd>
+<dt><a name="selectSignedHeaders" href="#selectSignedHeaders"><span>selectSignedHeaders:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="dkim: proc selectSignedHeaders(fields: seq[RawHeaderField]; names: seq[string]): seq[int]" href="meowmail/smtp/dkim.html#selectSignedHeaders%2Cseq%5BRawHeaderField%5D%2Cseq%5Bstring%5D">dkim: proc selectSignedHeaders(fields: seq[RawHeaderField]; names: seq[string]): seq[int]</a></li>
+          </ul></dd>
+<dt><a name="seqSetToUids" href="#seqSetToUids"><span>seqSetToUids:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: proc seqSetToUids(mb: Mailbox; spec: string): seq[uint32]" href="meowmail/imap/mailstore.html#seqSetToUids%2CMailbox%2Cstring">mailstore: proc seqSetToUids(mb: Mailbox; spec: string): seq[uint32]</a></li>
+          </ul></dd>
+<dt><a name="setGlobalLogger" href="#setGlobalLogger"><span>setGlobalLogger:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="logger: proc setGlobalLogger(logger: Logger)" href="meowmail/utils/logger.html#setGlobalLogger%2CLogger">logger: proc setGlobalLogger(logger: Logger)</a></li>
           </ul></dd>
 <dt><a name="setProvider" href="#setProvider"><span>setProvider:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpdelivery: proc setProvider(smtpd: var SMTPDelivery; provider: DeliveryProvider)" href="meowmail/smtpdelivery.html#setProvider%2CSMTPDelivery%2CDeliveryProvider">smtpdelivery: proc setProvider(smtpd: var SMTPDelivery; provider: DeliveryProvider)</a></li>
+          data-doc-search-tag="smtpdelivery: proc setProvider(smtpd: var SMTPDelivery; provider: DeliveryProvider)" href="meowmail/smtp/smtpdelivery.html#setProvider%2CSMTPDelivery%2CDeliveryProvider">smtpdelivery: proc setProvider(smtpd: var SMTPDelivery; provider: DeliveryProvider)</a></li>
           </ul></dd>
 <dt><a name="setSpoolDir" href="#setSpoolDir"><span>setSpoolDir:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpdelivery: proc setSpoolDir(smtpd: var SMTPDelivery; spoolDir: string)" href="meowmail/smtpdelivery.html#setSpoolDir%2CSMTPDelivery%2Cstring">smtpdelivery: proc setSpoolDir(smtpd: var SMTPDelivery; spoolDir: string)</a></li>
+          data-doc-search-tag="smtpdelivery: proc setSpoolDir(smtpd: var SMTPDelivery; spoolDir: string)" href="meowmail/smtp/smtpdelivery.html#setSpoolDir%2CSMTPDelivery%2Cstring">smtpdelivery: proc setSpoolDir(smtpd: var SMTPDelivery; spoolDir: string)</a></li>
           </ul></dd>
 <dt><a name="setupTlsCtx" href="#setupTlsCtx"><span>setupTlsCtx:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpserver: proc setupTlsCtx(server: SMTPServer; certPath, keyPath: string): bool" href="meowmail/smtpserver.html#setupTlsCtx%2CSMTPServer%2Cstring%2Cstring">smtpserver: proc setupTlsCtx(server: SMTPServer; certPath, keyPath: string): bool</a></li>
+          data-doc-search-tag="smtpserver: proc setupTlsCtx(server: SMTPServer; certPath, keyPath: string): bool" href="meowmail/smtp/smtpserver.html#setupTlsCtx%2CSMTPServer%2Cstring%2Cstring">smtpserver: proc setupTlsCtx(server: SMTPServer; certPath, keyPath: string): bool</a></li>
+          </ul></dd>
+<dt><a name="signMessage" href="#signMessage"><span>signMessage:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="dkim: proc signMessage(key: DkimKey; rawMessage: string;
+            signHeaders: seq[string] = DefaultSignHeaders): string" href="meowmail/smtp/dkim.html#signMessage%2CDkimKey%2Cstring%2Cseq%5Bstring%5D">dkim: proc signMessage(key: DkimKey; rawMessage: string;
+            signHeaders: seq[string] = DefaultSignHeaders): string</a></li>
+          </ul></dd>
+<dt><a name="simpleCanonBody" href="#simpleCanonBody"><span>simpleCanonBody:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="dkim: proc simpleCanonBody(body: string): string" href="meowmail/smtp/dkim.html#simpleCanonBody%2Cstring">dkim: proc simpleCanonBody(body: string): string</a></li>
+          </ul></dd>
+<dt><a name="skAll" href="#skAll"><span>skAll:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skAll" href="meowmail/imap/imapserver.html#skAll">imapserver: SearchKey.skAll</a></li>
+          </ul></dd>
+<dt><a name="skAnd" href="#skAnd"><span>skAnd:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skAnd" href="meowmail/imap/imapserver.html#skAnd">imapserver: SearchKey.skAnd</a></li>
+          </ul></dd>
+<dt><a name="skAnswered" href="#skAnswered"><span>skAnswered:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skAnswered" href="meowmail/imap/imapserver.html#skAnswered">imapserver: SearchKey.skAnswered</a></li>
+          </ul></dd>
+<dt><a name="skBcc" href="#skBcc"><span>skBcc:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skBcc" href="meowmail/imap/imapserver.html#skBcc">imapserver: SearchKey.skBcc</a></li>
+          </ul></dd>
+<dt><a name="skBefore" href="#skBefore"><span>skBefore:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skBefore" href="meowmail/imap/imapserver.html#skBefore">imapserver: SearchKey.skBefore</a></li>
+          </ul></dd>
+<dt><a name="skBody" href="#skBody"><span>skBody:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skBody" href="meowmail/imap/imapserver.html#skBody">imapserver: SearchKey.skBody</a></li>
+          </ul></dd>
+<dt><a name="skCc" href="#skCc"><span>skCc:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skCc" href="meowmail/imap/imapserver.html#skCc">imapserver: SearchKey.skCc</a></li>
+          </ul></dd>
+<dt><a name="skDeleted" href="#skDeleted"><span>skDeleted:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skDeleted" href="meowmail/imap/imapserver.html#skDeleted">imapserver: SearchKey.skDeleted</a></li>
+          </ul></dd>
+<dt><a name="skDraft" href="#skDraft"><span>skDraft:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skDraft" href="meowmail/imap/imapserver.html#skDraft">imapserver: SearchKey.skDraft</a></li>
+          </ul></dd>
+<dt><a name="skFlagged" href="#skFlagged"><span>skFlagged:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skFlagged" href="meowmail/imap/imapserver.html#skFlagged">imapserver: SearchKey.skFlagged</a></li>
+          </ul></dd>
+<dt><a name="skFrom" href="#skFrom"><span>skFrom:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skFrom" href="meowmail/imap/imapserver.html#skFrom">imapserver: SearchKey.skFrom</a></li>
+          </ul></dd>
+<dt><a name="skHeader" href="#skHeader"><span>skHeader:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skHeader" href="meowmail/imap/imapserver.html#skHeader">imapserver: SearchKey.skHeader</a></li>
+          </ul></dd>
+<dt><a name="skKeyword" href="#skKeyword"><span>skKeyword:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skKeyword" href="meowmail/imap/imapserver.html#skKeyword">imapserver: SearchKey.skKeyword</a></li>
+          </ul></dd>
+<dt><a name="skLarger" href="#skLarger"><span>skLarger:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skLarger" href="meowmail/imap/imapserver.html#skLarger">imapserver: SearchKey.skLarger</a></li>
+          </ul></dd>
+<dt><a name="skNew" href="#skNew"><span>skNew:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skNew" href="meowmail/imap/imapserver.html#skNew">imapserver: SearchKey.skNew</a></li>
+          </ul></dd>
+<dt><a name="skNot" href="#skNot"><span>skNot:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skNot" href="meowmail/imap/imapserver.html#skNot">imapserver: SearchKey.skNot</a></li>
+          </ul></dd>
+<dt><a name="skOld" href="#skOld"><span>skOld:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skOld" href="meowmail/imap/imapserver.html#skOld">imapserver: SearchKey.skOld</a></li>
+          </ul></dd>
+<dt><a name="skOn" href="#skOn"><span>skOn:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skOn" href="meowmail/imap/imapserver.html#skOn">imapserver: SearchKey.skOn</a></li>
+          </ul></dd>
+<dt><a name="skOr" href="#skOr"><span>skOr:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skOr" href="meowmail/imap/imapserver.html#skOr">imapserver: SearchKey.skOr</a></li>
+          </ul></dd>
+<dt><a name="skRecent" href="#skRecent"><span>skRecent:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skRecent" href="meowmail/imap/imapserver.html#skRecent">imapserver: SearchKey.skRecent</a></li>
+          </ul></dd>
+<dt><a name="skSeen" href="#skSeen"><span>skSeen:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skSeen" href="meowmail/imap/imapserver.html#skSeen">imapserver: SearchKey.skSeen</a></li>
+          </ul></dd>
+<dt><a name="skSentBefore" href="#skSentBefore"><span>skSentBefore:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skSentBefore" href="meowmail/imap/imapserver.html#skSentBefore">imapserver: SearchKey.skSentBefore</a></li>
+          </ul></dd>
+<dt><a name="skSentOn" href="#skSentOn"><span>skSentOn:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skSentOn" href="meowmail/imap/imapserver.html#skSentOn">imapserver: SearchKey.skSentOn</a></li>
+          </ul></dd>
+<dt><a name="skSentSince" href="#skSentSince"><span>skSentSince:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skSentSince" href="meowmail/imap/imapserver.html#skSentSince">imapserver: SearchKey.skSentSince</a></li>
+          </ul></dd>
+<dt><a name="skSince" href="#skSince"><span>skSince:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skSince" href="meowmail/imap/imapserver.html#skSince">imapserver: SearchKey.skSince</a></li>
+          </ul></dd>
+<dt><a name="skSmaller" href="#skSmaller"><span>skSmaller:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skSmaller" href="meowmail/imap/imapserver.html#skSmaller">imapserver: SearchKey.skSmaller</a></li>
+          </ul></dd>
+<dt><a name="skSubject" href="#skSubject"><span>skSubject:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skSubject" href="meowmail/imap/imapserver.html#skSubject">imapserver: SearchKey.skSubject</a></li>
+          </ul></dd>
+<dt><a name="skText" href="#skText"><span>skText:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skText" href="meowmail/imap/imapserver.html#skText">imapserver: SearchKey.skText</a></li>
+          </ul></dd>
+<dt><a name="skTo" href="#skTo"><span>skTo:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skTo" href="meowmail/imap/imapserver.html#skTo">imapserver: SearchKey.skTo</a></li>
+          </ul></dd>
+<dt><a name="skUid" href="#skUid"><span>skUid:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skUid" href="meowmail/imap/imapserver.html#skUid">imapserver: SearchKey.skUid</a></li>
+          </ul></dd>
+<dt><a name="skUnanswered" href="#skUnanswered"><span>skUnanswered:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skUnanswered" href="meowmail/imap/imapserver.html#skUnanswered">imapserver: SearchKey.skUnanswered</a></li>
+          </ul></dd>
+<dt><a name="skUndeleted" href="#skUndeleted"><span>skUndeleted:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skUndeleted" href="meowmail/imap/imapserver.html#skUndeleted">imapserver: SearchKey.skUndeleted</a></li>
+          </ul></dd>
+<dt><a name="skUndraft" href="#skUndraft"><span>skUndraft:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skUndraft" href="meowmail/imap/imapserver.html#skUndraft">imapserver: SearchKey.skUndraft</a></li>
+          </ul></dd>
+<dt><a name="skUnflagged" href="#skUnflagged"><span>skUnflagged:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skUnflagged" href="meowmail/imap/imapserver.html#skUnflagged">imapserver: SearchKey.skUnflagged</a></li>
+          </ul></dd>
+<dt><a name="skUnkeyword" href="#skUnkeyword"><span>skUnkeyword:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skUnkeyword" href="meowmail/imap/imapserver.html#skUnkeyword">imapserver: SearchKey.skUnkeyword</a></li>
+          </ul></dd>
+<dt><a name="skUnseen" href="#skUnseen"><span>skUnseen:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: SearchKey.skUnseen" href="meowmail/imap/imapserver.html#skUnseen">imapserver: SearchKey.skUnseen</a></li>
           </ul></dd>
 <dt><a name="SMTPCommand" href="#SMTPCommand"><span>SMTPCommand:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpserver: enum SMTPCommand" href="meowmail/smtpserver.html#SMTPCommand">smtpserver: enum SMTPCommand</a></li>
+          data-doc-search-tag="smtpserver: enum SMTPCommand" href="meowmail/smtp/smtpserver.html#SMTPCommand">smtpserver: enum SMTPCommand</a></li>
           </ul></dd>
 <dt><a name="SMTPDelivery" href="#SMTPDelivery"><span>SMTPDelivery:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpdelivery: type SMTPDelivery" href="meowmail/smtpdelivery.html#SMTPDelivery">smtpdelivery: type SMTPDelivery</a></li>
+          data-doc-search-tag="smtpdelivery: type SMTPDelivery" href="meowmail/smtp/smtpdelivery.html#SMTPDelivery">smtpdelivery: type SMTPDelivery</a></li>
+          </ul></dd>
+<dt><a name="smtpHostname" href="#smtpHostname"><span>smtpHostname:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="smtpserver: proc smtpHostname(): string" href="meowmail/smtp/smtpserver.html#smtpHostname">smtpserver: proc smtpHostname(): string</a></li>
+          </ul></dd>
+<dt><a name="SmtpLimits" href="#SmtpLimits"><span>SmtpLimits:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="ratelimit: object SmtpLimits" href="meowmail/smtp/ratelimit.html#SmtpLimits">ratelimit: object SmtpLimits</a></li>
+          </ul></dd>
+<dt><a name="SmtpRateLimit" href="#SmtpRateLimit"><span>SmtpRateLimit:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="ratelimit: type SmtpRateLimit" href="meowmail/smtp/ratelimit.html#SmtpRateLimit">ratelimit: type SmtpRateLimit</a></li>
+          </ul></dd>
+<dt><a name="SMTPSendPolicy" href="#SMTPSendPolicy"><span>SMTPSendPolicy:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="smtpserver: enum SMTPSendPolicy" href="meowmail/smtp/smtpserver.html#SMTPSendPolicy">smtpserver: enum SMTPSendPolicy</a></li>
           </ul></dd>
 <dt><a name="SMTPServer" href="#SMTPServer"><span>SMTPServer:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpserver: type SMTPServer" href="meowmail/smtpserver.html#SMTPServer">smtpserver: type SMTPServer</a></li>
+          data-doc-search-tag="smtpserver: type SMTPServer" href="meowmail/smtp/smtpserver.html#SMTPServer">smtpserver: type SMTPServer</a></li>
+          </ul></dd>
+<dt><a name="SMTPServerError" href="#SMTPServerError"><span>SMTPServerError:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="smtpserver: object SMTPServerError" href="meowmail/smtp/smtpserver.html#SMTPServerError">smtpserver: object SMTPServerError</a></li>
           </ul></dd>
 <dt><a name="SMTPSession" href="#SMTPSession"><span>SMTPSession:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpserver: type SMTPSession" href="meowmail/smtpserver.html#SMTPSession">smtpserver: type SMTPSession</a></li>
+          data-doc-search-tag="smtpserver: type SMTPSession" href="meowmail/smtp/smtpserver.html#SMTPSession">smtpserver: type SMTPSession</a></li>
           </ul></dd>
 <dt><a name="SMTPSettings" href="#SMTPSettings"><span>SMTPSettings:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpserver: object SMTPSettings" href="meowmail/smtpserver.html#SMTPSettings">smtpserver: object SMTPSettings</a></li>
+          data-doc-search-tag="smtpserver: object SMTPSettings" href="meowmail/smtp/smtpserver.html#SMTPSettings">smtpserver: object SMTPSettings</a></li>
           </ul></dd>
 <dt><a name="smtpUnknownCmd" href="#smtpUnknownCmd"><span>smtpUnknownCmd:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpserver: SMTPCommand.smtpUnknownCmd" href="meowmail/smtpserver.html#smtpUnknownCmd">smtpserver: SMTPCommand.smtpUnknownCmd</a></li>
+          data-doc-search-tag="smtpserver: SMTPCommand.smtpUnknownCmd" href="meowmail/smtp/smtpserver.html#smtpUnknownCmd">smtpserver: SMTPCommand.smtpUnknownCmd</a></li>
+          </ul></dd>
+<dt><a name="spDefault" href="#spDefault"><span>spDefault:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="smtpserver: SMTPSendPolicy.spDefault" href="meowmail/smtp/smtpserver.html#spDefault">smtpserver: SMTPSendPolicy.spDefault</a></li>
+          </ul></dd>
+<dt><a name="spfCommand" href="#spfCommand"><span>spfCommand:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="commands: proc spfCommand(v: Values)" href="meowmail/cli/commands.html#spfCommand%2CValues">commands: proc spfCommand(v: Values)</a></li>
+          </ul></dd>
+<dt><a name="spInternalSendOnly" href="#spInternalSendOnly"><span>spInternalSendOnly:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="smtpserver: SMTPSendPolicy.spInternalSendOnly" href="meowmail/smtp/smtpserver.html#spInternalSendOnly">smtpserver: SMTPSendPolicy.spInternalSendOnly</a></li>
+          </ul></dd>
+<dt><a name="splitDnsTxt" href="#splitDnsTxt"><span>splitDnsTxt:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="records_generator: proc splitDnsTxt(value: string; chunkSize = 255): seq[string]" href="meowmail/utils/records_generator.html#splitDnsTxt%2Cstring%2Cint">records_generator: proc splitDnsTxt(value: string; chunkSize = 255): seq[string]</a></li>
+          </ul></dd>
+<dt><a name="splitRawHeaders" href="#splitRawHeaders"><span>splitRawHeaders:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="dkim: proc splitRawHeaders(headerBlock: string): seq[RawHeaderField]" href="meowmail/smtp/dkim.html#splitRawHeaders%2Cstring">dkim: proc splitRawHeaders(headerBlock: string): seq[RawHeaderField]</a></li>
+          </ul></dd>
+<dt><a name="spLocalSendOnly" href="#spLocalSendOnly"><span>spLocalSendOnly:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="smtpserver: SMTPSendPolicy.spLocalSendOnly" href="meowmail/smtp/smtpserver.html#spLocalSendOnly">smtpserver: SMTPSendPolicy.spLocalSendOnly</a></li>
+          </ul></dd>
+<dt><a name="spNoRelay" href="#spNoRelay"><span>spNoRelay:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="smtpserver: SMTPSendPolicy.spNoRelay" href="meowmail/smtp/smtpserver.html#spNoRelay">smtpserver: SMTPSendPolicy.spNoRelay</a></li>
           </ul></dd>
 <dt><a name="spoolDeliver" href="#spoolDeliver"><span>spoolDeliver:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpdelivery: proc spoolDeliver(smtpd: SMTPDelivery; req: DeliveryRequest): DeliveryDecision" href="meowmail/smtpdelivery.html#spoolDeliver%2CSMTPDelivery%2CDeliveryRequest">smtpdelivery: proc spoolDeliver(smtpd: SMTPDelivery; req: DeliveryRequest): DeliveryDecision</a></li>
+          data-doc-search-tag="smtpdelivery: proc spoolDeliver(smtpd: SMTPDelivery; req: DeliveryRequest): DeliveryOutcome" href="meowmail/smtp/smtpdelivery.html#spoolDeliver%2CSMTPDelivery%2CDeliveryRequest">smtpdelivery: proc spoolDeliver(smtpd: SMTPDelivery; req: DeliveryRequest): DeliveryOutcome</a></li>
           </ul></dd>
 <dt><a name="start" href="#start"><span>start:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="imapserver: proc start(server: IMAPServer)" href="meowmail/imapserver.html#start%2CIMAPServer">imapserver: proc start(server: IMAPServer)</a></li>
+          data-doc-search-tag="imapserver: proc start(server: IMAPServer)" href="meowmail/imap/imapserver.html#start%2CIMAPServer">imapserver: proc start(server: IMAPServer)</a></li>
           <li><a class="reference external"
-          data-doc-search-tag="smtpserver: proc start(server: SMTPServer)" href="meowmail/smtpserver.html#start%2CSMTPServer">smtpserver: proc start(server: SMTPServer)</a></li>
+          data-doc-search-tag="server: proc start(server: JMAPServer)" href="meowmail/jmap/server.html#start%2CJMAPServer">server: proc start(server: JMAPServer)</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="admin: proc start(server: AdminServer)" href="meowmail/restapi/admin.html#start%2CAdminServer">admin: proc start(server: AdminServer)</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="smtpserver: proc start(server: SMTPServer)" href="meowmail/smtp/smtpserver.html#start%2CSMTPServer">smtpserver: proc start(server: SMTPServer)</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="logger: proc start(self: var Logger)" href="meowmail/utils/logger.html#start%2CLogger">logger: proc start(self: var Logger)</a></li>
+          </ul></dd>
+<dt><a name="startCommand" href="#startCommand"><span>startCommand:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="commands: proc startCommand(v: Values)" href="meowmail/cli/commands.html#startCommand%2CValues">commands: proc startCommand(v: Values)</a></li>
           </ul></dd>
 <dt><a name="STARTTLS" href="#STARTTLS"><span>STARTTLS:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpserver: SMTPCommand.STARTTLS" href="meowmail/smtpserver.html#STARTTLS">smtpserver: SMTPCommand.STARTTLS</a></li>
+          data-doc-search-tag="smtpserver: SMTPCommand.STARTTLS" href="meowmail/smtp/smtpserver.html#STARTTLS">smtpserver: SMTPCommand.STARTTLS</a></li>
+          </ul></dd>
+<dt><a name="stats" href="#stats"><span>stats:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="queue: proc stats(queue: Queue): tuple[total, deferred, active, delivered, bounced: int]" href="meowmail/smtp/queue.html#stats%2CQueue">queue: proc stats(queue: Queue): tuple[total, deferred, active, delivered, bounced: int]</a></li>
+          </ul></dd>
+<dt><a name="stAuthenticated" href="#stAuthenticated"><span>stAuthenticated:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: ImapState.stAuthenticated" href="meowmail/imap/imapserver.html#stAuthenticated">imapserver: ImapState.stAuthenticated</a></li>
+          </ul></dd>
+<dt><a name="stNotAuthenticated" href="#stNotAuthenticated"><span>stNotAuthenticated:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: ImapState.stNotAuthenticated" href="meowmail/imap/imapserver.html#stNotAuthenticated">imapserver: ImapState.stNotAuthenticated</a></li>
+          </ul></dd>
+<dt><a name="stSelected" href="#stSelected"><span>stSelected:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="imapserver: ImapState.stSelected" href="meowmail/imap/imapserver.html#stSelected">imapserver: ImapState.stSelected</a></li>
+          </ul></dd>
+<dt><a name="textContent" href="#textContent"><span>textContent:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="msgparse: proc textContent(parsed: ParsedMessage): string" href="meowmail/imap/msgparse.html#textContent%2CParsedMessage">msgparse: proc textContent(parsed: ParsedMessage): string</a></li>
+          </ul></dd>
+<dt><a name="toSMTPSettings" href="#toSMTPSettings"><span>toSMTPSettings:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="config: proc toSMTPSettings(cfg: MeowMailConfig): SMTPSettings" href="meowmail/cli/config.html#toSMTPSettings%2CMeowMailConfig">config: proc toSMTPSettings(cfg: MeowMailConfig): SMTPSettings</a></li>
+          </ul></dd>
+<dt><a name="TRACE" href="#TRACE"><span>TRACE:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="logger: LogLevel.TRACE" href="meowmail/utils/logger.html#TRACE">logger: LogLevel.TRACE</a></li>
+          </ul></dd>
+<dt><a name="trace" href="#trace"><span>trace:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="logger: template trace(self: Logger; message = &quot;&quot;; autoNewLine = true)" href="meowmail/utils/logger.html#trace.t%2CLogger%2Cstring">logger: template trace(self: Logger; message = &quot;&quot;; autoNewLine = true)</a></li>
+          </ul></dd>
+<dt><a name="trackConnect" href="#trackConnect"><span>trackConnect:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="ratelimit: proc trackConnect(limiter: ConnectionLimiter; ip: string)" href="meowmail/smtp/ratelimit.html#trackConnect%2CConnectionLimiter%2Cstring">ratelimit: proc trackConnect(limiter: ConnectionLimiter; ip: string)</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="ratelimit: proc trackConnect(rl: SmtpRateLimit; ip: string)" href="meowmail/smtp/ratelimit.html#trackConnect%2CSmtpRateLimit%2Cstring">ratelimit: proc trackConnect(rl: SmtpRateLimit; ip: string)</a></li>
+          </ul></dd>
+<dt><a name="trackDisconnect" href="#trackDisconnect"><span>trackDisconnect:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="ratelimit: proc trackDisconnect(limiter: ConnectionLimiter; ip: string)" href="meowmail/smtp/ratelimit.html#trackDisconnect%2CConnectionLimiter%2Cstring">ratelimit: proc trackDisconnect(limiter: ConnectionLimiter; ip: string)</a></li>
+          <li><a class="reference external"
+          data-doc-search-tag="ratelimit: proc trackDisconnect(rl: SmtpRateLimit; ip: string)" href="meowmail/smtp/ratelimit.html#trackDisconnect%2CSmtpRateLimit%2Cstring">ratelimit: proc trackDisconnect(rl: SmtpRateLimit; ip: string)</a></li>
+          </ul></dd>
+<dt><a name="uidSetToUids" href="#uidSetToUids"><span>uidSetToUids:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: proc uidSetToUids(mb: Mailbox; spec: string): seq[uint32]" href="meowmail/imap/mailstore.html#uidSetToUids%2CMailbox%2Cstring">mailstore: proc uidSetToUids(mb: Mailbox; spec: string): seq[uint32]</a></li>
+          </ul></dd>
+<dt><a name="updateFlags" href="#updateFlags"><span>updateFlags:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: proc updateFlags(mb: Mailbox; msg: MailMessage; flags: set[MailFlag])" href="meowmail/imap/mailstore.html#updateFlags%2CMailbox%2CMailMessage%2Cset%5BMailFlag%5D">mailstore: proc updateFlags(mb: Mailbox; msg: MailMessage; flags: set[MailFlag])</a></li>
+          </ul></dd>
+<dt><a name="userMaildirPath" href="#userMaildirPath"><span>userMaildirPath:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mailstore: proc userMaildirPath(store: MaildirStore; user: string): string" href="meowmail/imap/mailstore.html#userMaildirPath%2CMaildirStore%2Cstring">mailstore: proc userMaildirPath(store: MaildirStore; user: string): string</a></li>
+          </ul></dd>
+<dt><a name="verifyDkim" href="#verifyDkim"><span>verifyDkim:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="inbound: proc verifyDkim(headers: seq[Header]; body: string): (AuthResult, string)" href="meowmail/smtp/auth/inbound.html#verifyDkim%2Cseq%5BHeader%5D%2Cstring">inbound: proc verifyDkim(headers: seq[Header]; body: string): (AuthResult, string)</a></li>
+          </ul></dd>
+<dt><a name="verifySpf" href="#verifySpf"><span>verifySpf:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="inbound: proc verifySpf(spfServerPtr: pointer; clientIp, heloDomain, mailFrom: string): (
+    AuthResult, string)" href="meowmail/smtp/auth/inbound.html#verifySpf%2Cpointer%2Cstring%2Cstring%2Cstring">inbound: proc verifySpf(spfServerPtr: pointer; clientIp, heloDomain, mailFrom: string): (
+    AuthResult, string)</a></li>
           </ul></dd>
 <dt><a name="VRFY" href="#VRFY"><span>VRFY:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="smtpserver: SMTPCommand.VRFY" href="meowmail/smtpserver.html#VRFY">smtpserver: SMTPCommand.VRFY</a></li>
+          data-doc-search-tag="smtpserver: SMTPCommand.VRFY" href="meowmail/smtp/smtpserver.html#VRFY">smtpserver: SMTPCommand.VRFY</a></li>
+          </ul></dd>
+<dt><a name="WARN" href="#WARN"><span>WARN:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="logger: LogLevel.WARN" href="meowmail/utils/logger.html#WARN">logger: LogLevel.WARN</a></li>
+          </ul></dd>
+<dt><a name="warn" href="#warn"><span>warn:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="logger: template warn(self: Logger; message = &quot;&quot;; autoNewLine = true)" href="meowmail/utils/logger.html#warn.t%2CLogger%2Cstring">logger: template warn(self: Logger; message = &quot;&quot;; autoNewLine = true)</a></li>
           </ul></dd>
 </dl>
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-02-24 19:56:14 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-08-28 13:27:48 UTC</small>
       </div>
     </div>
   </div>

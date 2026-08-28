@@ -1,0 +1,11 @@
+nimTitle	records_generator	meowmail/utils/records_generator.html	module meowmail/utils/records_generator		0
+nim	dpNone	meowmail/utils/records_generator.html#dpNone	DmarcPolicy.dpNone		8
+nim	dpQuarantine	meowmail/utils/records_generator.html#dpQuarantine	DmarcPolicy.dpQuarantine		8
+nim	dpReject	meowmail/utils/records_generator.html#dpReject	DmarcPolicy.dpReject		8
+nim	DmarcPolicy	meowmail/utils/records_generator.html#DmarcPolicy	enum DmarcPolicy		8
+nim	splitDnsTxt	meowmail/utils/records_generator.html#splitDnsTxt,string,int	proc splitDnsTxt(value: string; chunkSize = 255): seq[string]		14
+nim	buildSpfTxt	meowmail/utils/records_generator.html#buildSpfTxt,seq[string],seq[string],seq[string],seq[string],string,string	proc buildSpfTxt(ip4: seq[string] = @[]; ip6: seq[string] = @[];\n            includes: seq[string] = @[]; mx = true; a = false;\n            existsRules: seq[string] = @[]; redirect: string = "";\n            allQualifier = "~all"): string		24
+nim	dkimRecordName	meowmail/utils/records_generator.html#dkimRecordName,string,string	proc dkimRecordName(selector, domain: string): string		56
+nim	normalizePemPublicKeyToB64	meowmail/utils/records_generator.html#normalizePemPublicKeyToB64,string	proc normalizePemPublicKeyToB64(pem: string): string		59
+nim	buildDkimTxt	meowmail/utils/records_generator.html#buildDkimTxt,string,string,seq[string],string,string	proc buildDkimTxt(publicKeyB64: string; keyType = "rsa";\n             hashAlgos: seq[string] = @["sha256"]; serviceType = "email";\n             notes = ""): string		68
+nim	buildDmarcTxt	meowmail/utils/records_generator.html#buildDmarcTxt,DmarcPolicy,seq[string],seq[string],int,string,string,Option[DmarcPolicy],string,string,int	proc buildDmarcTxt(policy: DmarcPolicy; rua: seq[string] = @[];\n              ruf: seq[string] = @[]; pct = 100; adkim = "r"; aspf = "r";\n              sp: Option[DmarcPolicy] = none(DmarcPolicy); fo = "0";\n              rf = "afrf"; ri = 86400): string		87

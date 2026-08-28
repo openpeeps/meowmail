@@ -1,0 +1,18 @@
+nimTitle	smtpdelivery	meowmail/smtp/smtpdelivery.html	module meowmail/smtp/smtpdelivery		0
+nim	ddOk	meowmail/smtp/smtpdelivery.html#ddOk	DeliveryDecision.ddOk		24
+nim	ddTempFail	meowmail/smtp/smtpdelivery.html#ddTempFail	DeliveryDecision.ddTempFail		24
+nim	ddPermFail	meowmail/smtp/smtpdelivery.html#ddPermFail	DeliveryDecision.ddPermFail		24
+nim	DeliveryDecision	meowmail/smtp/smtpdelivery.html#DeliveryDecision	enum DeliveryDecision		24
+nim	RcptFailure	meowmail/smtp/smtpdelivery.html#RcptFailure	object RcptFailure		27
+nim	DeliveryOutcome	meowmail/smtp/smtpdelivery.html#DeliveryOutcome	object DeliveryOutcome		33
+nim	okOutcome	meowmail/smtp/smtpdelivery.html#okOutcome,seq[RcptFailure]	proc okOutcome(decision = ddOk; failed: seq[RcptFailure] = @[]): DeliveryOutcome		40
+nim	isOk	meowmail/smtp/smtpdelivery.html#isOk,DeliveryOutcome	proc isOk(o: DeliveryOutcome): bool		43
+nim	DeliveryRequest	meowmail/smtp/smtpdelivery.html#DeliveryRequest	object DeliveryRequest		47
+nim	DeliveryProvider	meowmail/smtp/smtpdelivery.html#DeliveryProvider	type DeliveryProvider		59
+nim	SMTPDelivery	meowmail/smtp/smtpdelivery.html#SMTPDelivery	type SMTPDelivery		61
+nim	defaultSpoolDir	meowmail/smtp/smtpdelivery.html#defaultSpoolDir,SMTPDelivery	proc defaultSpoolDir(smtpd: SMTPDelivery): string		79
+nim	newSMTPDelivery	meowmail/smtp/smtpdelivery.html#newSMTPDelivery,Option[string],DeliveryProvider,MaildirStore	proc newSMTPDelivery(spoolDir: Option[string]; provider: DeliveryProvider = nil;\n                localStore: MaildirStore = nil): SMTPDelivery		84
+nim	spoolDeliver	meowmail/smtp/smtpdelivery.html#spoolDeliver,SMTPDelivery,DeliveryRequest	proc spoolDeliver(smtpd: SMTPDelivery; req: DeliveryRequest): DeliveryOutcome		96
+nim	deliverMessage	meowmail/smtp/smtpdelivery.html#deliverMessage,SMTPDelivery,DeliveryRequest	proc deliverMessage(smtpd: SMTPDelivery; req: DeliveryRequest): DeliveryOutcome		122
+nim	setProvider	meowmail/smtp/smtpdelivery.html#setProvider,SMTPDelivery,DeliveryProvider	proc setProvider(smtpd: var SMTPDelivery; provider: DeliveryProvider)		146
+nim	setSpoolDir	meowmail/smtp/smtpdelivery.html#setSpoolDir,SMTPDelivery,string	proc setSpoolDir(smtpd: var SMTPDelivery; spoolDir: string)		152

@@ -1,0 +1,2 @@
+nimTitle	dmarc_preflight	meowmail/smtp/auth/dmarc_preflight.html	module meowmail/smtp/auth/dmarc_preflight		0
+nim	runDmarcPreflight	meowmail/smtp/auth/dmarc_preflight.html#runDmarcPreflight,bool,string,string	proc runDmarcPreflight(enforce: bool; fromDomain: string; record: string): DeliveryDecision		5

@@ -1,0 +1,10 @@
+nimTitle	bounce	meowmail/smtp/bounce.html	module meowmail/smtp/bounce		0
+nim	dsnDelivered	meowmail/smtp/bounce.html#dsnDelivered	DsnStatus.dsnDelivered		11
+nim	dsnDelayed	meowmail/smtp/bounce.html#dsnDelayed	DsnStatus.dsnDelayed		11
+nim	dsnRejected	meowmail/smtp/bounce.html#dsnRejected	DsnStatus.dsnRejected		11
+nim	dsnFailed	meowmail/smtp/bounce.html#dsnFailed	DsnStatus.dsnFailed		11
+nim	dsnBadDestination	meowmail/smtp/bounce.html#dsnBadDestination	DsnStatus.dsnBadDestination		11
+nim	dsnMailboxFull	meowmail/smtp/bounce.html#dsnMailboxFull	DsnStatus.dsnMailboxFull		11
+nim	dsnMessageExpired	meowmail/smtp/bounce.html#dsnMessageExpired	DsnStatus.dsnMessageExpired		11
+nim	DsnStatus	meowmail/smtp/bounce.html#DsnStatus	enum DsnStatus		11
+nim	generateBounce	meowmail/smtp/bounce.html#generateBounce,string,string,string,DsnStatus,string	proc generateBounce(originalFrom, originalTo, heloName: string; status: DsnStatus;\n               diag: string = ""): (string, string)		40

@@ -1,0 +1,16 @@
+nimTitle	msgparse	meowmail/imap/msgparse.html	module meowmail/imap/msgparse		0
+nim	Header	meowmail/imap/msgparse.html#Header	tuple Header		17
+nim	EnvelopeAddress	meowmail/imap/msgparse.html#EnvelopeAddress	object EnvelopeAddress		18
+nim	Envelope	meowmail/imap/msgparse.html#Envelope	object Envelope		23
+nim	MimePart	meowmail/imap/msgparse.html#MimePart	type MimePart		35
+nim	ParsedMessage	meowmail/imap/msgparse.html#ParsedMessage	type ParsedMessage		54
+nim	getHeader	meowmail/imap/msgparse.html#getHeader,seq[Header],string	proc getHeader(headers: seq[Header]; name: string): string		86
+nim	getAllHeaders	meowmail/imap/msgparse.html#getAllHeaders,seq[Header],string	proc getAllHeaders(headers: seq[Header]; name: string): seq[string]		94
+nim	decodeMimeWords	meowmail/imap/msgparse.html#decodeMimeWords,string	proc decodeMimeWords(s: string): string		117
+nim	parseAddressList	meowmail/imap/msgparse.html#parseAddressList,string	proc parseAddressList(s: string): seq[EnvelopeAddress]		152
+nim	parseDateStr	meowmail/imap/msgparse.html#parseDateStr,string	proc parseDateStr(s: string): Time		238
+nim	parseMessage	meowmail/imap/msgparse.html#parseMessage,string	proc parseMessage(raw: string): ParsedMessage		302
+nim	renderEnvelope	meowmail/imap/msgparse.html#renderEnvelope,Envelope	proc renderEnvelope(env: Envelope): string		461
+nim	renderBodyStructure	meowmail/imap/msgparse.html#renderBodyStructure,MimePart,bool	proc renderBodyStructure(part: MimePart; extensions: bool): string		476
+nim	textContent	meowmail/imap/msgparse.html#textContent,ParsedMessage	proc textContent(parsed: ParsedMessage): string		532
+nim	headerSearchText	meowmail/imap/msgparse.html#headerSearchText,ParsedMessage	proc headerSearchText(parsed: ParsedMessage): string		564

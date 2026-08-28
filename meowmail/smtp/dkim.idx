@@ -1,0 +1,17 @@
+nimTitle	dkim	meowmail/smtp/dkim.html	module meowmail/smtp/dkim		0
+nim	DkimKey	meowmail/smtp/dkim.html#DkimKey	type DkimKey		10
+nim	DkimSignature	meowmail/smtp/dkim.html#DkimSignature	object DkimSignature		18
+nim	splitRawHeaders	meowmail/smtp/dkim.html#splitRawHeaders,string	proc splitRawHeaders(headerBlock: string): seq[RawHeaderField]		116
+nim	relaxWsp	meowmail/smtp/dkim.html#relaxWsp,string	proc relaxWsp(s: string): string		140
+nim	relaxedHeaderValue	meowmail/smtp/dkim.html#relaxedHeaderValue,RawHeaderField	proc relaxedHeaderValue(field: RawHeaderField): string		153
+nim	canonHeaderSimple	meowmail/smtp/dkim.html#canonHeaderSimple,RawHeaderField	proc canonHeaderSimple(field: RawHeaderField): string		161
+nim	selectSignedHeaders	meowmail/smtp/dkim.html#selectSignedHeaders,seq[RawHeaderField],seq[string]	proc selectSignedHeaders(fields: seq[RawHeaderField]; names: seq[string]): seq[int]		165
+nim	simpleCanonBody	meowmail/smtp/dkim.html#simpleCanonBody,string	proc simpleCanonBody(body: string): string		184
+nim	relaxedCanonBody	meowmail/smtp/dkim.html#relaxedCanonBody,string	proc relaxedCanonBody(body: string): string		194
+nim	newDkimKeyFromPem	meowmail/smtp/dkim.html#newDkimKeyFromPem,string,string,string	proc newDkimKeyFromPem(domain, selector, pemData: string): DkimKey		207
+nim	newDkimKey	meowmail/smtp/dkim.html#newDkimKey,string,string,string	proc newDkimKey(domain, selector, pemKeyFile: string): DkimKey		221
+nim	publicKeyDer	meowmail/smtp/dkim.html#publicKeyDer,DkimKey	proc publicKeyDer(key: DkimKey): string		227
+nim	dkimTxtRecord	meowmail/smtp/dkim.html#dkimTxtRecord,DkimKey	proc dkimTxtRecord(key: DkimKey): string		237
+nim	DefaultSignHeaders	meowmail/smtp/dkim.html#DefaultSignHeaders	const DefaultSignHeaders		246
+nim	signMessage	meowmail/smtp/dkim.html#signMessage,DkimKey,string,seq[string]	proc signMessage(key: DkimKey; rawMessage: string;\n            signHeaders: seq[string] = DefaultSignHeaders): string		259
+nim	destroy	meowmail/smtp/dkim.html#destroy,DkimKey	proc destroy(key: DkimKey)		311

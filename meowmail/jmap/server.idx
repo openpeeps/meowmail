@@ -1,0 +1,4 @@
+nimTitle	server	meowmail/jmap/server.html	module meowmail/jmap/server		0
+nim	JMAPServer	meowmail/jmap/server.html#JMAPServer	type JMAPServer		24
+nim	newJMAPServer	meowmail/jmap/server.html#newJMAPServer,MaildirStore,string,string,Port,SslContext	proc newJMAPServer(store: MaildirStore; username: string; host = "0.0.0.0";\n              port: Port = Port(8080); tlsCtx: SslContext = nil): JMAPServer		166
+nim	start	meowmail/jmap/server.html#start,JMAPServer	proc start(server: JMAPServer)		189

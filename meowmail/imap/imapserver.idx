@@ -1,0 +1,47 @@
+nimTitle	imapserver	meowmail/imap/imapserver.html	module meowmail/imap/imapserver		0
+nim	stNotAuthenticated	meowmail/imap/imapserver.html#stNotAuthenticated	ImapState.stNotAuthenticated		21
+nim	stAuthenticated	meowmail/imap/imapserver.html#stAuthenticated	ImapState.stAuthenticated		21
+nim	stSelected	meowmail/imap/imapserver.html#stSelected	ImapState.stSelected		21
+nim	ImapState	meowmail/imap/imapserver.html#ImapState	enum ImapState		21
+nim	IMAPSession	meowmail/imap/imapserver.html#IMAPSession	type IMAPSession		27
+nim	IMAPServer	meowmail/imap/imapserver.html#IMAPServer	type IMAPServer		52
+nim	skAll	meowmail/imap/imapserver.html#skAll	SearchKey.skAll		515
+nim	skAnd	meowmail/imap/imapserver.html#skAnd	SearchKey.skAnd		515
+nim	skOr	meowmail/imap/imapserver.html#skOr	SearchKey.skOr		515
+nim	skNot	meowmail/imap/imapserver.html#skNot	SearchKey.skNot		515
+nim	skAnswered	meowmail/imap/imapserver.html#skAnswered	SearchKey.skAnswered		515
+nim	skBcc	meowmail/imap/imapserver.html#skBcc	SearchKey.skBcc		515
+nim	skBefore	meowmail/imap/imapserver.html#skBefore	SearchKey.skBefore		515
+nim	skBody	meowmail/imap/imapserver.html#skBody	SearchKey.skBody		515
+nim	skCc	meowmail/imap/imapserver.html#skCc	SearchKey.skCc		515
+nim	skDeleted	meowmail/imap/imapserver.html#skDeleted	SearchKey.skDeleted		515
+nim	skDraft	meowmail/imap/imapserver.html#skDraft	SearchKey.skDraft		515
+nim	skFlagged	meowmail/imap/imapserver.html#skFlagged	SearchKey.skFlagged		515
+nim	skFrom	meowmail/imap/imapserver.html#skFrom	SearchKey.skFrom		515
+nim	skHeader	meowmail/imap/imapserver.html#skHeader	SearchKey.skHeader		515
+nim	skKeyword	meowmail/imap/imapserver.html#skKeyword	SearchKey.skKeyword		515
+nim	skLarger	meowmail/imap/imapserver.html#skLarger	SearchKey.skLarger		515
+nim	skNew	meowmail/imap/imapserver.html#skNew	SearchKey.skNew		515
+nim	skOld	meowmail/imap/imapserver.html#skOld	SearchKey.skOld		515
+nim	skOn	meowmail/imap/imapserver.html#skOn	SearchKey.skOn		515
+nim	skRecent	meowmail/imap/imapserver.html#skRecent	SearchKey.skRecent		515
+nim	skSeen	meowmail/imap/imapserver.html#skSeen	SearchKey.skSeen		515
+nim	skSentBefore	meowmail/imap/imapserver.html#skSentBefore	SearchKey.skSentBefore		515
+nim	skSentOn	meowmail/imap/imapserver.html#skSentOn	SearchKey.skSentOn		515
+nim	skSentSince	meowmail/imap/imapserver.html#skSentSince	SearchKey.skSentSince		515
+nim	skSince	meowmail/imap/imapserver.html#skSince	SearchKey.skSince		515
+nim	skSmaller	meowmail/imap/imapserver.html#skSmaller	SearchKey.skSmaller		515
+nim	skSubject	meowmail/imap/imapserver.html#skSubject	SearchKey.skSubject		515
+nim	skText	meowmail/imap/imapserver.html#skText	SearchKey.skText		515
+nim	skTo	meowmail/imap/imapserver.html#skTo	SearchKey.skTo		515
+nim	skUid	meowmail/imap/imapserver.html#skUid	SearchKey.skUid		515
+nim	skUnanswered	meowmail/imap/imapserver.html#skUnanswered	SearchKey.skUnanswered		515
+nim	skUndeleted	meowmail/imap/imapserver.html#skUndeleted	SearchKey.skUndeleted		515
+nim	skUndraft	meowmail/imap/imapserver.html#skUndraft	SearchKey.skUndraft		515
+nim	skUnflagged	meowmail/imap/imapserver.html#skUnflagged	SearchKey.skUnflagged		515
+nim	skUnkeyword	meowmail/imap/imapserver.html#skUnkeyword	SearchKey.skUnkeyword		515
+nim	skUnseen	meowmail/imap/imapserver.html#skUnseen	SearchKey.skUnseen		515
+nim	SearchKey	meowmail/imap/imapserver.html#SearchKey	enum SearchKey		515
+nim	SearchNode	meowmail/imap/imapserver.html#SearchNode	type SearchNode		523
+nim	newIMAPServer	meowmail/imap/imapserver.html#newIMAPServer,Port,MaildirStore,SslContext	proc newIMAPServer(port: Port = Port(143); store: MaildirStore = nil;\n              tlsCtx: SslContext = nil): IMAPServer		1286
+nim	start	meowmail/imap/imapserver.html#start,IMAPServer	proc start(server: IMAPServer)		1311

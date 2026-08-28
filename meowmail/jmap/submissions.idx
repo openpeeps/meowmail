@@ -1,0 +1,3 @@
+nimTitle	submissions	meowmail/jmap/submissions.html	module meowmail/jmap/submissions		0
+nim	handleIdentityGet	meowmail/jmap/submissions.html#handleIdentityGet,string,JsonNode,string	proc handleIdentityGet(username: string; args: JsonNode; callId: string): seq[\n    JsonNode]		13
+nim	handleEmailSubmissionSet	meowmail/jmap/submissions.html#handleEmailSubmissionSet,string,string,JsonNode,string	proc handleEmailSubmissionSet(username: string; state: string; args: JsonNode;\n                         callId: string): seq[JsonNode]		56

@@ -1,0 +1,8 @@
+nimTitle	mxprovider	meowmail/smtp/mxprovider.html	module meowmail/smtp/mxprovider		0
+nim	MXHost	meowmail/smtp/mxprovider.html#MXHost	object MXHost		29
+nim	DmarcRecordLookup	meowmail/smtp/mxprovider.html#DmarcRecordLookup	type DmarcRecordLookup		36
+nim	MXProviderConfig	meowmail/smtp/mxprovider.html#MXProviderConfig	object MXProviderConfig		38
+nim	initMXProviderConfig	meowmail/smtp/mxprovider.html#initMXProviderConfig,string,int,int,bool,int,bool,bool,pointer,string,string,bool,DmarcRecordLookup	proc initMXProviderConfig(heloName: string; connectTimeoutMs: int = 7000;\n                     commandTimeoutMs: int = 10000;\n                     requireStartTls: bool = false;\n                     maxMxHostsPerDomain: int = 5; debug: bool = false;\n                     enforceSpf: bool = false; spfServer: pointer = nil;\n                     spfClientIp: string = "127.0.0.1";\n                     spfHeloDomain: string = "localhost";\n                     enforceDmarc: bool = false;\n                     dmarcLookup: DmarcRecordLookup = nil): MXProviderConfig		70
+nim	resolveMxHosts	meowmail/smtp/mxprovider.html#resolveMxHosts,string,int	proc resolveMxHosts(domain: string; maxHosts = 5): seq[MXHost]		136
+nim	resolveTxtRecords	meowmail/smtp/mxprovider.html#resolveTxtRecords,string	proc resolveTxtRecords(hostname: string): seq[string]		162
+nim	newMXProvider	meowmail/smtp/mxprovider.html#newMXProvider	proc newMXProvider(cfg = MXProviderConfig(); performSpfPreflight = true;\n              performDmarcPreflight = true): DeliveryProvider		536

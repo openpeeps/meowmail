@@ -1,0 +1,35 @@
+nimTitle	smtpserver	meowmail/smtp/smtpserver.html	module meowmail/smtp/smtpserver		0
+nim	MaxMessageBytes	meowmail/smtp/smtpserver.html#MaxMessageBytes	const MaxMessageBytes		37
+nim	smtpUnknownCmd	meowmail/smtp/smtpserver.html#smtpUnknownCmd	SMTPCommand.smtpUnknownCmd		40
+nim	HELO	meowmail/smtp/smtpserver.html#HELO	SMTPCommand.HELO		40
+nim	EHLO	meowmail/smtp/smtpserver.html#EHLO	SMTPCommand.EHLO		40
+nim	STARTTLS	meowmail/smtp/smtpserver.html#STARTTLS	SMTPCommand.STARTTLS		40
+nim	AUTH	meowmail/smtp/smtpserver.html#AUTH	SMTPCommand.AUTH		40
+nim	MAIL	meowmail/smtp/smtpserver.html#MAIL	SMTPCommand.MAIL		40
+nim	RCPT	meowmail/smtp/smtpserver.html#RCPT	SMTPCommand.RCPT		40
+nim	DATA	meowmail/smtp/smtpserver.html#DATA	SMTPCommand.DATA		40
+nim	QUIT	meowmail/smtp/smtpserver.html#QUIT	SMTPCommand.QUIT		40
+nim	RSET	meowmail/smtp/smtpserver.html#RSET	SMTPCommand.RSET		40
+nim	NOOP	meowmail/smtp/smtpserver.html#NOOP	SMTPCommand.NOOP		40
+nim	VRFY	meowmail/smtp/smtpserver.html#VRFY	SMTPCommand.VRFY		40
+nim	EXPN	meowmail/smtp/smtpserver.html#EXPN	SMTPCommand.EXPN		40
+nim	HELP	meowmail/smtp/smtpserver.html#HELP	SMTPCommand.HELP		40
+nim	SMTPCommand	meowmail/smtp/smtpserver.html#SMTPCommand	enum SMTPCommand		40
+nim	SMTPSession	meowmail/smtp/smtpserver.html#SMTPSession	type SMTPSession		58
+nim	spLocalSendOnly	meowmail/smtp/smtpserver.html#spLocalSendOnly	SMTPSendPolicy.spLocalSendOnly		92
+nim	spDefault	meowmail/smtp/smtpserver.html#spDefault	SMTPSendPolicy.spDefault		92
+nim	spInternalSendOnly	meowmail/smtp/smtpserver.html#spInternalSendOnly	SMTPSendPolicy.spInternalSendOnly		92
+nim	spNoRelay	meowmail/smtp/smtpserver.html#spNoRelay	SMTPSendPolicy.spNoRelay		92
+nim	SMTPSendPolicy	meowmail/smtp/smtpserver.html#SMTPSendPolicy	enum SMTPSendPolicy		92
+nim	SMTPSettings	meowmail/smtp/smtpserver.html#SMTPSettings	object SMTPSettings		100
+nim	SMTPServer	meowmail/smtp/smtpserver.html#SMTPServer	type SMTPServer		148
+nim	SMTPServerError	meowmail/smtp/smtpserver.html#SMTPServerError	object SMTPServerError		190
+nim	smtpHostname	meowmail/smtp/smtpserver.html#smtpHostname	proc smtpHostname(): string		286
+nim	dataOverflow	meowmail/smtp/smtpserver.html#dataOverflow,SMTPSession	proc dataOverflow(s: SMTPSession): bool		401
+nim	bindListener587	meowmail/smtp/smtpserver.html#bindListener587,SMTPServer,Port	proc bindListener587(server: SMTPServer; port: Port = Port(587))		954
+nim	bindListener465	meowmail/smtp/smtpserver.html#bindListener465,SMTPServer,Port	proc bindListener465(server: SMTPServer; port: Port = Port(465))		968
+nim	enableMxDelivery	meowmail/smtp/smtpserver.html#enableMxDelivery,SMTPServer	proc enableMxDelivery(server: SMTPServer; cfg = MXProviderConfig())		984
+nim	opensslLastError	meowmail/smtp/smtpserver.html#opensslLastError	proc opensslLastError(): string		1001
+nim	setupTlsCtx	meowmail/smtp/smtpserver.html#setupTlsCtx,SMTPServer,string,string	proc setupTlsCtx(server: SMTPServer; certPath, keyPath: string): bool		1005
+nim	newSMTPServer	meowmail/smtp/smtpserver.html#newSMTPServer,SMTPSettings	proc newSMTPServer(settings: SMTPSettings): SMTPServer		1017
+nim	start	meowmail/smtp/smtpserver.html#start,SMTPServer	proc start(server: SMTPServer)		1135

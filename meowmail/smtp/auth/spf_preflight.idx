@@ -1,0 +1,2 @@
+nimTitle	spf_preflight	meowmail/smtp/auth/spf_preflight.html	module meowmail/smtp/auth/spf_preflight		0
+nim	runSpfPreflight	meowmail/smtp/auth/spf_preflight.html#runSpfPreflight,bool,pointer,string,string,string	proc runSpfPreflight(enforce: bool; spfServerPtr: pointer; spfClientIp: string;\n                spfHeloDomain: string; mailFrom: string): DeliveryDecision		5

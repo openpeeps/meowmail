@@ -1,0 +1,24 @@
+nimTitle	queue	meowmail/smtp/queue.html	module meowmail/smtp/queue		0
+nim	qsDeferred	meowmail/smtp/queue.html#qsDeferred	QueueStatus.qsDeferred		15
+nim	qsActive	meowmail/smtp/queue.html#qsActive	QueueStatus.qsActive		15
+nim	qsDelivered	meowmail/smtp/queue.html#qsDelivered	QueueStatus.qsDelivered		15
+nim	qsBounced	meowmail/smtp/queue.html#qsBounced	QueueStatus.qsBounced		15
+nim	qsFailed	meowmail/smtp/queue.html#qsFailed	QueueStatus.qsFailed		15
+nim	QueueStatus	meowmail/smtp/queue.html#QueueStatus	enum QueueStatus		15
+nim	QueueEntry	meowmail/smtp/queue.html#QueueEntry	object QueueEntry		22
+nim	Queue	meowmail/smtp/queue.html#Queue	type Queue		36
+nim	newQueue	meowmail/smtp/queue.html#newQueue,string,int,int,int	proc newQueue(dir: string; maxRetries = 20; baseDelay = 300; maxDelay = 86400): Queue		114
+nim	load	meowmail/smtp/queue.html#load,Queue	proc load(queue: Queue)		129
+nim	saveMeta	meowmail/smtp/queue.html#saveMeta,Queue,QueueEntry	proc saveMeta(queue: Queue; entry: QueueEntry)		164
+nim	deleteEntryFiles	meowmail/smtp/queue.html#deleteEntryFiles,Queue,QueueEntry	proc deleteEntryFiles(queue: Queue; entry: QueueEntry)		178
+nim	enqueue	meowmail/smtp/queue.html#enqueue,Queue,DeliveryRequest	proc enqueue(queue: Queue; req: DeliveryRequest): string		189
+nim	markDelivered	meowmail/smtp/queue.html#markDelivered,Queue,string	proc markDelivered(queue: Queue; entryId: string)		223
+nim	markFailed	meowmail/smtp/queue.html#markFailed,Queue,string,string	proc markFailed(queue: Queue; entryId: string; errorMsg: string)		235
+nim	pending	meowmail/smtp/queue.html#pending,Queue	proc pending(queue: Queue): seq[QueueEntry]		253
+nim	getEntry	meowmail/smtp/queue.html#getEntry,Queue,string	proc getEntry(queue: Queue; entryId: string): QueueEntry		261
+nim	removeEntry	meowmail/smtp/queue.html#removeEntry,Queue,string	proc removeEntry(queue: Queue; entryId: string)		268
+nim	stats	meowmail/smtp/queue.html#stats,Queue	proc stats(queue: Queue): tuple[total, deferred, active, delivered, bounced: int]		273
+nim	routeBounce	meowmail/smtp/queue.html#routeBounce,MaildirStore,Queue,string,string,string,DsnStatus,string	proc routeBounce(localStore: MaildirStore; q: Queue;\n            envelopeFrom, rcpt, helo: string; status: DsnStatus;\n            diag: string = ""): bool		287
+nim	attemptEntry	meowmail/smtp/queue.html#attemptEntry,Queue,string,proc(DeliveryRequest),MaildirStore	proc attemptEntry(queue: Queue; entryId: string; deliverProc: proc (\n    req: DeliveryRequest): DeliveryOutcome {.gcsafe.}; localStore: MaildirStore): bool		313
+nim	flushQueue	meowmail/smtp/queue.html#flushQueue,Queue,proc(DeliveryRequest),MaildirStore	proc flushQueue(queue: Queue;\n           deliverProc: proc (req: DeliveryRequest): DeliveryOutcome {.gcsafe.};\n           localStore: MaildirStore = nil): int		396
+nim	runQueue	meowmail/smtp/queue.html#runQueue,Queue,proc(DeliveryRequest),int,MaildirStore	proc runQueue(queue: Queue;\n         deliverProc: proc (req: DeliveryRequest): DeliveryOutcome {.gcsafe.};\n         intervalMs: int = 30000; localStore: MaildirStore = nil)		413
