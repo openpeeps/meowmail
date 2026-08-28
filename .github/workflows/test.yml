@@ -25,10 +25,6 @@ jobs:
         with:
           nim-version: ${{ matrix.nim-version }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Fetch powpow + openparser (sibling dirs used by config.nims)
-        run: |
-          git clone --depth 1 https://github.com/openpeeps/powpow ../powpow
-          git clone --depth 1 https://github.com/openpeeps/openparser ../openparser
       - name: Install deps
         run: |
           sudo apt-get update
@@ -72,6 +68,7 @@ jobs:
             -config tests/certs/openssl-smtp.cnf \
             -extensions v3_req
 
+      - run: nimble install kapsis # for building the CLI
       - run: nimble install -Y
       - run: nim c src/${{ github.event.repository.name }}.nim
       # Outbound SMTP from GitHub Actions is blocked, so we can only run the tests\
