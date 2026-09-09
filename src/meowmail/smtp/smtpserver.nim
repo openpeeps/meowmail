@@ -1010,6 +1010,11 @@ proc enableMxDelivery*(server: SMTPServer, cfg = MXProviderConfig()) =
     let s = SPF_server_new(SPF_DNS_CACHE, 0)
     if s != nil:
       server.spfServer = cast[pointer](s)
+  # The MX provider's SPF preflight needs the same server backend (the
+  # TOML config cannot carry a pointer); without this every SPF/DMARC
+  # preflight would tempfail.
+  if mxCfg.spfServer == nil:
+    mxCfg.spfServer = server.spfServer
   server.delivery.setProvider(newMXProvider(mxCfg))
 
 proc opensslLastError*(): string =

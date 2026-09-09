@@ -28,9 +28,6 @@ type
     dmarcReject*: bool       ## DMARC p=reject applied and enforcement on
     combined*: string        ## Full Authentication-Results header value
 
-  DkimKeyLookup* = proc(domain, selector: string): string {.closure, gcsafe.}
-    ## Returns the selected `v=DKIM1` TXT record ("" when unavailable).
-
 proc authResultStr(r: AuthResult): string =
   case r
   of arPass: "pass"
@@ -51,7 +48,8 @@ proc verifySpf*(spfServerPtr: pointer, clientIp, heloDomain, mailFrom: string): 
   if clientIp.len == 0:
     return (arPermError, "no client IP")
 
-  let envFrom = mailFrom.strip()
+  # libspf2 expects a bare address; bracketed senders fail with NOT_SPF.
+  let envFrom = mailFrom.strip().strip(chars = {'<', '>'})
   if envFrom.len == 0:
     return (arPermError, "empty MAIL FROM")
 

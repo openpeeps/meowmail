@@ -5,7 +5,9 @@
 #          https://github.com/openpeeps/meowmail
 
 import std/[strutils, sequtils, algorithm]
-import ./auth/[spf_preflight, dmarc_preflight]
+import ./auth/spf_preflight
+import ./auth/dmarc
+import ./dkim
 
 ## This module implements an MX delivery provider for MeowMail that delivers
 ## messages directly to recipient domains by resolving their MX records and
@@ -66,6 +68,9 @@ type
     # DMARC preflight (optional)
     enforceDmarc*: bool = false
     dmarcLookup*: DmarcRecordLookup = nil
+    dkimLookup*: DkimKeyLookup = nil
+      ## Key lookup for outbound DKIM verification. Nil uses powpow's TXT
+      ## resolver; tests inject stub records.
 
 proc initMXProviderConfig*(
   heloName: string,
@@ -79,7 +84,8 @@ proc initMXProviderConfig*(
   spfClientIp: string = "127.0.0.1",
   spfHeloDomain: string = "localhost",
   enforceDmarc: bool = false,
-  dmarcLookup: DmarcRecordLookup = nil
+  dmarcLookup: DmarcRecordLookup = nil,
+  dkimLookup: DkimKeyLookup = nil
 ): MXProviderConfig =
   ## Initializes an `MXProviderConfig` object with the specified parameters.
   MXProviderConfig(
@@ -94,7 +100,8 @@ proc initMXProviderConfig*(
     spfClientIp: spfClientIp,
     spfHeloDomain: spfHeloDomain,
     enforceDmarc: enforceDmarc,
-    dmarcLookup: dmarcLookup
+    dmarcLookup: dmarcLookup,
+    dkimLookup: dkimLookup
   )
 
 proc extractMailFromDomain(path: string): string =
@@ -111,14 +118,6 @@ proc runSpfPreflight(req: DeliveryRequest, cfg: MXProviderConfig): DeliveryDecis
   spf_preflight.runSpfPreflight(
     cfg.enforceSpf, cfg.spfServer, cfg.spfClientIp, cfg.spfHeloDomain, req.mailFrom
   )
-
-proc runDmarcPreflight(req: DeliveryRequest, cfg: MXProviderConfig): DeliveryDecision =
-  if not cfg.enforceDmarc: return ddOk
-  if cfg.dmarcLookup.isNil: return ddTempFail
-
-  let fromDomain = extractMailFromDomain(req.mailFrom)
-  let rec = if fromDomain.len == 0: "" else: cfg.dmarcLookup(fromDomain)
-  dmarc_preflight.runDmarcPreflight(cfg.enforceDmarc, fromDomain, rec)
 
 proc extractRcptDomain(rcpt: string): string =
   # Extracts the domain part from a recipient email address.
@@ -177,6 +176,53 @@ proc resolveTxtRecords*(hostname: string): seq[string] {.gcsafe.} =
       loop.run()
     loop.close()
     results
+
+proc defaultDkimLookup(domain, selector: string): string {.gcsafe.} =
+  ## Fetch the `v=DKIM1` key record via powpow's TXT resolver.
+  selectDkimKeyRecord(resolveTxtRecords(selector & "._domainkey." & domain))
+
+proc decideJointDmarc*(fromDomain, record, envDomain: string,
+                       spf: SpfPreflightResult,
+                       dkimDomains: seq[string],
+                       dkimTempError: bool): DeliveryDecision =
+  ## Pure joint DMARC verdict for outbound preflight (no I/O; unit-testable).
+  ## Sampling is forced on (`pctRoll = 0`): senders do not get to deliver a
+  ## fraction of spoofed mail. Inconclusive DNS (SPF/DKIM temp errors) defers
+  ## instead of refusing so legitimate mail is never bounced on resolver
+  ## trouble; unparsable records are treated as absent (receivers agree).
+  if fromDomain.len == 0: return ddPermFail
+  if record.strip().len == 0: return ddOk
+  if spf.tempError: return ddTempFail
+  let outcome = evaluateDmarc(fromDomain, record, envDomain, spf.pass,
+                              dkimDomains, pctRoll = 0)
+  if outcome.policy == dpAbsent: return ddOk
+  if outcome.policy == dpNone: return ddOk
+  if outcome.aligned: return ddOk
+  if not outcome.enforced: return ddOk
+  if dkimTempError: return ddTempFail
+  ddPermFail
+
+proc runDmarcPreflight(req: DeliveryRequest, cfg: MXProviderConfig): DeliveryDecision =
+  if not cfg.enforceDmarc: return ddOk
+  if cfg.dmarcLookup.isNil: return ddTempFail
+
+  let fromDomain = extractMailFromDomain(req.mailFrom)
+  if fromDomain.len == 0: return ddPermFail
+  let rec = cfg.dmarcLookup(fromDomain)
+  if rec.strip().len == 0: return ddOk
+
+  # SPF disposition for the envelope sender (raw: pass/fail/defer).
+  let spf = querySpfRaw(cfg.spfServer, cfg.spfClientIp, cfg.spfHeloDomain,
+                        req.mailFrom)
+  if spf.tempError: return ddTempFail
+
+  # DKIM signatures already on the message (ours and/or the author's).
+  let lookup: DkimKeyLookup =
+    if cfg.dkimLookup != nil: cfg.dkimLookup else: defaultDkimLookup
+  let dkim = verifyDkimData(req.data, lookup)
+
+  decideJointDmarc(fromDomain, rec, spf.domain, spf, dkim.domains,
+                   dkim.tempError)
 
 type
   MxTxnState = enum
@@ -541,17 +587,17 @@ proc newMXProvider*(cfg = MXProviderConfig(), performSpfPreflight = true, perfor
     if req.rcptTo.len == 0:
       return okOutcome(ddPermFail)
 
-    # when enabled, perform SPF and DMARC preflight checks before attempting
-    # delivery to MX hosts.
-    if performSpfPreflight:
-      let spfDecision = runSpfPreflight(req, cfg)
-      if spfDecision != ddOk:
-        return okOutcome(spfDecision)
-
-    if performDmarcPreflight:
+    # When DMARC enforcement is active its joint evaluation owns the SPF
+    # verdict: a standalone SPF short-circuit here would refuse SPF-fail +
+    # DKIM-pass mail that DMARC explicitly allows.
+    if performDmarcPreflight and cfg.enforceDmarc:
       let dmarcDecision = runDmarcPreflight(req, cfg)
       if dmarcDecision != ddOk:
         return okOutcome(dmarcDecision)
+    elif performSpfPreflight:
+      let spfDecision = runSpfPreflight(req, cfg)
+      if spfDecision != ddOk:
+        return okOutcome(spfDecision)
 
     # Validate recipients and collect unique domains.
     var domains: seq[string] = @[]

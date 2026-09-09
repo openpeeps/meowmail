@@ -113,6 +113,11 @@ proc loadPrivateKey(pemData: string): EVP_PKEY =
 # ── Canonicalization (RFC 6376 §3.4) ─────────────────────────────────────────
 
 type
+  DkimKeyLookup* = proc(domain, selector: string): string {.closure, gcsafe.}
+    ## Returns the selected `v=DKIM1` TXT record ("" when unavailable).
+    ## Lives here (not in auth/inbound) so both inbound verification and
+    ## outbound preflight can share it without import cycles.
+
   RawHeaderField* = object
     ## A single header field exactly as it appears on the wire, including any
     ## folded continuation lines (CRLF + WSP preserved).
@@ -524,6 +529,64 @@ proc verifyDkimSignature*(fields: seq[RawHeaderField], sigIdx: int, body: string
       (false, tags.domain, "signature mismatch")
   finally:
     EVP_PKEY_free(pkey)
+
+proc verifyDkimData*(rawMessage: string, keyLookup: DkimKeyLookup):
+    tuple[pass: bool, domains: seq[string], tempError: bool, detail: string] =
+  ## Verify the DKIM signatures of a complete raw message. Returns whether
+  ## at least one signature verified, the passing `d=` domains (for DMARC
+  ## alignment), whether verification was inconclusive due to unavailable
+  ## keys (retry later rather than refuse), and a detail string. A nil
+  ## lookup means no key source, so every signature reports key-unavailable.
+  let sep = rawMessage.find("\r\n\r\n")
+  if sep < 0:
+    return (false, @[], false, "no headers")
+  let fields = splitRawHeaders(rawMessage[0 ..< sep])
+  let body = rawMessage[sep + 4 .. ^1]
+  var sigIdxs: seq[int]
+  for i, f in fields:
+    if f.name.toLowerAscii == "dkim-signature":
+      sigIdxs.add(i)
+  if sigIdxs.len == 0:
+    return (false, @[], false, "no signature")
+  var passDomains: seq[string]
+  var passDetail = ""
+  var failDetail = ""
+  var tempDetail = ""
+  var permDetail = ""
+  for sigIdx in sigIdxs:
+    let value = fields[sigIdx].raw.split(":", 1)[^1]
+    let (tok, tags, terr) = parseDkimSigTags(value)
+    if not tok:
+      if permDetail.len == 0: permDetail = terr
+      continue
+    var record = ""
+    if keyLookup != nil:
+      record = keyLookup(tags.domain, tags.selector)
+    if record.len == 0:
+      if tempDetail.len == 0:
+        tempDetail = "header.d=" & tags.domain & "; key unavailable"
+      continue
+    let (kok, pubkeyDer, kerr) = parseDkimKeyRecord(record)
+    if not kok:
+      if failDetail.len == 0:
+        failDetail = "header.d=" & tags.domain & "; " & kerr
+      continue
+    let (valid, domain, verr) = verifyDkimSignature(fields, sigIdx, body, pubkeyDer)
+    if valid:
+      if domain notin passDomains:
+        passDomains.add(domain)
+      if passDetail.len == 0:
+        passDetail = "header.d=" & domain
+    elif failDetail.len == 0:
+      failDetail = "header.d=" & domain & "; " & verr
+  if passDomains.len > 0:
+    (true, passDomains, false, passDetail)
+  elif failDetail.len > 0 or permDetail.len > 0:
+    (false, @[], false, if failDetail.len > 0: failDetail else: permDetail)
+  elif tempDetail.len > 0:
+    (false, @[], true, tempDetail)
+  else:
+    (false, @[], false, "no signature")
 
 proc destroy*(key: DkimKey) =
   ## Free the private key resources.

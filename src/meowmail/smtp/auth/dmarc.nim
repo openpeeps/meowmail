@@ -1,10 +1,9 @@
 ## MeowMail — Inbound DMARC evaluation (RFC 7489).
 ##
-## Native policy evaluator used for inbound mail: it parses the `_dmarc`
+## Native policy evaluator for DMARC (RFC 7489): parses the `_dmarc`
 ## TXT record, checks SPF/DKIM alignment against the From domain, applies
-## sampling (pct=) and returns the disposition. Outbound preflight keeps
-## using libopendmarc (`dmarc_preflight.nim`); this module is for reporting
-## and enforcing policy on received messages.
+## sampling (pct=) and returns the disposition. Used both for inbound
+## reporting/enforcement and for the outbound preflight joint decision.
 
 import std/[strutils, random]
 
