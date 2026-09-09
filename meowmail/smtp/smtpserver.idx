@@ -22,14 +22,14 @@ nim	spInternalSendOnly	meowmail/smtp/smtpserver.html#spInternalSendOnly	SMTPSend
 nim	spNoRelay	meowmail/smtp/smtpserver.html#spNoRelay	SMTPSendPolicy.spNoRelay		92
 nim	SMTPSendPolicy	meowmail/smtp/smtpserver.html#SMTPSendPolicy	enum SMTPSendPolicy		92
 nim	SMTPSettings	meowmail/smtp/smtpserver.html#SMTPSettings	object SMTPSettings		100
-nim	SMTPServer	meowmail/smtp/smtpserver.html#SMTPServer	type SMTPServer		148
-nim	SMTPServerError	meowmail/smtp/smtpserver.html#SMTPServerError	object SMTPServerError		190
-nim	smtpHostname	meowmail/smtp/smtpserver.html#smtpHostname	proc smtpHostname(): string		286
-nim	dataOverflow	meowmail/smtp/smtpserver.html#dataOverflow,SMTPSession	proc dataOverflow(s: SMTPSession): bool		401
-nim	bindListener587	meowmail/smtp/smtpserver.html#bindListener587,SMTPServer,Port	proc bindListener587(server: SMTPServer; port: Port = Port(587))		954
-nim	bindListener465	meowmail/smtp/smtpserver.html#bindListener465,SMTPServer,Port	proc bindListener465(server: SMTPServer; port: Port = Port(465))		968
-nim	enableMxDelivery	meowmail/smtp/smtpserver.html#enableMxDelivery,SMTPServer	proc enableMxDelivery(server: SMTPServer; cfg = MXProviderConfig())		984
-nim	opensslLastError	meowmail/smtp/smtpserver.html#opensslLastError	proc opensslLastError(): string		1001
-nim	setupTlsCtx	meowmail/smtp/smtpserver.html#setupTlsCtx,SMTPServer,string,string	proc setupTlsCtx(server: SMTPServer; certPath, keyPath: string): bool		1005
-nim	newSMTPServer	meowmail/smtp/smtpserver.html#newSMTPServer,SMTPSettings	proc newSMTPServer(settings: SMTPSettings): SMTPServer		1017
-nim	start	meowmail/smtp/smtpserver.html#start,SMTPServer	proc start(server: SMTPServer)		1135
+nim	SMTPServer	meowmail/smtp/smtpserver.html#SMTPServer	type SMTPServer		154
+nim	SMTPServerError	meowmail/smtp/smtpserver.html#SMTPServerError	object SMTPServerError		196
+nim	smtpHostname	meowmail/smtp/smtpserver.html#smtpHostname	proc smtpHostname(): string		292
+nim	dataOverflow	meowmail/smtp/smtpserver.html#dataOverflow,SMTPSession	proc dataOverflow(s: SMTPSession): bool		407
+nim	bindListener587	meowmail/smtp/smtpserver.html#bindListener587,SMTPServer,Port	proc bindListener587(server: SMTPServer; port: Port = Port(587))		969
+nim	bindListener465	meowmail/smtp/smtpserver.html#bindListener465,SMTPServer,Port	proc bindListener465(server: SMTPServer; port: Port = Port(465))		983
+nim	enableMxDelivery	meowmail/smtp/smtpserver.html#enableMxDelivery,SMTPServer	proc enableMxDelivery(server: SMTPServer; cfg = MXProviderConfig())		999
+nim	opensslLastError	meowmail/smtp/smtpserver.html#opensslLastError	proc opensslLastError(): string		1015
+nim	setupTlsCtx	meowmail/smtp/smtpserver.html#setupTlsCtx,SMTPServer,string,string	proc setupTlsCtx(server: SMTPServer; certPath, keyPath: string): bool		1019
+nim	newSMTPServer	meowmail/smtp/smtpserver.html#newSMTPServer,SMTPSettings	proc newSMTPServer(settings: SMTPSettings): SMTPServer		1031
+nim	start	meowmail/smtp/smtpserver.html#start,SMTPServer	proc start(server: SMTPServer)		1149

@@ -16,10 +16,10 @@
 <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAA3XAAAN1wFCKJt4AAAAB3RJTUUH4QQQEwksSS9ZWwAAAk1JREFUWMPtll2ITVEUx39nn/O7Y5qR8f05wtCUUr6ZIS++8pEnkZInPImneaCQ5METNdOkeFBKUhMPRIkHKfEuUZSUlGlKPN2TrgfncpvmnntnmlEyq1Z7t89/rf9a6+y99oZxGZf/XeIq61EdtgKXgdXA0xrYAvBjOIF1AI9zvjcC74BSpndrJPkBWDScTF8Aa4E3wDlgHbASaANmVqlcCnwHvgDvgVfAJ+AikAAvgfVZwLnSVZHZaOuKoQi3ZOMi4NkYkpe1p4J7A8BpYAD49hfIy/oqG0+hLomiKP2L5L+1ubn5115S+3OAn4EnwBlgMzCjyt6ZAnQCJ4A7wOs88iRJHvw50HoujuPBoCKwHWiosy8MdfZnAdcHk8dxXFJ3VQbQlCTJvRBCGdRbD4M6uc5glpY3eAihpN5S5w12diSEcCCEcKUO4ljdr15T76ur1FDDLIQQ3qv71EdDOe3Kxj3leRXyk+pxdWnFWod6Wt2bY3de3aSuUHcPBVimHs7mK9WrmeOF6lR1o9qnzskh2ar2qm1qizpfXaPeVGdlmGN5pb09qMxz1Xb1kLqgzn1RyH7JUXW52lr5e/Kqi9qpto7V1atuUzfnARrV7jEib1T76gG2qxdGmXyiekkt1GswPTtek0aBfJp6YySGBfWg2tPQ0FAYgf1stUfdmdcjarbYJEniKIq6gY/Aw+zWHAC+p2labGpqiorFYgGYCEzN7oQdQClN07O1/EfDyGgC0ALMBdYAi4FyK+4H3gLPsxfR1zRNi+NP7nH5J+QntnXe5B5mpfQAAAAASUVORK5CYII=">
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="../../../nimdoc.out.css?v=2.2.10">
+<link rel="stylesheet" type="text/css" href="../../../nimdoc.out.css?v=2.2.12">
 
 <!-- JS -->
-<script type="text/javascript" src="../../../dochack.js?v=2.2.10"></script>
+<script type="text/javascript" src="../../../dochack.js?v=2.2.12"></script>
 </head>
 <body>
   <div class="document" id="documentId">
@@ -66,11 +66,14 @@
   spfDetail*: string         ## e.g. &quot;smtp.mailfrom=alice@example.com&quot;
   dkim*: AuthResult
   dkimDetail*: string        ## e.g. &quot;header.d=example.com&quot;
+  dkimDomains*: seq[string]  ## domains of passing signatures (for DMARC)
   dmarc*: AuthResult
   dmarcDetail*: string
+  dmarcReject*: bool         ## DMARC p=reject applied and enforcement on
   combined*: string          ## Full Authentication-Results header value">AuthHeader</a></li>
 <li><a class="reference" href="#AuthResult" title="AuthResult = enum
   arPass, arFail, arSoftFail, arNeutral, arNone, arTempError, arPermError">AuthResult</a></li>
+<li><a class="reference" href="#DkimKeyLookup" title="DkimKeyLookup = proc (domain, selector: string): string {.closure, gcsafe.}">DkimKeyLookup</a></li>
 
     </ul>
   </details>
@@ -80,11 +83,17 @@
     <summary><a class="reference reference-toplevel" href="#12" id="62">Procs</a></summary>
     <ul class="simple simple-toc-section">
       <ul class="simple nested-toc-section">authenticateMessage
-  <li><a class="reference" href="#authenticateMessage%2Cpointer%2Cstring%2Cstring%2Cseq%5BHeader%5D%2Cstring%2Cstring" title="authenticateMessage(spfServerPtr: pointer; clientIp, heloDomain: string;
+  <li><a class="reference" href="#authenticateMessage%2Cpointer%2Cstring%2Cstring%2Cseq%5BHeader%5D%2Cstring%2Cstring%2Cstring%2CDkimKeyLookup%2CDmarcRecordLookup%2Cstring%2Cstring" title="authenticateMessage(spfServerPtr: pointer; clientIp, heloDomain: string;
                     headers: seq[Header]; body: string;
-                    envelopeFrom: string = &quot;&quot;): AuthHeader">authenticateMessage(spfServerPtr: pointer; clientIp, heloDomain: string;
+                    envelopeFrom: string = &quot;&quot;; rawHeaderBlock: string = &quot;&quot;;
+                    keyLookup: DkimKeyLookup = nil;
+                    dmarcFetch: DmarcRecordLookup = nil; dmarcMode = &quot;report&quot;;
+                    authHost = &quot;meowmail.local&quot;; verifyDkimSigs = true): AuthHeader">authenticateMessage(spfServerPtr: pointer; clientIp, heloDomain: string;
                     headers: seq[Header]; body: string;
-                    envelopeFrom: string = &quot;&quot;): AuthHeader</a></li>
+                    envelopeFrom: string = &quot;&quot;; rawHeaderBlock: string = &quot;&quot;;
+                    keyLookup: DkimKeyLookup = nil;
+                    dmarcFetch: DmarcRecordLookup = nil; dmarcMode = &quot;report&quot;;
+                    authHost = &quot;meowmail.local&quot;; verifyDkimSigs = true): AuthHeader</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">renderAuthHeader
@@ -92,7 +101,9 @@
 
 </ul>
 <ul class="simple nested-toc-section">verifyDkim
-  <li><a class="reference" href="#verifyDkim%2Cseq%5BHeader%5D%2Cstring" title="verifyDkim(headers: seq[Header]; body: string): (AuthResult, string)">verifyDkim(headers: seq[Header]; body: string): (AuthResult, string)</a></li>
+  <li><a class="reference" href="#verifyDkim%2Cseq%5BHeader%5D%2Cstring%2CDkimKeyLookup%2Cstring" title="verifyDkim(headers: seq[Header]; body: string; keyLookup: DkimKeyLookup = nil;
+           rawHeaderBlock: string = &quot;&quot;): (AuthResult, seq[string], string)">verifyDkim(headers: seq[Header]; body: string; keyLookup: DkimKeyLookup = nil;
+           rawHeaderBlock: string = &quot;&quot;): (AuthResult, seq[string], string)</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">verifySpf
@@ -119,7 +130,7 @@
     <div class="section" id="6">
   <h1><a class="toc-backref" href="#6">Imports</a></h1>
   <dl class="item">
-    <a class="reference external" href="../smtpdelivery.html">../smtpdelivery</a>, <a class="reference external" href="../../imap/msgparse.html">../../imap/msgparse</a>
+    <a class="reference external" href="../smtpdelivery.html">../smtpdelivery</a>, <a class="reference external" href="../../imap/msgparse.html">../../imap/msgparse</a>, <a class="reference external" href="../dkim.html">../dkim</a>, <a class="reference external" href="dmarc.html">dmarc</a>, <a class="reference external" href="../mxprovider.html">../mxprovider</a>
   </dl>
 </div>
 <div class="section" id="7">
@@ -131,8 +142,10 @@
   <span class="Identifier">spfDetail</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">string</span>         <span class="Comment">## e.g. &quot;smtp.mailfrom=alice@example.com&quot;</span>
   <span class="Identifier">dkim</span><span class="Operator">*</span><span class="Other">:</span> <a href="#AuthResult"><span class="Identifier">AuthResult</span></a>
   <span class="Identifier">dkimDetail</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">string</span>        <span class="Comment">## e.g. &quot;header.d=example.com&quot;</span>
+  <span class="Identifier">dkimDomains</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span>  <span class="Comment">## domains of passing signatures (for DMARC)</span>
   <span class="Identifier">dmarc</span><span class="Operator">*</span><span class="Other">:</span> <a href="#AuthResult"><span class="Identifier">AuthResult</span></a>
   <span class="Identifier">dmarcDetail</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">string</span>
+  <span class="Identifier">dmarcReject</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span>         <span class="Comment">## DMARC p=reject applied and enforcement on</span>
   <span class="Identifier">combined</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">string</span>          <span class="Comment">## Full Authentication-Results header value</span></pre></dt>
   <dd>
     
@@ -149,6 +162,14 @@
     
   </dd>
 </div>
+<div id="DkimKeyLookup">
+  <dt><pre><a href="#DkimKeyLookup"><span class="Identifier">DkimKeyLookup</span></a> <span class="Other">=</span> <span class="Keyword">proc</span> <span class="Other">(</span><span class="Identifier">domain</span><span class="Other">,</span> <span class="Identifier">selector</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">string</span> {.<span class="Identifier">closure</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">gcsafe</span></span>.}</pre></dt>
+  <dd>
+    
+    Returns the selected <tt class="docutils literal"><span class="pre"><span class="Identifier">v</span><span class="Operator">=</span><span class="Identifier">DKIM1</span></span></tt> TXT record (&quot;&quot; when unavailable).
+    
+  </dd>
+</div>
 
   </dl>
 </div>
@@ -156,15 +177,19 @@
   <h1><a class="toc-backref" href="#12">Procs</a></h1>
   <dl class="item">
     <div id="authenticateMessage-procs-all">
-  <div id="authenticateMessage,pointer,string,string,seq[Header],string,string">
-  <dt><pre><span class="Keyword">proc</span> <a href="#authenticateMessage%2Cpointer%2Cstring%2Cstring%2Cseq%5BHeader%5D%2Cstring%2Cstring"><span class="Identifier">authenticateMessage</span></a><span class="Other">(</span><span class="Identifier">spfServerPtr</span><span class="Other">:</span> <span class="Identifier">pointer</span><span class="Other">;</span> <span class="Identifier">clientIp</span><span class="Other">,</span> <span class="Identifier">heloDomain</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span>
+  <div id="authenticateMessage,pointer,string,string,seq[Header],string,string,string,DkimKeyLookup,DmarcRecordLookup,string,string">
+  <dt><pre><span class="Keyword">proc</span> <a href="#authenticateMessage%2Cpointer%2Cstring%2Cstring%2Cseq%5BHeader%5D%2Cstring%2Cstring%2Cstring%2CDkimKeyLookup%2CDmarcRecordLookup%2Cstring%2Cstring"><span class="Identifier">authenticateMessage</span></a><span class="Other">(</span><span class="Identifier">spfServerPtr</span><span class="Other">:</span> <span class="Identifier">pointer</span><span class="Other">;</span> <span class="Identifier">clientIp</span><span class="Other">,</span> <span class="Identifier">heloDomain</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span>
                          <span class="Identifier">headers</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="../../imap/msgparse.html#Header"><span class="Identifier">Header</span></a><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">body</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span>
-                         <span class="Identifier">envelopeFrom</span><span class="Other">:</span> <span class="Identifier">string</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">)</span><span class="Other">:</span> <a href="#AuthHeader"><span class="Identifier">AuthHeader</span></a> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
-    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+                         <span class="Identifier">envelopeFrom</span><span class="Other">:</span> <span class="Identifier">string</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span> <span class="Identifier">rawHeaderBlock</span><span class="Other">:</span> <span class="Identifier">string</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">;</span>
+                         <span class="Identifier">keyLookup</span><span class="Other">:</span> <a href="#DkimKeyLookup"><span class="Identifier">DkimKeyLookup</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">;</span>
+                         <span class="Identifier">dmarcFetch</span><span class="Other">:</span> <a href="../mxprovider.html#DmarcRecordLookup"><span class="Identifier">DmarcRecordLookup</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">;</span>
+                         <span class="Identifier">dmarcMode</span> <span class="Other">=</span> <span class="StringLit">&quot;report&quot;</span><span class="Other">;</span> <span class="Identifier">authHost</span> <span class="Other">=</span> <span class="StringLit">&quot;meowmail.local&quot;</span><span class="Other">;</span>
+                         <span class="Identifier">verifyDkimSigs</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">)</span><span class="Other">:</span> <a href="#AuthHeader"><span class="Identifier">AuthHeader</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">TimeEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
     <p>Run all authentication checks on an incoming message and build the Authentication-Results header value.</p>
-<p>SPF is evaluated against the envelope sender (RFC 7208), falling back to the From: domain only when the envelope is unavailable. DKIM/DMARC are reported honestly: signatures found in the message are marked as unverified until full cryptographic verification lands (Phase B), and DMARC is omitted entirely since policy evaluation requires the _dmarc DNS record.</p>
+<p>SPF is evaluated against the envelope sender (RFC 7208), falling back to the From: domain only when the envelope is unavailable. DKIM signatures are cryptographically verified (RFC 6376) and DMARC is evaluated (RFC 7489) with SPF/DKIM alignment. <tt class="docutils literal"><span class="pre"><span class="Identifier">dmarcMode</span></span></tt> controls enforcement: &quot;report&quot; never rejects, &quot;quarantine&quot; accepts and reports, &quot;reject&quot; marks <tt class="docutils literal"><span class="pre"><span class="Identifier">dmarcReject</span></span></tt> when a <tt class="docutils literal"><span class="pre"><span class="Identifier">p</span><span class="Operator">=</span><span class="Identifier">reject</span></span></tt> policy applies so the caller can refuse the message.</p>
 
     
   </dd>
@@ -184,18 +209,16 @@
 
 </div>
 <div id="verifyDkim-procs-all">
-  <div id="verifyDkim,seq[Header],string">
-  <dt><pre><span class="Keyword">proc</span> <a href="#verifyDkim%2Cseq%5BHeader%5D%2Cstring"><span class="Identifier">verifyDkim</span></a><span class="Other">(</span><span class="Identifier">headers</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="../../imap/msgparse.html#Header"><span class="Identifier">Header</span></a><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">body</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <span class="Other">(</span><a href="#AuthResult"><span class="Identifier">AuthResult</span></a><span class="Other">,</span> <span class="Identifier">string</span><span class="Other">)</span> {.
-    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <div id="verifyDkim,seq[Header],string,DkimKeyLookup,string">
+  <dt><pre><span class="Keyword">proc</span> <a href="#verifyDkim%2Cseq%5BHeader%5D%2Cstring%2CDkimKeyLookup%2Cstring"><span class="Identifier">verifyDkim</span></a><span class="Other">(</span><span class="Identifier">headers</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="../../imap/msgparse.html#Header"><span class="Identifier">Header</span></a><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">body</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span>
+                <span class="Identifier">keyLookup</span><span class="Other">:</span> <a href="#DkimKeyLookup"><span class="Identifier">DkimKeyLookup</span></a> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">;</span> <span class="Identifier">rawHeaderBlock</span><span class="Other">:</span> <span class="Identifier">string</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">)</span><span class="Other">:</span> <span class="Other">(</span>
+    <a href="#AuthResult"><span class="Identifier">AuthResult</span></a><span class="Other">,</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">string</span><span class="Other">)</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
+                                       <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">TimeEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">]</span><span class="Other">,</span>
+                                       <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    <p>Verify DKIM signature(s) in the message headers. Returns (result, detail string for the first valid/invalid signature).</p>
-<p>This is a simplified verifier that checks:</p>
-<ol class="simple"><li>A DKIM-Signature header exists</li>
-<li>The d= domain and s= selector are present</li>
-<li>The bh= (body hash) matches the actual body hash</li>
-</ol>
-<p>Full RSA signature verification would require DNS lookup + key retrieval. This implementation validates the body hash and structural integrity.</p>
+    <p>Cryptographically verify DKIM signature(s) in the message headers. Returns (result, passing domains, detail string).</p>
+<p>The raw header block is preferred: <tt class="docutils literal"><span class="pre"><span class="Identifier">simple</span></span></tt> canonicalization is only byte-exact when the original wire bytes are available. Without it the fields are rebuilt from parsed headers, which is exact for <tt class="docutils literal"><span class="pre"><span class="Identifier">relaxed</span></span></tt> but best-effort for <tt class="docutils literal"><span class="pre"><span class="Identifier">simple</span></span></tt>.</p>
 
     
   </dd>
@@ -224,7 +247,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-08-28 13:27:48 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-09-09 19:17:47 UTC</small>
       </div>
     </div>
   </div>
