@@ -1,2 +1,5 @@
 nimTitle	spf_preflight	meowmail/smtp/auth/spf_preflight.html	module meowmail/smtp/auth/spf_preflight		0
-nim	runSpfPreflight	meowmail/smtp/auth/spf_preflight.html#runSpfPreflight,bool,pointer,string,string,string	proc runSpfPreflight(enforce: bool; spfServerPtr: pointer; spfClientIp: string;\n                spfHeloDomain: string; mailFrom: string): DeliveryDecision		5
+nim	SpfPreflightResult	meowmail/smtp/auth/spf_preflight.html#SpfPreflightResult	object SpfPreflightResult		6
+nim	extractSpfDomain	meowmail/smtp/auth/spf_preflight.html#extractSpfDomain,string	proc extractSpfDomain(mailFrom: string): string		18
+nim	querySpfRaw	meowmail/smtp/auth/spf_preflight.html#querySpfRaw,pointer,string,string,string	proc querySpfRaw(spfServerPtr: pointer; spfClientIp, spfHeloDomain, mailFrom: string): SpfPreflightResult		27
+nim	runSpfPreflight	meowmail/smtp/auth/spf_preflight.html#runSpfPreflight,bool,pointer,string,string,string	proc runSpfPreflight(enforce: bool; spfServerPtr: pointer; spfClientIp: string;\n                spfHeloDomain: string; mailFrom: string): DeliveryDecision		75

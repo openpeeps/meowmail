@@ -68,6 +68,7 @@
   bodyLength*: int
   headerCanon*: string
   bodyCanon*: string">DkimKey</a></li>
+<li><a class="reference" href="#DkimKeyLookup" title="DkimKeyLookup = proc (domain, selector: string): string {.closure, gcsafe.}">DkimKeyLookup</a></li>
 <li><a class="reference" href="#DkimSignature" title="DkimSignature = object
   headerCanon*: string
   bodyCanon*: string
@@ -186,6 +187,12 @@
   <li><a class="reference" href="#splitRawHeaders%2Cstring" title="splitRawHeaders(headerBlock: string): seq[RawHeaderField]">splitRawHeaders(headerBlock: string): seq[RawHeaderField]</a></li>
 
 </ul>
+<ul class="simple nested-toc-section">verifyDkimData
+  <li><a class="reference" href="#verifyDkimData%2Cstring%2CDkimKeyLookup" title="verifyDkimData(rawMessage: string; keyLookup: DkimKeyLookup): tuple[pass: bool,
+    domains: seq[string], tempError: bool, detail: string]">verifyDkimData(rawMessage: string; keyLookup: DkimKeyLookup): tuple[pass: bool,
+    domains: seq[string], tempError: bool, detail: string]</a></li>
+
+</ul>
 <ul class="simple nested-toc-section">verifyDkimSignature
   <li><a class="reference" href="#verifyDkimSignature%2Cseq%5BRawHeaderField%5D%2Cint%2Cstring%2Cstring" title="verifyDkimSignature(fields: seq[RawHeaderField]; sigIdx: int; body: string;
                     pubkeyDer: string): tuple[valid: bool, domain, err: string]">verifyDkimSignature(fields: seq[RawHeaderField]; sigIdx: int; body: string;
@@ -227,6 +234,14 @@
   <dd>
     
     
+    
+  </dd>
+</div>
+<div id="DkimKeyLookup">
+  <dt><pre><a href="#DkimKeyLookup"><span class="Identifier">DkimKeyLookup</span></a> <span class="Other">=</span> <span class="Keyword">proc</span> <span class="Other">(</span><span class="Identifier">domain</span><span class="Other">,</span> <span class="Identifier">selector</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">string</span> {.<span class="Identifier">closure</span><span class="Other">,</span> <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">gcsafe</span></span>.}</pre></dt>
+  <dd>
+    
+    Returns the selected <tt class="docutils literal"><span class="pre"><span class="Identifier">v</span><span class="Operator">=</span><span class="Identifier">DKIM1</span></span></tt> TXT record (&quot;&quot; when unavailable). Lives here (not in auth/inbound) so both inbound verification and outbound preflight can share it without import cycles.
     
   </dd>
 </div>
@@ -512,6 +527,19 @@
 </div>
 
 </div>
+<div id="verifyDkimData-procs-all">
+  <div id="verifyDkimData,string,DkimKeyLookup">
+  <dt><pre><span class="Keyword">proc</span> <a href="#verifyDkimData%2Cstring%2CDkimKeyLookup"><span class="Identifier">verifyDkimData</span></a><span class="Other">(</span><span class="Identifier">rawMessage</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">keyLookup</span><span class="Other">:</span> <a href="#DkimKeyLookup"><span class="Identifier">DkimKeyLookup</span></a><span class="Other">)</span><span class="Other">:</span> <span class="Keyword">tuple</span><span class="Other">[</span>
+    <span class="Identifier">pass</span><span class="Other">:</span> <span class="Identifier">bool</span><span class="Other">,</span> <span class="Identifier">domains</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tempError</span><span class="Other">:</span> <span class="Identifier">bool</span><span class="Other">,</span> <span class="Identifier">detail</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">]</span> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">TimeEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Verify the DKIM signatures of a complete raw message. Returns whether at least one signature verified, the passing <tt class="docutils literal"><span class="pre"><span class="Identifier">d</span><span class="Operator">=</span></span></tt> domains (for DMARC alignment), whether verification was inconclusive due to unavailable keys (retry later rather than refuse), and a detail string. A nil lookup means no key source, so every signature reports key-unavailable.
+    
+  </dd>
+</div>
+
+</div>
 <div id="verifyDkimSignature-procs-all">
   <div id="verifyDkimSignature,seq[RawHeaderField],int,string,string">
   <dt><pre><span class="Keyword">proc</span> <a href="#verifyDkimSignature%2Cseq%5BRawHeaderField%5D%2Cint%2Cstring%2Cstring"><span class="Identifier">verifyDkimSignature</span></a><span class="Other">(</span><span class="Identifier">fields</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="#RawHeaderField"><span class="Identifier">RawHeaderField</span></a><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">sigIdx</span><span class="Other">:</span> <span class="Identifier">int</span><span class="Other">;</span> <span class="Identifier">body</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span>
@@ -535,7 +563,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-09-09 19:17:47 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-09-09 19:52:16 UTC</small>
       </div>
     </div>
   </div>

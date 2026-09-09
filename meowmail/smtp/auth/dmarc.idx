@@ -1,14 +1,14 @@
 nimTitle	dmarc	meowmail/smtp/auth/dmarc.html	module meowmail/smtp/auth/dmarc		0
-nim	dpNone	meowmail/smtp/auth/dmarc.html#dpNone	DmarcPolicy.dpNone		12
-nim	dpQuarantine	meowmail/smtp/auth/dmarc.html#dpQuarantine	DmarcPolicy.dpQuarantine		12
-nim	dpReject	meowmail/smtp/auth/dmarc.html#dpReject	DmarcPolicy.dpReject		12
-nim	dpAbsent	meowmail/smtp/auth/dmarc.html#dpAbsent	DmarcPolicy.dpAbsent		12
-nim	DmarcPolicy	meowmail/smtp/auth/dmarc.html#DmarcPolicy	enum DmarcPolicy		12
-nim	DmarcRecord	meowmail/smtp/auth/dmarc.html#DmarcRecord	object DmarcRecord		18
-nim	DmarcOutcome	meowmail/smtp/auth/dmarc.html#DmarcOutcome	object DmarcOutcome		28
-nim	selectDmarcRecord	meowmail/smtp/auth/dmarc.html#selectDmarcRecord,seq[string]	proc selectDmarcRecord(records: seq[string]): string		37
-nim	parseDmarcPolicy	meowmail/smtp/auth/dmarc.html#parseDmarcPolicy,string	proc parseDmarcPolicy(s: string): tuple[ok: bool, p: DmarcPolicy]		44
-nim	dmarcPolicyStr	meowmail/smtp/auth/dmarc.html#dmarcPolicyStr,DmarcPolicy	proc dmarcPolicyStr(p: DmarcPolicy): string		51
-nim	parseDmarcRecord	meowmail/smtp/auth/dmarc.html#parseDmarcRecord,string	proc parseDmarcRecord(record: string): tuple[ok: bool, rec: DmarcRecord, err: string]		59
-nim	domainsAlign	meowmail/smtp/auth/dmarc.html#domainsAlign,string,string,bool	proc domainsAlign(a, b: string; strict: bool): bool		107
-nim	evaluateDmarc	meowmail/smtp/auth/dmarc.html#evaluateDmarc,string,string,string,bool,seq[string],int	proc evaluateDmarc(fromDomain: string; record: string; envelopeFromDomain: string;\n              spfPass: bool; dkimPassDomains: seq[string]; isSubdomain = false;\n              pctRoll = -1): DmarcOutcome		118
+nim	dpNone	meowmail/smtp/auth/dmarc.html#dpNone	DmarcPolicy.dpNone		11
+nim	dpQuarantine	meowmail/smtp/auth/dmarc.html#dpQuarantine	DmarcPolicy.dpQuarantine		11
+nim	dpReject	meowmail/smtp/auth/dmarc.html#dpReject	DmarcPolicy.dpReject		11
+nim	dpAbsent	meowmail/smtp/auth/dmarc.html#dpAbsent	DmarcPolicy.dpAbsent		11
+nim	DmarcPolicy	meowmail/smtp/auth/dmarc.html#DmarcPolicy	enum DmarcPolicy		11
+nim	DmarcRecord	meowmail/smtp/auth/dmarc.html#DmarcRecord	object DmarcRecord		17
+nim	DmarcOutcome	meowmail/smtp/auth/dmarc.html#DmarcOutcome	object DmarcOutcome		27
+nim	selectDmarcRecord	meowmail/smtp/auth/dmarc.html#selectDmarcRecord,seq[string]	proc selectDmarcRecord(records: seq[string]): string		36
+nim	parseDmarcPolicy	meowmail/smtp/auth/dmarc.html#parseDmarcPolicy,string	proc parseDmarcPolicy(s: string): tuple[ok: bool, p: DmarcPolicy]		43
+nim	dmarcPolicyStr	meowmail/smtp/auth/dmarc.html#dmarcPolicyStr,DmarcPolicy	proc dmarcPolicyStr(p: DmarcPolicy): string		50
+nim	parseDmarcRecord	meowmail/smtp/auth/dmarc.html#parseDmarcRecord,string	proc parseDmarcRecord(record: string): tuple[ok: bool, rec: DmarcRecord, err: string]		58
+nim	domainsAlign	meowmail/smtp/auth/dmarc.html#domainsAlign,string,string,bool	proc domainsAlign(a, b: string; strict: bool): bool		106
+nim	evaluateDmarc	meowmail/smtp/auth/dmarc.html#evaluateDmarc,string,string,string,bool,seq[string],int	proc evaluateDmarc(fromDomain: string; record: string; envelopeFromDomain: string;\n              spfPass: bool; dkimPassDomains: seq[string]; isSubdomain = false;\n              pctRoll = -1): DmarcOutcome		117

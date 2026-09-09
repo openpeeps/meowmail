@@ -28,7 +28,7 @@
     <label for="nav-toggle" id="nav-overlay"></label>
     <div class="container">
       <h1 class="title">Index</h1>
-      Modules: <a href="index.html">meowmail</a>, <a href="meowmail/cli/commands.html">meowmail/cli/commands</a>, <a href="meowmail/cli/config.html">meowmail/cli/config</a>, <a href="meowmail/imap/imapserver.html">meowmail/imap/imapserver</a>, <a href="meowmail/imap/mailstore.html">meowmail/imap/mailstore</a>, <a href="meowmail/imap/msgparse.html">meowmail/imap/msgparse</a>, <a href="meowmail/jmap/core.html">meowmail/jmap/core</a>, <a href="meowmail/jmap/emails.html">meowmail/jmap/emails</a>, <a href="meowmail/jmap/mailboxes.html">meowmail/jmap/mailboxes</a>, <a href="meowmail/jmap/server.html">meowmail/jmap/server</a>, <a href="meowmail/jmap/submissions.html">meowmail/jmap/submissions</a>, <a href="meowmail/jmap/types.html">meowmail/jmap/types</a>, <a href="meowmail/restapi/admin.html">meowmail/restapi/admin</a>, <a href="meowmail/smtp/address.html">meowmail/smtp/address</a>, <a href="meowmail/smtp/auth/dmarc.html">meowmail/smtp/auth/dmarc</a>, <a href="meowmail/smtp/auth/dmarc_preflight.html">meowmail/smtp/auth/dmarc_preflight</a>, <a href="meowmail/smtp/auth/inbound.html">meowmail/smtp/auth/inbound</a>, <a href="meowmail/smtp/auth/spf_preflight.html">meowmail/smtp/auth/spf_preflight</a>, <a href="meowmail/smtp/bounce.html">meowmail/smtp/bounce</a>, <a href="meowmail/smtp/dkim.html">meowmail/smtp/dkim</a>, <a href="meowmail/smtp/mxprovider.html">meowmail/smtp/mxprovider</a>, <a href="meowmail/smtp/queue.html">meowmail/smtp/queue</a>, <a href="meowmail/smtp/ratelimit.html">meowmail/smtp/ratelimit</a>, <a href="meowmail/smtp/smtpauth.html">meowmail/smtp/smtpauth</a>, <a href="meowmail/smtp/smtpdelivery.html">meowmail/smtp/smtpdelivery</a>, <a href="meowmail/smtp/smtpserver.html">meowmail/smtp/smtpserver</a>, <a href="meowmail/utils/logger.html">meowmail/utils/logger</a>, <a href="meowmail/utils/records_generator.html">meowmail/utils/records_generator</a>.<br/><p /><h2>API symbols</h2>
+      Modules: <a href="index.html">meowmail</a>, <a href="meowmail/cli/commands.html">meowmail/cli/commands</a>, <a href="meowmail/cli/config.html">meowmail/cli/config</a>, <a href="meowmail/imap/imapserver.html">meowmail/imap/imapserver</a>, <a href="meowmail/imap/mailstore.html">meowmail/imap/mailstore</a>, <a href="meowmail/imap/msgparse.html">meowmail/imap/msgparse</a>, <a href="meowmail/jmap/core.html">meowmail/jmap/core</a>, <a href="meowmail/jmap/emails.html">meowmail/jmap/emails</a>, <a href="meowmail/jmap/mailboxes.html">meowmail/jmap/mailboxes</a>, <a href="meowmail/jmap/server.html">meowmail/jmap/server</a>, <a href="meowmail/jmap/submissions.html">meowmail/jmap/submissions</a>, <a href="meowmail/jmap/types.html">meowmail/jmap/types</a>, <a href="meowmail/restapi/admin.html">meowmail/restapi/admin</a>, <a href="meowmail/smtp/address.html">meowmail/smtp/address</a>, <a href="meowmail/smtp/auth/dmarc.html">meowmail/smtp/auth/dmarc</a>, <a href="meowmail/smtp/auth/inbound.html">meowmail/smtp/auth/inbound</a>, <a href="meowmail/smtp/auth/spf_preflight.html">meowmail/smtp/auth/spf_preflight</a>, <a href="meowmail/smtp/bounce.html">meowmail/smtp/bounce</a>, <a href="meowmail/smtp/dkim.html">meowmail/smtp/dkim</a>, <a href="meowmail/smtp/mxprovider.html">meowmail/smtp/mxprovider</a>, <a href="meowmail/smtp/queue.html">meowmail/smtp/queue</a>, <a href="meowmail/smtp/ratelimit.html">meowmail/smtp/ratelimit</a>, <a href="meowmail/smtp/smtpauth.html">meowmail/smtp/smtpauth</a>, <a href="meowmail/smtp/smtpdelivery.html">meowmail/smtp/smtpdelivery</a>, <a href="meowmail/smtp/smtpserver.html">meowmail/smtp/smtpserver</a>, <a href="meowmail/utils/logger.html">meowmail/utils/logger</a>, <a href="meowmail/utils/records_generator.html">meowmail/utils/records_generator</a>.<br/><p /><h2>API symbols</h2>
 <dl><dt><a name="%60%24%60" href="#%60%24%60"><span>`$`:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="logger: proc `$`(lvl: LogLevel): string" href="meowmail/utils/logger.html#%24%2CLogLevel">logger: proc `$`(lvl: LogLevel): string</a></li>
@@ -269,6 +269,12 @@
 <li><a class="reference external"
           data-doc-search-tag="logger: template debug(self: Logger; message = &quot;&quot;; autoNewLine = true)" href="meowmail/utils/logger.html#debug.t%2CLogger%2Cstring">logger: template debug(self: Logger; message = &quot;&quot;; autoNewLine = true)</a></li>
           </ul></dd>
+<dt><a name="decideJointDmarc" href="#decideJointDmarc"><span>decideJointDmarc:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mxprovider: proc decideJointDmarc(fromDomain, record, envDomain: string; spf: SpfPreflightResult;
+                 dkimDomains: seq[string]; dkimTempError: bool): DeliveryDecision" href="meowmail/smtp/mxprovider.html#decideJointDmarc%2Cstring%2Cstring%2Cstring%2CSpfPreflightResult%2Cseq%5Bstring%5D%2Cbool">mxprovider: proc decideJointDmarc(fromDomain, record, envDomain: string; spf: SpfPreflightResult;
+                 dkimDomains: seq[string]; dkimTempError: bool): DeliveryDecision</a></li>
+          </ul></dd>
 <dt><a name="decodeMimeWords" href="#decodeMimeWords"><span>decodeMimeWords:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="msgparse: proc decodeMimeWords(s: string): string" href="meowmail/imap/msgparse.html#decodeMimeWords%2Cstring">msgparse: proc decodeMimeWords(s: string): string</a></li>
@@ -331,7 +337,7 @@
           </ul></dd>
 <dt><a name="DkimKeyLookup" href="#DkimKeyLookup"><span>DkimKeyLookup:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="inbound: type DkimKeyLookup" href="meowmail/smtp/auth/inbound.html#DkimKeyLookup">inbound: type DkimKeyLookup</a></li>
+          data-doc-search-tag="dkim: type DkimKeyLookup" href="meowmail/smtp/dkim.html#DkimKeyLookup">dkim: type DkimKeyLookup</a></li>
           </ul></dd>
 <dt><a name="dkimRecordName" href="#dkimRecordName"><span>dkimRecordName:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -557,6 +563,10 @@
 <li><a class="reference external"
           data-doc-search-tag="mailstore: proc expungeMessage(mb: Mailbox; msg: MailMessage)" href="meowmail/imap/mailstore.html#expungeMessage%2CMailbox%2CMailMessage">mailstore: proc expungeMessage(mb: Mailbox; msg: MailMessage)</a></li>
           </ul></dd>
+<dt><a name="extractSpfDomain" href="#extractSpfDomain"><span>extractSpfDomain:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="spf_preflight: proc extractSpfDomain(mailFrom: string): string" href="meowmail/smtp/auth/spf_preflight.html#extractSpfDomain%2Cstring">spf_preflight: proc extractSpfDomain(mailFrom: string): string</a></li>
+          </ul></dd>
 <dt><a name="extractUser" href="#extractUser"><span>extractUser:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="mailstore: proc extractUser(rcpt: string): string" href="meowmail/imap/mailstore.html#extractUser%2Cstring">mailstore: proc extractUser(rcpt: string): string</a></li>
@@ -735,7 +745,8 @@
                      spfClientIp: string = &quot;127.0.0.1&quot;;
                      spfHeloDomain: string = &quot;localhost&quot;;
                      enforceDmarc: bool = false;
-                     dmarcLookup: DmarcRecordLookup = nil): MXProviderConfig" href="meowmail/smtp/mxprovider.html#initMXProviderConfig%2Cstring%2Cint%2Cint%2Cbool%2Cint%2Cbool%2Cbool%2Cpointer%2Cstring%2Cstring%2Cbool%2CDmarcRecordLookup">mxprovider: proc initMXProviderConfig(heloName: string; connectTimeoutMs: int = 7000;
+                     dmarcLookup: DmarcRecordLookup = nil;
+                     dkimLookup: DkimKeyLookup = nil): MXProviderConfig" href="meowmail/smtp/mxprovider.html#initMXProviderConfig%2Cstring%2Cint%2Cint%2Cbool%2Cint%2Cbool%2Cbool%2Cpointer%2Cstring%2Cstring%2Cbool%2CDmarcRecordLookup%2CDkimKeyLookup">mxprovider: proc initMXProviderConfig(heloName: string; connectTimeoutMs: int = 7000;
                      commandTimeoutMs: int = 10000;
                      requireStartTls: bool = false;
                      maxMxHostsPerDomain: int = 5; debug: bool = false;
@@ -743,7 +754,8 @@
                      spfClientIp: string = &quot;127.0.0.1&quot;;
                      spfHeloDomain: string = &quot;localhost&quot;;
                      enforceDmarc: bool = false;
-                     dmarcLookup: DmarcRecordLookup = nil): MXProviderConfig</a></li>
+                     dmarcLookup: DmarcRecordLookup = nil;
+                     dkimLookup: DkimKeyLookup = nil): MXProviderConfig</a></li>
           </ul></dd>
 <dt><a name="InstantiationInfo" href="#InstantiationInfo"><span>InstantiationInfo:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -1177,6 +1189,10 @@
 <li><a class="reference external"
           data-doc-search-tag="queue: QueueStatus.qsFailed" href="meowmail/smtp/queue.html#qsFailed">queue: QueueStatus.qsFailed</a></li>
           </ul></dd>
+<dt><a name="querySpfRaw" href="#querySpfRaw"><span>querySpfRaw:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="spf_preflight: proc querySpfRaw(spfServerPtr: pointer; spfClientIp, spfHeloDomain, mailFrom: string): SpfPreflightResult" href="meowmail/smtp/auth/spf_preflight.html#querySpfRaw%2Cpointer%2Cstring%2Cstring%2Cstring">spf_preflight: proc querySpfRaw(spfServerPtr: pointer; spfClientIp, spfHeloDomain, mailFrom: string): SpfPreflightResult</a></li>
+          </ul></dd>
 <dt><a name="Queue" href="#Queue"><span>Queue:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="queue: type Queue" href="meowmail/smtp/queue.html#Queue">queue: type Queue</a></li>
@@ -1300,10 +1316,6 @@
 <dt><a name="RSET" href="#RSET"><span>RSET:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="smtpserver: SMTPCommand.RSET" href="meowmail/smtp/smtpserver.html#RSET">smtpserver: SMTPCommand.RSET</a></li>
-          </ul></dd>
-<dt><a name="runDmarcPreflight" href="#runDmarcPreflight"><span>runDmarcPreflight:</span></a></dt><dd><ul class="simple">
-<li><a class="reference external"
-          data-doc-search-tag="dmarc_preflight: proc runDmarcPreflight(enforce: bool; fromDomain: string; record: string): DeliveryDecision" href="meowmail/smtp/auth/dmarc_preflight.html#runDmarcPreflight%2Cbool%2Cstring%2Cstring">dmarc_preflight: proc runDmarcPreflight(enforce: bool; fromDomain: string; record: string): DeliveryDecision</a></li>
           </ul></dd>
 <dt><a name="runQueue" href="#runQueue"><span>runQueue:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -1573,6 +1585,10 @@
 <li><a class="reference external"
           data-doc-search-tag="commands: proc spfCommand(v: Values)" href="meowmail/cli/commands.html#spfCommand%2CValues">commands: proc spfCommand(v: Values)</a></li>
           </ul></dd>
+<dt><a name="SpfPreflightResult" href="#SpfPreflightResult"><span>SpfPreflightResult:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="spf_preflight: object SpfPreflightResult" href="meowmail/smtp/auth/spf_preflight.html#SpfPreflightResult">spf_preflight: object SpfPreflightResult</a></li>
+          </ul></dd>
 <dt><a name="spInternalSendOnly" href="#spInternalSendOnly"><span>spInternalSendOnly:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="smtpserver: SMTPSendPolicy.spInternalSendOnly" href="meowmail/smtp/smtpserver.html#spInternalSendOnly">smtpserver: SMTPSendPolicy.spInternalSendOnly</a></li>
@@ -1679,6 +1695,12 @@
            rawHeaderBlock: string = &quot;&quot;): (AuthResult, seq[string], string)" href="meowmail/smtp/auth/inbound.html#verifyDkim%2Cseq%5BHeader%5D%2Cstring%2CDkimKeyLookup%2Cstring">inbound: proc verifyDkim(headers: seq[Header]; body: string; keyLookup: DkimKeyLookup = nil;
            rawHeaderBlock: string = &quot;&quot;): (AuthResult, seq[string], string)</a></li>
           </ul></dd>
+<dt><a name="verifyDkimData" href="#verifyDkimData"><span>verifyDkimData:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="dkim: proc verifyDkimData(rawMessage: string; keyLookup: DkimKeyLookup): tuple[pass: bool,
+    domains: seq[string], tempError: bool, detail: string]" href="meowmail/smtp/dkim.html#verifyDkimData%2Cstring%2CDkimKeyLookup">dkim: proc verifyDkimData(rawMessage: string; keyLookup: DkimKeyLookup): tuple[pass: bool,
+    domains: seq[string], tempError: bool, detail: string]</a></li>
+          </ul></dd>
 <dt><a name="verifyDkimSignature" href="#verifyDkimSignature"><span>verifyDkimSignature:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="dkim: proc verifyDkimSignature(fields: seq[RawHeaderField]; sigIdx: int; body: string;
@@ -1707,7 +1729,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-09-09 19:17:47 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-09-09 19:52:17 UTC</small>
       </div>
     </div>
   </div>
