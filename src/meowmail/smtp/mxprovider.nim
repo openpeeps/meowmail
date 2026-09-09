@@ -33,7 +33,7 @@ type
     host*: string
       ## The hostname of the MX server to which mail should be delivered.
 
-  DmarcRecordLookup* = proc(domain: string): string {.gcsafe.}
+  DmarcRecordLookup* = proc(domain: string): string {.closure, gcsafe.}
 
   MXProviderConfig* = object
     heloName*: string = "localhost"

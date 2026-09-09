@@ -11,7 +11,7 @@ from std/net import Port, `$`
 import powpow
 import powpow/net/tlsapi
 import ./smtpauth, ./smtpdelivery, ./mxprovider, ./dkim, ./queue, ./bounce, ./ratelimit, ./address
-import ./auth/inbound
+import ./auth/[inbound, dmarc]
 import ../imap/msgparse
 import pkg/spf
 import ../imap/mailstore
@@ -130,6 +130,12 @@ type
       ## When true, validate the sender domain has MX/A records at MAIL FROM time.
     checkRcptDomain*: bool = false
       ## When true, validate recipient domain has MX/A records at RCPT TO time.
+    dkimVerify*: bool = true
+      ## When true, cryptographically verify DKIM signatures on inbound mail.
+    dmarcMode*: string = "report"
+      ## Inbound DMARC enforcement: "report" (never reject), "quarantine"
+      ## (accept and report), "reject" (refuse messages failing a p=reject
+      ## policy with 550).
     msgPerHour*: int = 100
       ## Max messages per IP per hour (0 = unlimited).
     msgPerDay*: int = 1000
@@ -586,9 +592,18 @@ proc handleSmtpLine(conn: Connection, server: SMTPServer, line: string) =
               if colon > 0:
                 headers.add((name: hline[0 ..< colon], value: hline[colon + 1 .. ^1].strip()))
             let clientIp = conn.getClientIp()
+            var dmarcMode = server.settings.dmarcMode.strip().toLowerAscii()
+            if dmarcMode notin ["report", "quarantine", "reject"]:
+              dmarcMode = "report"
             let auth = authenticateMessage(server.spfServer, clientIp, s.heloName,
                                            headers, bodyPart,
-                                           s.mailFrom)
+                                           s.mailFrom, headerBlock,
+                                           nil, nil, dmarcMode,
+                                           smtpHostname(), server.settings.dkimVerify)
+            if auth.dmarcReject:
+              smtpReply(conn, 550, "DMARC policy rejects unauthenticated mail")
+              resetTxn(s)
+              return
             # Prepend Authentication-Results header
             msgData = auth.renderAuthHeader() & "\r\n" & msgData
         except CatchableError as e:
@@ -989,8 +1004,7 @@ proc enableMxDelivery*(server: SMTPServer, cfg = MXProviderConfig()) =
   # Wire DMARC TXT lookup if enforcement is requested but no custom provider.
   if mxCfg.enforceDmarc and mxCfg.dmarcLookup == nil:
     mxCfg.dmarcLookup = proc(domain: string): string =
-      let records = resolveTxtRecords("_dmarc." & domain)
-      if records.len > 0: records[0] else: ""
+      selectDmarcRecord(resolveTxtRecords("_dmarc." & domain))
   # Initialize SPF server for inbound verification if not already set
   if server.spfServer == nil:
     let s = SPF_server_new(SPF_DNS_CACHE, 0)

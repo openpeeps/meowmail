@@ -50,6 +50,12 @@ proc EVP_SignUpdate(ctx: EVP_MD_CTX, d: pointer, cnt: csize_t): cint {.importc, 
 proc EVP_SignFinal(ctx: EVP_MD_CTX, sig: ptr UncheckedArray[byte], s: var cuint, pkey: EVP_PKEY): cint {.importc, header: "<openssl/evp.h>".}
 proc EVP_PKEY_size(pkey: EVP_PKEY): cint {.importc, header: "<openssl/evp.h>".}
 
+proc EVP_DigestVerifyInit(ctx: EVP_MD_CTX, pctx: pointer, mdType: EVP_MD,
+                          engine: pointer, pkey: EVP_PKEY): cint {.importc, header: "<openssl/evp.h>".}
+proc EVP_DigestVerifyFinal(ctx: EVP_MD_CTX, sig: pointer,
+                           siglen: csize_t): cint {.importc, header: "<openssl/evp.h>".}
+proc d2i_PUBKEY(a: pointer, pp: ptr pointer, length: clong): EVP_PKEY {.importc, header: "<openssl/x509.h>".}
+
 proc BIO_new_mem_buf(data: pointer, len: cint): BIO {.importc, header: "<openssl/bio.h>".}
 proc BIO_free(bio: BIO): cint {.importc, header: "<openssl/bio.h>".}
 
@@ -107,7 +113,7 @@ proc loadPrivateKey(pemData: string): EVP_PKEY =
 # ── Canonicalization (RFC 6376 §3.4) ─────────────────────────────────────────
 
 type
-  RawHeaderField = object
+  RawHeaderField* = object
     ## A single header field exactly as it appears on the wire, including any
     ## folded continuation lines (CRLF + WSP preserved).
     name*: string   # field name as written (original case)
@@ -307,6 +313,217 @@ proc signMessage*(key: DkimKey, rawMessage: string,
 
   # Insert DKIM-Signature after the last header
   result = headerBlock & "\r\n" & sigHeader & "\r\n\r\n" & bodyPart
+
+# ── Verification (RFC 6376 §3.7, §6.1) ───────────────────────────────────────
+
+type
+  DkimSigTags* = object
+    version*: string
+    algo*: string
+    headerCanon*: string
+    bodyCanon*: string
+    domain*: string
+    selector*: string
+    signedHeaders*: seq[string]
+    bodyHashB64*: string
+    sigB64*: string
+    bodyLength*: int     # l= tag, -1 = absent
+    timestamp*: int64    # t= tag, 0 = absent
+    expiry*: int64       # x= tag, 0 = absent
+    query*: string       # q= tag, "" = default dns/txt
+
+proc parseDkimSigTags*(value: string): tuple[ok: bool, tags: DkimSigTags, err: string] =
+  ## Parse a DKIM-Signature header value into its tags. The b= signature
+  ## value is base64 (no semicolons), so splitting on ";" is safe.
+  var tags = DkimSigTags(headerCanon: "simple", bodyCanon: "simple", bodyLength: -1)
+  for part in value.split(';'):
+    let kv = part.strip().split('=', 1)
+    if kv.len != 2: continue
+    let key = kv[0].strip().toLowerAscii
+    let val = kv[1].strip()
+    case key
+    of "v": tags.version = val
+    of "a": tags.algo = val.toLowerAscii
+    of "c":
+      let parts = val.split('/')
+      tags.headerCanon = parts[0].strip().toLowerAscii
+      tags.bodyCanon = if parts.len > 1: parts[^1].strip().toLowerAscii
+                       else: parts[0].strip().toLowerAscii
+    of "d": tags.domain = val.toLowerAscii
+    of "s": tags.selector = val
+    of "h":
+      tags.signedHeaders = @[]
+      for n in val.split(':'):
+        let hn = n.strip()
+        if hn.len > 0: tags.signedHeaders.add(hn)
+    of "bh": tags.bodyHashB64 = val.replace(" ", "").replace("\t", "")
+    of "b": tags.sigB64 = val.replace(" ", "").replace("\t", "")
+    of "l":
+      try: tags.bodyLength = parseInt(val)
+      except ValueError: return (false, tags, "invalid l= tag")
+    of "t":
+      try: tags.timestamp = parseBiggestInt(val)
+      except ValueError: return (false, tags, "invalid t= tag")
+    of "x":
+      try: tags.expiry = parseBiggestInt(val)
+      except ValueError: return (false, tags, "invalid x= tag")
+    of "q": tags.query = val.toLowerAscii
+    else: discard
+  if tags.version != "1":
+    return (false, tags, "unsupported version: " & tags.version)
+  if tags.algo != "rsa-sha256":
+    return (false, tags, "unsupported algorithm: " & tags.algo)
+  if tags.headerCanon notin ["simple", "relaxed"]:
+    return (false, tags, "unsupported header canonicalization: " & tags.headerCanon)
+  if tags.bodyCanon notin ["simple", "relaxed"]:
+    return (false, tags, "unsupported body canonicalization: " & tags.bodyCanon)
+  if tags.query.len > 0 and tags.query != "dns/txt":
+    return (false, tags, "unsupported query method: " & tags.query)
+  if tags.domain.len == 0 or tags.selector.len == 0:
+    return (false, tags, "missing d= or s=")
+  if tags.bodyHashB64.len == 0:
+    return (false, tags, "missing bh=")
+  if tags.sigB64.len == 0:
+    return (false, tags, "missing b=")
+  if tags.signedHeaders.len == 0:
+    return (false, tags, "missing h=")
+  if tags.expiry > 0 and getTime().toUnix() > tags.expiry:
+    return (false, tags, "signature expired")
+  (true, tags, "")
+
+proc selectDkimKeyRecord*(records: seq[string]): string =
+  ## Pick the `v=DKIM1` key record out of a set of TXT strings.
+  for r in records:
+    if r.strip().toLowerAscii.startsWith("v=dkim1"):
+      return r
+  ""
+
+proc parseDkimKeyRecord*(record: string): tuple[ok: bool, pubkeyDer: string, err: string] =
+  ## Extract the DER public key from a `v=DKIM1` TXT record.
+  var keyType = "rsa"
+  var pubB64 = ""
+  for part in record.split(';'):
+    let kv = part.strip().split('=', 1)
+    if kv.len != 2: continue
+    case kv[0].strip().toLowerAscii
+    of "k": keyType = kv[1].strip().toLowerAscii
+    of "p": pubB64 = kv[1].strip().replace(" ", "").replace("\t", "")
+    else: discard
+  if keyType != "rsa":
+    return (false, "", "unsupported key type: " & keyType)
+  if pubB64.len == 0:
+    return (false, "", "key revoked (empty p=)")
+  try:
+    let der = decode(pubB64)
+    if der.len == 0:
+      return (false, "", "empty public key")
+    (true, der, "")
+  except CatchableError:
+    (false, "", "invalid base64 in p=")
+
+proc loadPublicKeyDer*(der: string): EVP_PKEY =
+  ## Load a DER SubjectPublicKeyInfo into an EVP_PKEY. Caller must free with
+  ## EVP_PKEY_free. Returns nil on failure.
+  if der.len == 0: return nil
+  var p = unsafeAddr der[0]
+  result = d2i_PUBKEY(nil, cast[ptr pointer](addr p), der.len.clong)
+
+proc rsaVerify*(data, sigBytes: string, pkey: EVP_PKEY): bool =
+  ## Verify RSA-SHA256 `sigBytes` over `data`. Returns false on any failure.
+  if pkey == nil or sigBytes.len == 0: return false
+  let ctx = EVP_MD_CTX_new()
+  if ctx == nil: return false
+  try:
+    if EVP_DigestVerifyInit(ctx, nil, EVP_sha256(), nil, pkey) != 1:
+      return false
+    if data.len > 0:
+      if EVP_DigestUpdate(ctx, unsafeAddr data[0], data.len.csize_t) != 1:
+        return false
+    else:
+      if EVP_DigestUpdate(ctx, nil, 0.csize_t) != 1:
+        return false
+    EVP_DigestVerifyFinal(ctx, unsafeAddr sigBytes[0],
+                           sigBytes.len.csize_t) == 1
+  finally:
+    EVP_MD_CTX_free(ctx)
+
+proc stripSigValue(raw: string): string =
+  ## Remove the b= signature value from a raw DKIM-Signature field, keeping
+  ## every other byte intact (RFC 6376 §3.7: verify the header with an
+  ## empty b= value). Tag values are base64 (no semicolons), so splitting
+  ## the field on ";" locates tag boundaries exactly.
+  var pos = 0
+  while true:
+    let semi = raw.find(';', pos)
+    let segEnd = if semi < 0: raw.len else: semi
+    let eq = raw.find('=', pos)
+    if eq >= 0 and eq < segEnd and raw[pos ..< eq].strip().toLowerAscii == "b":
+      return raw[0 ..< eq + 1]
+    if semi < 0:
+      return raw
+    pos = semi + 1
+
+proc verifyDkimSignature*(fields: seq[RawHeaderField], sigIdx: int, body: string,
+                          pubkeyDer: string): tuple[valid: bool, domain, err: string] =
+  ## Verify the DKIM-Signature at `fields[sigIdx]` against `body` using the
+  ## DER public key. Reconstructs the signed data per RFC 6376 §3.7: selected
+  ## headers bottom-up (excluding the other signatures) plus the signature
+  ## header itself with an empty b= and no trailing CRLF.
+  if sigIdx < 0 or sigIdx > fields.high:
+    return (false, "", "signature index out of range")
+  let (ok, tags, perr) = parseDkimSigTags(fields[sigIdx].raw.split(":", 1)[^1])
+  if not ok:
+    return (false, "", perr)
+  # Body hash over the canonicalized body (l= truncates to a prefix).
+  let canonBody = if tags.bodyCanon == "relaxed": relaxedCanonBody(body)
+                  else: simpleCanonBody(body)
+  let hashedBody = if tags.bodyLength >= 0: canonBody[0 ..< min(tags.bodyLength, canonBody.len)]
+                   else: canonBody
+  let bh = sha256(hashedBody)
+  var claimedBh: string
+  try:
+    claimedBh = decode(tags.bodyHashB64)
+  except CatchableError:
+    return (false, tags.domain, "invalid bh encoding")
+  if claimedBh != bh:
+    return (false, tags.domain, "body hash mismatch")
+  # Signed headers: bottom-up instances, ignoring the other signatures. The
+  # signature under test is appended last with an empty b=.
+  var pool: seq[RawHeaderField]
+  for i, f in fields:
+    if i != sigIdx and f.name.toLowerAscii != "dkim-signature":
+      pool.add(f)
+  let selected = selectSignedHeaders(pool, tags.signedHeaders)
+  var data = ""
+  # Map pool indexes back: selectSignedHeaders returns pool positions, and
+  # pool preserves field order, so index directly into pool.
+  for i in selected:
+    if tags.headerCanon == "relaxed":
+      data.add(relaxedHeaderValue(pool[i]) & "\r\n")
+    else:
+      data.add(canonHeaderSimple(pool[i]))
+  let placeholder = stripSigValue(fields[sigIdx].raw)
+  # No trailing CRLF on the signature header (RFC 6376 §3.7), matching the
+  # signer which appends the placeholder without one.
+  if tags.headerCanon == "relaxed":
+    data.add(relaxedHeaderValue(RawHeaderField(name: "dkim-signature", raw: placeholder)))
+  else:
+    data.add(placeholder)
+  var sigBytes: string
+  try:
+    sigBytes = decode(tags.sigB64)
+  except CatchableError:
+    return (false, tags.domain, "invalid b encoding")
+  let pkey = loadPublicKeyDer(pubkeyDer)
+  if pkey == nil:
+    return (false, tags.domain, "invalid public key")
+  try:
+    if rsaVerify(data, sigBytes, pkey):
+      (true, tags.domain, "")
+    else:
+      (false, tags.domain, "signature mismatch")
+  finally:
+    EVP_PKEY_free(pkey)
 
 proc destroy*(key: DkimKey) =
   ## Free the private key resources.

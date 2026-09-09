@@ -49,6 +49,8 @@ type
     queueRunnerInterval*: int
     checkSenderDomain*: bool
     checkRcptDomain*: bool
+    dkimVerify*: bool
+    dmarcMode*: string
     msgPerHour*: int
     msgPerDay*: int
     userMsgPerHour*: int
@@ -141,6 +143,8 @@ proc loadConfig*(path: string): MeowMailConfig =
   result.queueRunnerInterval = intOf("queue.runner_interval", 30)
   result.checkSenderDomain = boolOf("smtp.validation.check_sender_domain")
   result.checkRcptDomain = boolOf("smtp.validation.check_rcpt_domain")
+  result.dkimVerify = boolOf("smtp.auth.dkim.verify", true)
+  result.dmarcMode = strOf("smtp.auth.dmarc.mode", "report")
   result.msgPerHour = intOf("smtp.limits.messages_per_hour", 100)
   result.msgPerDay = intOf("smtp.limits.messages_per_day", 1000)
   result.userMsgPerHour = intOf("smtp.limits.user_messages_per_hour")
@@ -174,6 +178,8 @@ proc toSMTPSettings*(cfg: MeowMailConfig): SMTPSettings =
     localDomains: cfg.localDomains,
     checkSenderDomain: cfg.checkSenderDomain,
     checkRcptDomain: cfg.checkRcptDomain,
+    dkimVerify: cfg.dkimVerify,
+    dmarcMode: cfg.dmarcMode,
     msgPerHour: cfg.msgPerHour,
     msgPerDay: cfg.msgPerDay,
     userMsgPerHour: cfg.userMsgPerHour,

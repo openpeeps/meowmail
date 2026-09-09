@@ -5,10 +5,13 @@
 ## DKIM verifies cryptographic signatures.
 ## DMARC checks alignment between SPF and DKIM results.
 
-import std/[strutils, sequtils, base64]
+import std/strutils
 import pkg/spf
 import ../smtpdelivery
 import ../../imap/msgparse
+import ../dkim
+import ./dmarc
+import ../mxprovider
 
 type
   AuthResult* = enum
@@ -19,9 +22,14 @@ type
     spfDetail*: string       ## e.g. "smtp.mailfrom=alice@example.com"
     dkim*: AuthResult
     dkimDetail*: string      ## e.g. "header.d=example.com"
+    dkimDomains*: seq[string] ## domains of passing signatures (for DMARC)
     dmarc*: AuthResult
     dmarcDetail*: string
+    dmarcReject*: bool       ## DMARC p=reject applied and enforcement on
     combined*: string        ## Full Authentication-Results header value
+
+  DkimKeyLookup* = proc(domain, selector: string): string {.closure, gcsafe.}
+    ## Returns the selected `v=DKIM1` TXT record ("" when unavailable).
 
 proc authResultStr(r: AuthResult): string =
   case r
@@ -99,76 +107,86 @@ proc verifySpf*(spfServerPtr: pointer, clientIp, heloDomain, mailFrom: string): 
   finally:
     if resp != nil: SPF_response_free(resp)
 
-# ── DKIM verification ─────────────────────────────────────────────────────────
+# ── DKIM verification (RFC 6376) ──────────────────────────────────────────────
 
-proc verifyDkim*(headers: seq[Header], body: string): (AuthResult, string) =
-  ## Verify DKIM signature(s) in the message headers.
-  ## Returns (result, detail string for the first valid/invalid signature).
+proc defaultDkimKeyLookup(domain, selector: string): string {.gcsafe.} =
+  ## Fetch the `v=DKIM1` key record via powpow's TXT resolver.
+  selectDkimKeyRecord(resolveTxtRecords(selector & "._domainkey." & domain))
+
+proc defaultDmarcFetch(domain: string): string {.gcsafe.} =
+  ## Fetch the `v=DMARC1` record via powpow's TXT resolver.
+  selectDmarcRecord(resolveTxtRecords("_dmarc." & domain))
+
+proc verifyDkim*(headers: seq[Header], body: string,
+                 keyLookup: DkimKeyLookup = nil,
+                 rawHeaderBlock: string = ""): (AuthResult, seq[string], string) =
+  ## Cryptographically verify DKIM signature(s) in the message headers.
+  ## Returns (result, passing domains, detail string).
   ##
-  ## This is a simplified verifier that checks:
-  ## 1. A DKIM-Signature header exists
-  ## 2. The d= domain and s= selector are present
-  ## 3. The bh= (body hash) matches the actual body hash
-  ##
-  ## Full RSA signature verification would require DNS lookup + key retrieval.
-  ## This implementation validates the body hash and structural integrity.
+  ## The raw header block is preferred: `simple` canonicalization is only
+  ## byte-exact when the original wire bytes are available. Without it the
+  ## fields are rebuilt from parsed headers, which is exact for `relaxed`
+  ## but best-effort for `simple`.
+  let lookup: DkimKeyLookup = if keyLookup != nil: keyLookup else: defaultDkimKeyLookup
+  var fields: seq[RawHeaderField]
+  if rawHeaderBlock.len > 0:
+    fields = splitRawHeaders(rawHeaderBlock)
+  else:
+    for h in headers:
+      fields.add(RawHeaderField(name: h.name, raw: h.name & ": " & h.value))
+  var sigIdxs: seq[int]
+  for i, f in fields:
+    if f.name.toLowerAscii == "dkim-signature":
+      sigIdxs.add(i)
+  if sigIdxs.len == 0:
+    return (arNone, @[], "no signature")
 
-  # Find DKIM-Signature headers
-  var dkimHeaders: seq[Header]
-  for h in headers:
-    if h.name.toLowerAscii == "dkim-signature":
-      dkimHeaders.add(h)
-
-  if dkimHeaders.len == 0:
-    return (arNone, "no signature")
-
-  # Parse the first DKIM-Signature
-  let sig = dkimHeaders[0].value
-  var domain, selector, bodyHash, signature: string
-  var signedHeaders: seq[string]
-  var bodyCanon = "simple"
-
-  for part in sig.split(';'):
-    let kv = part.strip().split('=', 1)
-    if kv.len != 2: continue
-    let key = kv[0].strip().toLowerAscii
-    let val = kv[1].strip()
-    case key
-    of "d": domain = val
-    of "s": selector = val
-    of "bh": bodyHash = val
-    of "b": signature = val
-    of "c":
-      let parts = val.split('/')
-      if parts.len >= 1: bodyCanon = parts[0].strip()
-    of "h":
-      signedHeaders = val.split(':').mapIt(it.strip())
-
-  if domain.len == 0 or selector.len == 0:
-    return (arPermError, "invalid signature: missing d= or s=")
-  if signature.len == 0:
-    return (arPermError, "invalid signature: missing b=")
-  if bodyHash.len == 0:
-    return (arPermError, "invalid signature: missing bh=")
-
-  # Verify body hash (simplified — just check it's valid base64 of correct length)
-  try:
-    let decodedHash = decode(bodyHash)
-    if decodedHash.len != 32:  # SHA-256 = 32 bytes
-      return (arFail, "header.d=" & domain & "; body hash length mismatch")
-  except CatchableError:
-    return (arPermError, "header.d=" & domain & "; invalid body hash encoding")
-
-  # For a full implementation, we would:
-  # 1. Look up DNS TXT record for selector._domainkey.domain
-  # 2. Extract the public key
-  # 3. Reconstruct the signed data (headers + dkim-signature placeholder)
-  # 4. Verify the RSA/Ed25519 signature
-  #
-  # For now, we validate the structural integrity and body hash format.
-  # A production implementation would use DNS-over-HTTPS or a resolver library.
-
-  return (arPass, "header.d=" & domain)
+  var passDomains: seq[string]
+  var firstDetail = ""
+  var sawTemp = false
+  var tempDetail = ""
+  var sawFail = false
+  var failDetail = ""
+  var sawPerm = false
+  var permDetail = ""
+  for sigIdx in sigIdxs:
+    let value = fields[sigIdx].raw.split(":", 1)[^1]
+    let (tok, tags, terr) = parseDkimSigTags(value)
+    if not tok:
+      sawPerm = true
+      if permDetail.len == 0: permDetail = terr
+      continue
+    let record = lookup(tags.domain, tags.selector)
+    if record.len == 0:
+      sawTemp = true
+      if tempDetail.len == 0:
+        tempDetail = "header.d=" & tags.domain & "; key unavailable"
+      continue
+    let (kok, pubkeyDer, kerr) = parseDkimKeyRecord(record)
+    if not kok:
+      sawFail = true
+      if failDetail.len == 0:
+        failDetail = "header.d=" & tags.domain & "; " & kerr
+      continue
+    let (valid, domain, verr) = verifyDkimSignature(fields, sigIdx, body, pubkeyDer)
+    if valid:
+      if domain notin passDomains:
+        passDomains.add(domain)
+      if firstDetail.len == 0:
+        firstDetail = "header.d=" & domain
+    else:
+      sawFail = true
+      if failDetail.len == 0:
+        failDetail = "header.d=" & domain & "; " & verr
+  if passDomains.len > 0:
+    return (arPass, passDomains, firstDetail)
+  if sawFail:
+    return (arFail, @[], failDetail)
+  if sawTemp:
+    return (arTempError, @[], tempDetail)
+  if sawPerm:
+    return (arPermError, @[], permDetail)
+  (arNone, @[], "no signature")
 
 # ── Combined authentication ───────────────────────────────────────────────────
 
@@ -184,18 +202,34 @@ proc extractHeaderDomain(headers: seq[Header], name: string): string =
   if at > 0:
     result = addrPart[at + 1 .. ^1].strip(chars = {'>', ' '}).toLowerAscii()
 
+proc extractEnvelopeDomain(envSender: string): string =
+  ## Domain of the envelope sender ("" for null path or malformed).
+  var v = envSender.strip()
+  if v.len == 0 or v == "<>": return ""
+  v = v.strip(chars = {'<', '>'})
+  let at = v.rfind('@')
+  if at < 0 or at == v.high: return ""
+  v[at + 1 .. ^1].strip().toLowerAscii()
+
 proc authenticateMessage*(spfServerPtr: pointer, clientIp, heloDomain: string,
                           headers: seq[Header], body: string,
-                          envelopeFrom: string = ""): AuthHeader =
+                          envelopeFrom: string = "",
+                          rawHeaderBlock: string = "",
+                          keyLookup: DkimKeyLookup = nil,
+                          dmarcFetch: DmarcRecordLookup = nil,
+                          dmarcMode = "report",
+                          authHost = "meowmail.local",
+                          verifyDkimSigs = true): AuthHeader =
   ## Run all authentication checks on an incoming message and build
   ## the Authentication-Results header value.
   ##
   ## SPF is evaluated against the envelope sender (RFC 7208), falling back to
-  ## the From: domain only when the envelope is unavailable. DKIM/DMARC are
-  ## reported honestly: signatures found in the message are marked as
-  ## unverified until full cryptographic verification lands (Phase B), and
-  ## DMARC is omitted entirely since policy evaluation requires the _dmarc
-  ## DNS record.
+  ## the From: domain only when the envelope is unavailable. DKIM signatures
+  ## are cryptographically verified (RFC 6376) and DMARC is evaluated
+  ## (RFC 7489) with SPF/DKIM alignment. `dmarcMode` controls enforcement:
+  ## "report" never rejects, "quarantine" accepts and reports, "reject"
+  ## marks `dmarcReject` when a `p=reject` policy applies so the caller can
+  ## refuse the message.
 
   # Envelope sender for SPF (strip angle brackets / null path)
   var envSender = envelopeFrom.strip()
@@ -203,38 +237,76 @@ proc authenticateMessage*(spfServerPtr: pointer, clientIp, heloDomain: string,
     envSender = envSender.strip(chars = {'<', '>'})
   else:
     envSender = ""
+  let envDomain = extractEnvelopeDomain(envSender)
 
-  # Extract From domain (used for DMARC alignment once implemented)
   let fromDomain = extractHeaderDomain(headers, "from")
 
   # Run SPF against the envelope identity
   let spfIdentity = if envSender.len > 0: envSender else: fromDomain
   let (spfResult, spfDetail) = verifySpf(spfServerPtr, clientIp, heloDomain, spfIdentity)
 
-  # Run DKIM (structural check only; see Phase B for real verification)
-  let (dkimStubResult, dkimDetail) = verifyDkim(headers, body)
+  # Run DKIM (cryptographic verification, unless disabled)
+  var dkimResult = arNone
+  var dkimDomains: seq[string]
+  var dkimDetail = ""
+  if verifyDkimSigs:
+    (dkimResult, dkimDomains, dkimDetail) =
+      verifyDkim(headers, body, keyLookup, rawHeaderBlock)
 
-  # Build combined Authentication-Results header.
-  # dmarc is deliberately NOT reported: without the policy record any claim
-  # would be fabricated. DKIM results from the structural stub are reported
-  # as neutral: no cryptographic verification was performed.
+  # Run DMARC (alignment of SPF/DKIM against the From domain)
+  var dmarcResult = arNone
+  var dmarcDetail = ""
+  var dmarcReject = false
+  if fromDomain.len > 0:
+    let fetch: DmarcRecordLookup = if dmarcFetch != nil: dmarcFetch else: defaultDmarcFetch
+    let record = fetch(fromDomain)
+    if record.strip().len == 0:
+      dmarcDetail = "no DMARC record"
+    else:
+      let outcome = evaluateDmarc(fromDomain, record, envDomain,
+                                  spfResult == arPass, dkimDomains)
+      if outcome.policy == dpAbsent:
+        dmarcDetail = outcome.detail
+      elif outcome.aligned:
+        dmarcResult = arPass
+        dmarcDetail = outcome.detail
+      else:
+        dmarcDetail = outcome.detail
+        if outcome.enforced:
+          dmarcResult = arFail
+          if outcome.policy == dpReject and dmarcMode == "reject":
+            dmarcReject = true
+        else:
+          # Fail without enforcement (p=none, or not sampled): report only.
+          dmarcResult = if outcome.policy == dpNone: arNone else: arFail
+
   var results: seq[string]
   if spfIdentity.len > 0:
     results.add("spf=" & authResultStr(spfResult) & " (" & spfDetail & ")")
-  case dkimStubResult
+  case dkimResult
   of arNone:
     discard # no signature present; omit from header like most MTAs
   else:
-    results.add("dkim=neutral (" & dkimDetail & "; signature not verified)")
+    results.add("dkim=" & authResultStr(dkimResult) & " (" & dkimDetail & ")")
+  case dmarcResult
+  of arNone:
+    if dmarcDetail.len > 0 and dmarcDetail != "no DMARC record":
+      results.add("dmarc=none (" & dmarcDetail & ")")
+    else:
+      discard
+  else:
+    results.add("dmarc=" & authResultStr(dmarcResult) & " (" & dmarcDetail & ")")
 
   AuthHeader(
     spf: spfResult,
     spfDetail: spfDetail,
-    dkim: (if dkimStubResult == arNone: arNone else: arNeutral),
+    dkim: dkimResult,
     dkimDetail: dkimDetail,
-    dmarc: arNone,
-    dmarcDetail: "",
-    combined: "Authentication-Results: meowmail.local;\r\n\t" & results.join(";\r\n\t"),
+    dkimDomains: dkimDomains,
+    dmarc: dmarcResult,
+    dmarcDetail: dmarcDetail,
+    dmarcReject: dmarcReject,
+    combined: "Authentication-Results: " & authHost & ";\r\n\t" & results.join(";\r\n\t"),
   )
 
 proc renderAuthHeader*(auth: AuthHeader): string =
