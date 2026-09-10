@@ -219,6 +219,10 @@
 <li><a class="reference external"
           data-doc-search-tag="dkim: proc canonHeaderSimple(field: RawHeaderField): string" href="meowmail/smtp/dkim.html#canonHeaderSimple%2CRawHeaderField">dkim: proc canonHeaderSimple(field: RawHeaderField): string</a></li>
           </ul></dd>
+<dt><a name="classifyMxAnswer" href="#classifyMxAnswer"><span>classifyMxAnswer:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mxprovider: proc classifyMxAnswer(err: string; hosts: seq[MXHost]): MxResolveStatus" href="meowmail/smtp/mxprovider.html#classifyMxAnswer%2Cstring%2Cseq%5BMXHost%5D">mxprovider: proc classifyMxAnswer(err: string; hosts: seq[MXHost]): MxResolveStatus</a></li>
+          </ul></dd>
 <dt><a name="cleanup" href="#cleanup"><span>cleanup:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="ratelimit: proc cleanup(limiter: ConnectionLimiter)" href="meowmail/smtp/ratelimit.html#cleanup%2CConnectionLimiter">ratelimit: proc cleanup(limiter: ConnectionLimiter)</a></li>
@@ -740,17 +744,23 @@
           data-doc-search-tag="mxprovider: proc initMXProviderConfig(heloName: string; connectTimeoutMs: int = 7000;
                      commandTimeoutMs: int = 10000;
                      requireStartTls: bool = false;
-                     maxMxHostsPerDomain: int = 5; debug: bool = false;
-                     enforceSpf: bool = false; spfServer: pointer = nil;
+                     startTlsOpportunistic: bool = true;
+                     tlsSkipDomains: seq[string] = @[];
+                     maxMxHostsPerDomain: int = 5; dnsTimeoutMs: int = 8000;
+                     debug: bool = false; enforceSpf: bool = false;
+                     spfServer: pointer = nil;
                      spfClientIp: string = &quot;127.0.0.1&quot;;
                      spfHeloDomain: string = &quot;localhost&quot;;
                      enforceDmarc: bool = false;
                      dmarcLookup: DmarcRecordLookup = nil;
-                     dkimLookup: DkimKeyLookup = nil): MXProviderConfig" href="meowmail/smtp/mxprovider.html#initMXProviderConfig%2Cstring%2Cint%2Cint%2Cbool%2Cint%2Cbool%2Cbool%2Cpointer%2Cstring%2Cstring%2Cbool%2CDmarcRecordLookup%2CDkimKeyLookup">mxprovider: proc initMXProviderConfig(heloName: string; connectTimeoutMs: int = 7000;
+                     dkimLookup: DkimKeyLookup = nil): MXProviderConfig" href="meowmail/smtp/mxprovider.html#initMXProviderConfig%2Cstring%2Cint%2Cint%2Cbool%2Cbool%2Cseq%5Bstring%5D%2Cint%2Cint%2Cbool%2Cbool%2Cpointer%2Cstring%2Cstring%2Cbool%2CDmarcRecordLookup%2CDkimKeyLookup">mxprovider: proc initMXProviderConfig(heloName: string; connectTimeoutMs: int = 7000;
                      commandTimeoutMs: int = 10000;
                      requireStartTls: bool = false;
-                     maxMxHostsPerDomain: int = 5; debug: bool = false;
-                     enforceSpf: bool = false; spfServer: pointer = nil;
+                     startTlsOpportunistic: bool = true;
+                     tlsSkipDomains: seq[string] = @[];
+                     maxMxHostsPerDomain: int = 5; dnsTimeoutMs: int = 8000;
+                     debug: bool = false; enforceSpf: bool = false;
+                     spfServer: pointer = nil;
                      spfClientIp: string = &quot;127.0.0.1&quot;;
                      spfHeloDomain: string = &quot;localhost&quot;;
                      enforceDmarc: bool = false;
@@ -985,6 +995,26 @@
 <li><a class="reference external"
           data-doc-search-tag="address: MailboxKind.mkStandard" href="meowmail/smtp/address.html#mkStandard">address: MailboxKind.mkStandard</a></li>
           </ul></dd>
+<dt><a name="mrsNoData" href="#mrsNoData"><span>mrsNoData:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mxprovider: MxResolveStatus.mrsNoData" href="meowmail/smtp/mxprovider.html#mrsNoData">mxprovider: MxResolveStatus.mrsNoData</a></li>
+          </ul></dd>
+<dt><a name="mrsNullMx" href="#mrsNullMx"><span>mrsNullMx:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mxprovider: MxResolveStatus.mrsNullMx" href="meowmail/smtp/mxprovider.html#mrsNullMx">mxprovider: MxResolveStatus.mrsNullMx</a></li>
+          </ul></dd>
+<dt><a name="mrsNxDomain" href="#mrsNxDomain"><span>mrsNxDomain:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mxprovider: MxResolveStatus.mrsNxDomain" href="meowmail/smtp/mxprovider.html#mrsNxDomain">mxprovider: MxResolveStatus.mrsNxDomain</a></li>
+          </ul></dd>
+<dt><a name="mrsOk" href="#mrsOk"><span>mrsOk:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mxprovider: MxResolveStatus.mrsOk" href="meowmail/smtp/mxprovider.html#mrsOk">mxprovider: MxResolveStatus.mrsOk</a></li>
+          </ul></dd>
+<dt><a name="mrsTempError" href="#mrsTempError"><span>mrsTempError:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mxprovider: MxResolveStatus.mrsTempError" href="meowmail/smtp/mxprovider.html#mrsTempError">mxprovider: MxResolveStatus.mrsTempError</a></li>
+          </ul></dd>
 <dt><a name="MXHost" href="#MXHost"><span>MXHost:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="mxprovider: object MXHost" href="meowmail/smtp/mxprovider.html#MXHost">mxprovider: object MXHost</a></li>
@@ -992,6 +1022,14 @@
 <dt><a name="MXProviderConfig" href="#MXProviderConfig"><span>MXProviderConfig:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="mxprovider: object MXProviderConfig" href="meowmail/smtp/mxprovider.html#MXProviderConfig">mxprovider: object MXProviderConfig</a></li>
+          </ul></dd>
+<dt><a name="MxResolveResult" href="#MxResolveResult"><span>MxResolveResult:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mxprovider: object MxResolveResult" href="meowmail/smtp/mxprovider.html#MxResolveResult">mxprovider: object MxResolveResult</a></li>
+          </ul></dd>
+<dt><a name="MxResolveStatus" href="#MxResolveStatus"><span>MxResolveStatus:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mxprovider: enum MxResolveStatus" href="meowmail/smtp/mxprovider.html#MxResolveStatus">mxprovider: enum MxResolveStatus</a></li>
           </ul></dd>
 <dt><a name="newAdminServer" href="#newAdminServer"><span>newAdminServer:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -1297,9 +1335,13 @@
 <li><a class="reference external"
           data-doc-search-tag="mxprovider: proc resolveMxHosts(domain: string; maxHosts = 5): seq[MXHost]" href="meowmail/smtp/mxprovider.html#resolveMxHosts%2Cstring%2Cint">mxprovider: proc resolveMxHosts(domain: string; maxHosts = 5): seq[MXHost]</a></li>
           </ul></dd>
+<dt><a name="resolveMxOutcome" href="#resolveMxOutcome"><span>resolveMxOutcome:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mxprovider: proc resolveMxOutcome(domain: string; maxHosts = 5; dnsTimeoutMs = 8000): MxResolveResult" href="meowmail/smtp/mxprovider.html#resolveMxOutcome%2Cstring%2Cint%2Cint">mxprovider: proc resolveMxOutcome(domain: string; maxHosts = 5; dnsTimeoutMs = 8000): MxResolveResult</a></li>
+          </ul></dd>
 <dt><a name="resolveTxtRecords" href="#resolveTxtRecords"><span>resolveTxtRecords:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
-          data-doc-search-tag="mxprovider: proc resolveTxtRecords(hostname: string): seq[string]" href="meowmail/smtp/mxprovider.html#resolveTxtRecords%2Cstring">mxprovider: proc resolveTxtRecords(hostname: string): seq[string]</a></li>
+          data-doc-search-tag="mxprovider: proc resolveTxtRecords(hostname: string; dnsTimeoutMs = 8000): seq[string]" href="meowmail/smtp/mxprovider.html#resolveTxtRecords%2Cstring%2Cint">mxprovider: proc resolveTxtRecords(hostname: string; dnsTimeoutMs = 8000): seq[string]</a></li>
           </ul></dd>
 <dt><a name="routeBounce" href="#routeBounce"><span>routeBounce:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
@@ -1653,6 +1695,10 @@
 <li><a class="reference external"
           data-doc-search-tag="msgparse: proc textContent(parsed: ParsedMessage): string" href="meowmail/imap/msgparse.html#textContent%2CParsedMessage">msgparse: proc textContent(parsed: ParsedMessage): string</a></li>
           </ul></dd>
+<dt><a name="tlsHostSkipped" href="#tlsHostSkipped"><span>tlsHostSkipped:</span></a></dt><dd><ul class="simple">
+<li><a class="reference external"
+          data-doc-search-tag="mxprovider: proc tlsHostSkipped(skipDomains: seq[string]; host: string): bool" href="meowmail/smtp/mxprovider.html#tlsHostSkipped%2Cseq%5Bstring%5D%2Cstring">mxprovider: proc tlsHostSkipped(skipDomains: seq[string]; host: string): bool</a></li>
+          </ul></dd>
 <dt><a name="toSMTPSettings" href="#toSMTPSettings"><span>toSMTPSettings:</span></a></dt><dd><ul class="simple">
 <li><a class="reference external"
           data-doc-search-tag="config: proc toSMTPSettings(cfg: MeowMailConfig): SMTPSettings" href="meowmail/cli/config.html#toSMTPSettings%2CMeowMailConfig">config: proc toSMTPSettings(cfg: MeowMailConfig): SMTPSettings</a></li>
@@ -1729,7 +1775,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-09-10 13:11:36 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-09-10 14:14:14 UTC</small>
       </div>
     </div>
   </div>

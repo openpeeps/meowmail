@@ -65,6 +65,8 @@
   hostname*: string
   listenPort*: int
   enablePort25*, enablePort587*, enablePort465*: bool
+  port587*: int
+  port465*: int
   certifications*: Option[(string, string)]
   requireTlsForAuth*: bool
   requireAuth*: bool
@@ -158,6 +160,8 @@
   <span class="Identifier">hostname</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">string</span>
   <span class="Identifier">listenPort</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
   <span class="Identifier">enablePort25</span><span class="Operator">*</span><span class="Other">,</span> <span class="Identifier">enablePort587</span><span class="Operator">*</span><span class="Other">,</span> <span class="Identifier">enablePort465</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span>
+  <span class="Identifier">port587</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
+  <span class="Identifier">port465</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span>
   <span class="Identifier">certifications</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">Option</span><span class="Other">[</span><span class="Other">(</span><span class="Identifier">string</span><span class="Other">,</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">]</span>
   <span class="Identifier">requireTlsForAuth</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span>
   <span class="Identifier">requireAuth</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span>
@@ -263,7 +267,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-09-10 13:11:36 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-09-10 14:14:14 UTC</small>
       </div>
     </div>
   </div>

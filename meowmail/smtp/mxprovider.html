@@ -77,8 +77,22 @@
                          ## the provider will only attempt delivery to MX hosts that advertise
                          ## STARTTLS in their EHLO response and will upgrade the connection to
                          ## TLS before sending mail.
+  startTlsOpportunistic*: bool = true ## Offer STARTTLS whenever the peer advertises it, even when
+                                      ## `requireStartTls` is false. The upgrade is verified (chain against
+                                      ## the system CA store plus hostname check); if it fails, delivery
+                                      ## falls back to plaintext once rather than losing the message.
+                                      ## This protects against passive observers only. Active downgrade
+                                      ## protection needs MTA-STS or DANE (future work).
+  tlsSkipDomains*: seq[string] = [] ## MX hostnames that never get a STARTTLS upgrade, in either mode.
+                                    ## Explicit admin exception for broken peers. Matched case-insensitively
+                                    ## with trailing dots ignored.
   maxMxHostsPerDomain*: int = 5 ## The maximum number of MX hosts to consider for each
                                 ## recipient domain.
+  dnsTimeoutMs*: int = 8000 ## Upper bound in milliseconds for the blocking DNS wrappers
+                            ## (`resolveMxOutcome`, `resolveTxtRecords`). Powpow resolves
+                            ## asynchronously on a throwaway loop; the watchdog stops the loop
+                            ## so unresolvable domains fail fast instead of stalling the
+                            ## delivery thread.
   debug*: bool = false       ## Whether to enable debug logging for the MX provider.
   enforceSpf*: bool = false
   spfServer*: pointer = nil
@@ -88,6 +102,16 @@
   dmarcLookup*: DmarcRecordLookup = nil
   dkimLookup*: DkimKeyLookup = nil ## Key lookup for outbound DKIM verification. Nil uses powpow's TXT
                                    ## resolver; tests inject stub records.">MXProviderConfig</a></li>
+<li><a class="reference" href="#MxResolveResult" title="MxResolveResult = object
+  status*: MxResolveStatus
+  hosts*: seq[MXHost]">MxResolveResult</a></li>
+<li><a class="reference" href="#MxResolveStatus" title="MxResolveStatus = enum
+  mrsOk,                    ## Usable MX hosts found.
+  mrsNoData, ## Name exists but publishes no MX (RFC 5321 section 5.1
+              ## address fallback applies).
+  mrsNxDomain,              ## Name does not exist: permanent failure, no fallback.
+  mrsNullMx,                ## Null MX (RFC 7505): the domain accepts no mail, permanent.
+  mrsTempError               ## DNS failure or timeout: defer, retry later.">MxResolveStatus</a></li>
 
     </ul>
   </details>
@@ -96,18 +120,25 @@
   <details open>
     <summary><a class="reference reference-toplevel" href="#12" id="62">Procs</a></summary>
     <ul class="simple simple-toc-section">
-      <ul class="simple nested-toc-section">decideJointDmarc
+      <ul class="simple nested-toc-section">classifyMxAnswer
+  <li><a class="reference" href="#classifyMxAnswer%2Cstring%2Cseq%5BMXHost%5D" title="classifyMxAnswer(err: string; hosts: seq[MXHost]): MxResolveStatus">classifyMxAnswer(err: string; hosts: seq[MXHost]): MxResolveStatus</a></li>
+
+</ul>
+<ul class="simple nested-toc-section">decideJointDmarc
   <li><a class="reference" href="#decideJointDmarc%2Cstring%2Cstring%2Cstring%2CSpfPreflightResult%2Cseq%5Bstring%5D%2Cbool" title="decideJointDmarc(fromDomain, record, envDomain: string; spf: SpfPreflightResult;
                  dkimDomains: seq[string]; dkimTempError: bool): DeliveryDecision">decideJointDmarc(fromDomain, record, envDomain: string; spf: SpfPreflightResult;
                  dkimDomains: seq[string]; dkimTempError: bool): DeliveryDecision</a></li>
 
 </ul>
 <ul class="simple nested-toc-section">initMXProviderConfig
-  <li><a class="reference" href="#initMXProviderConfig%2Cstring%2Cint%2Cint%2Cbool%2Cint%2Cbool%2Cbool%2Cpointer%2Cstring%2Cstring%2Cbool%2CDmarcRecordLookup%2CDkimKeyLookup" title="initMXProviderConfig(heloName: string; connectTimeoutMs: int = 7000;
+  <li><a class="reference" href="#initMXProviderConfig%2Cstring%2Cint%2Cint%2Cbool%2Cbool%2Cseq%5Bstring%5D%2Cint%2Cint%2Cbool%2Cbool%2Cpointer%2Cstring%2Cstring%2Cbool%2CDmarcRecordLookup%2CDkimKeyLookup" title="initMXProviderConfig(heloName: string; connectTimeoutMs: int = 7000;
                      commandTimeoutMs: int = 10000;
                      requireStartTls: bool = false;
-                     maxMxHostsPerDomain: int = 5; debug: bool = false;
-                     enforceSpf: bool = false; spfServer: pointer = nil;
+                     startTlsOpportunistic: bool = true;
+                     tlsSkipDomains: seq[string] = @[];
+                     maxMxHostsPerDomain: int = 5; dnsTimeoutMs: int = 8000;
+                     debug: bool = false; enforceSpf: bool = false;
+                     spfServer: pointer = nil;
                      spfClientIp: string = &quot;127.0.0.1&quot;;
                      spfHeloDomain: string = &quot;localhost&quot;;
                      enforceDmarc: bool = false;
@@ -115,8 +146,11 @@
                      dkimLookup: DkimKeyLookup = nil): MXProviderConfig">initMXProviderConfig(heloName: string; connectTimeoutMs: int = 7000;
                      commandTimeoutMs: int = 10000;
                      requireStartTls: bool = false;
-                     maxMxHostsPerDomain: int = 5; debug: bool = false;
-                     enforceSpf: bool = false; spfServer: pointer = nil;
+                     startTlsOpportunistic: bool = true;
+                     tlsSkipDomains: seq[string] = @[];
+                     maxMxHostsPerDomain: int = 5; dnsTimeoutMs: int = 8000;
+                     debug: bool = false; enforceSpf: bool = false;
+                     spfServer: pointer = nil;
                      spfClientIp: string = &quot;127.0.0.1&quot;;
                      spfHeloDomain: string = &quot;localhost&quot;;
                      enforceDmarc: bool = false;
@@ -134,8 +168,16 @@
   <li><a class="reference" href="#resolveMxHosts%2Cstring%2Cint" title="resolveMxHosts(domain: string; maxHosts = 5): seq[MXHost]">resolveMxHosts(domain: string; maxHosts = 5): seq[MXHost]</a></li>
 
 </ul>
+<ul class="simple nested-toc-section">resolveMxOutcome
+  <li><a class="reference" href="#resolveMxOutcome%2Cstring%2Cint%2Cint" title="resolveMxOutcome(domain: string; maxHosts = 5; dnsTimeoutMs = 8000): MxResolveResult">resolveMxOutcome(domain: string; maxHosts = 5; dnsTimeoutMs = 8000): MxResolveResult</a></li>
+
+</ul>
 <ul class="simple nested-toc-section">resolveTxtRecords
-  <li><a class="reference" href="#resolveTxtRecords%2Cstring" title="resolveTxtRecords(hostname: string): seq[string]">resolveTxtRecords(hostname: string): seq[string]</a></li>
+  <li><a class="reference" href="#resolveTxtRecords%2Cstring%2Cint" title="resolveTxtRecords(hostname: string; dnsTimeoutMs = 8000): seq[string]">resolveTxtRecords(hostname: string; dnsTimeoutMs = 8000): seq[string]</a></li>
+
+</ul>
+<ul class="simple nested-toc-section">tlsHostSkipped
+  <li><a class="reference" href="#tlsHostSkipped%2Cseq%5Bstring%5D%2Cstring" title="tlsHostSkipped(skipDomains: seq[string]; host: string): bool">tlsHostSkipped(skipDomains: seq[string]; host: string): bool</a></li>
 
 </ul>
 
@@ -194,8 +236,22 @@
                          <span class="Comment">## the provider will only attempt delivery to MX hosts that advertise</span>
                          <span class="Comment">## STARTTLS in their EHLO response and will upgrade the connection to</span>
                          <span class="Comment">## TLS before sending mail.</span>
+  <span class="Identifier">startTlsOpportunistic</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="DecNumber">true</span> <span class="Comment">## Offer STARTTLS whenever the peer advertises it, even when</span>
+                                      <span class="Comment">## `requireStartTls` is false. The upgrade is verified (chain against</span>
+                                      <span class="Comment">## the system CA store plus hostname check); if it fails, delivery</span>
+                                      <span class="Comment">## falls back to plaintext once rather than losing the message.</span>
+                                      <span class="Comment">## This protects against passive observers only. Active downgrade</span>
+                                      <span class="Comment">## protection needs MTA-STS or DANE (future work).</span>
+  <span class="Identifier">tlsSkipDomains</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span> <span class="Other">=</span> <span class="Other">[</span><span class="Other">]</span> <span class="Comment">## MX hostnames that never get a STARTTLS upgrade, in either mode.</span>
+                                    <span class="Comment">## Explicit admin exception for broken peers. Matched case-insensitively</span>
+                                    <span class="Comment">## with trailing dots ignored.</span>
   <span class="Identifier">maxMxHostsPerDomain</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span> <span class="Other">=</span> <span class="DecNumber">5</span> <span class="Comment">## The maximum number of MX hosts to consider for each</span>
                                 <span class="Comment">## recipient domain.</span>
+  <span class="Identifier">dnsTimeoutMs</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">int</span> <span class="Other">=</span> <span class="DecNumber">8000</span> <span class="Comment">## Upper bound in milliseconds for the blocking DNS wrappers</span>
+                            <span class="Comment">## (`resolveMxOutcome`, `resolveTxtRecords`). Powpow resolves</span>
+                            <span class="Comment">## asynchronously on a throwaway loop; the watchdog stops the loop</span>
+                            <span class="Comment">## so unresolvable domains fail fast instead of stalling the</span>
+                            <span class="Comment">## delivery thread.</span>
   <span class="Identifier">debug</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="DecNumber">false</span>       <span class="Comment">## Whether to enable debug logging for the MX provider.</span>
   <span class="Identifier">enforceSpf</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="DecNumber">false</span>
   <span class="Identifier">spfServer</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">pointer</span> <span class="Other">=</span> <span class="Keyword">nil</span>
@@ -211,13 +267,49 @@
     
   </dd>
 </div>
+<div id="MxResolveResult">
+  <dt><pre><a href="#MxResolveResult"><span class="Identifier">MxResolveResult</span></a> <span class="Other">=</span> <span class="Keyword">object</span>
+  <span class="Identifier">status</span><span class="Operator">*</span><span class="Other">:</span> <a href="#MxResolveStatus"><span class="Identifier">MxResolveStatus</span></a>
+  <span class="Identifier">hosts</span><span class="Operator">*</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="#MXHost"><span class="Identifier">MXHost</span></a><span class="Other">]</span></pre></dt>
+  <dd>
+    
+    
+    
+  </dd>
+</div>
+<div id="MxResolveStatus">
+  <dt><pre><a href="#MxResolveStatus"><span class="Identifier">MxResolveStatus</span></a> <span class="Other">=</span> <span class="Keyword">enum</span>
+  <span class="Identifier">mrsOk</span><span class="Other">,</span>                    <span class="Comment">## Usable MX hosts found.</span>
+  <span class="Identifier">mrsNoData</span><span class="Other">,</span> <span class="Comment">## Name exists but publishes no MX (RFC 5321 section 5.1</span>
+              <span class="Comment">## address fallback applies).</span>
+  <span class="Identifier">mrsNxDomain</span><span class="Other">,</span>              <span class="Comment">## Name does not exist: permanent failure, no fallback.</span>
+  <span class="Identifier">mrsNullMx</span><span class="Other">,</span>                <span class="Comment">## Null MX (RFC 7505): the domain accepts no mail, permanent.</span>
+  <span class="Identifier">mrsTempError</span>               <span class="Comment">## DNS failure or timeout: defer, retry later.</span></pre></dt>
+  <dd>
+    
+    
+    
+  </dd>
+</div>
 
   </dl>
 </div>
 <div class="section" id="12">
   <h1><a class="toc-backref" href="#12">Procs</a></h1>
   <dl class="item">
-    <div id="decideJointDmarc-procs-all">
+    <div id="classifyMxAnswer-procs-all">
+  <div id="classifyMxAnswer,string,seq[MXHost]">
+  <dt><pre><span class="Keyword">func</span> <a href="#classifyMxAnswer%2Cstring%2Cseq%5BMXHost%5D"><span class="Identifier">classifyMxAnswer</span></a><span class="Other">(</span><span class="Identifier">err</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">hosts</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><a href="#MXHost"><span class="Identifier">MXHost</span></a><span class="Other">]</span><span class="Other">)</span><span class="Other">:</span> <a href="#MxResolveStatus"><span class="Identifier">MxResolveStatus</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Pure mapping from a powpow MX answer to a delivery-grade status. NXDOMAIN arrives as <tt class="docutils literal"><span class="pre"><span class="StringLit">&quot;DNS: host not found: ...&quot;</span></span></tt> (rcode 3, including negative-cache hits); every other non-empty <tt class="docutils literal"><span class="pre"><span class="Identifier">err</span></span></tt> (SERVFAIL, timeout, truncation, resolver failure) is transient. A lone <tt class="docutils literal"><span class="pre"><span class="Operator">.</span></span></tt> exchange is a null MX per RFC 7505. Unit-testable without network I/O.
+    
+  </dd>
+</div>
+
+</div>
+<div id="decideJointDmarc-procs-all">
   <div id="decideJointDmarc,string,string,string,SpfPreflightResult,seq[string],bool">
   <dt><pre><span class="Keyword">proc</span> <a href="#decideJointDmarc%2Cstring%2Cstring%2Cstring%2CSpfPreflightResult%2Cseq%5Bstring%5D%2Cbool"><span class="Identifier">decideJointDmarc</span></a><span class="Other">(</span><span class="Identifier">fromDomain</span><span class="Other">,</span> <span class="Identifier">record</span><span class="Other">,</span> <span class="Identifier">envDomain</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span>
                       <span class="Identifier">spf</span><span class="Other">:</span> <a href="auth/spf_preflight.html#SpfPreflightResult"><span class="Identifier">SpfPreflightResult</span></a><span class="Other">;</span> <span class="Identifier">dkimDomains</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span><span class="Other">;</span>
@@ -232,11 +324,14 @@
 
 </div>
 <div id="initMXProviderConfig-procs-all">
-  <div id="initMXProviderConfig,string,int,int,bool,int,bool,bool,pointer,string,string,bool,DmarcRecordLookup,DkimKeyLookup">
-  <dt><pre><span class="Keyword">proc</span> <a href="#initMXProviderConfig%2Cstring%2Cint%2Cint%2Cbool%2Cint%2Cbool%2Cbool%2Cpointer%2Cstring%2Cstring%2Cbool%2CDmarcRecordLookup%2CDkimKeyLookup"><span class="Identifier">initMXProviderConfig</span></a><span class="Other">(</span><span class="Identifier">heloName</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">connectTimeoutMs</span><span class="Other">:</span> <span class="Identifier">int</span> <span class="Other">=</span> <span class="DecNumber">7000</span><span class="Other">;</span>
+  <div id="initMXProviderConfig,string,int,int,bool,bool,seq[string],int,int,bool,bool,pointer,string,string,bool,DmarcRecordLookup,DkimKeyLookup">
+  <dt><pre><span class="Keyword">proc</span> <a href="#initMXProviderConfig%2Cstring%2Cint%2Cint%2Cbool%2Cbool%2Cseq%5Bstring%5D%2Cint%2Cint%2Cbool%2Cbool%2Cpointer%2Cstring%2Cstring%2Cbool%2CDmarcRecordLookup%2CDkimKeyLookup"><span class="Identifier">initMXProviderConfig</span></a><span class="Other">(</span><span class="Identifier">heloName</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">connectTimeoutMs</span><span class="Other">:</span> <span class="Identifier">int</span> <span class="Other">=</span> <span class="DecNumber">7000</span><span class="Other">;</span>
                           <span class="Identifier">commandTimeoutMs</span><span class="Other">:</span> <span class="Identifier">int</span> <span class="Other">=</span> <span class="DecNumber">10000</span><span class="Other">;</span>
                           <span class="Identifier">requireStartTls</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">;</span>
-                          <span class="Identifier">maxMxHostsPerDomain</span><span class="Other">:</span> <span class="Identifier">int</span> <span class="Other">=</span> <span class="DecNumber">5</span><span class="Other">;</span> <span class="Identifier">debug</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">;</span>
+                          <span class="Identifier">startTlsOpportunistic</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">;</span>
+                          <span class="Identifier">tlsSkipDomains</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span> <span class="Other">=</span> <span class="Operator">@</span><span class="Other">[</span><span class="Other">]</span><span class="Other">;</span>
+                          <span class="Identifier">maxMxHostsPerDomain</span><span class="Other">:</span> <span class="Identifier">int</span> <span class="Other">=</span> <span class="DecNumber">5</span><span class="Other">;</span>
+                          <span class="Identifier">dnsTimeoutMs</span><span class="Other">:</span> <span class="Identifier">int</span> <span class="Other">=</span> <span class="DecNumber">8000</span><span class="Other">;</span> <span class="Identifier">debug</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">;</span>
                           <span class="Identifier">enforceSpf</span><span class="Other">:</span> <span class="Identifier">bool</span> <span class="Other">=</span> <span class="Identifier">false</span><span class="Other">;</span> <span class="Identifier">spfServer</span><span class="Other">:</span> <span class="Identifier">pointer</span> <span class="Other">=</span> <span class="Keyword">nil</span><span class="Other">;</span>
                           <span class="Identifier">spfClientIp</span><span class="Other">:</span> <span class="Identifier">string</span> <span class="Other">=</span> <span class="StringLit">&quot;127.0.0.1&quot;</span><span class="Other">;</span>
                           <span class="Identifier">spfHeloDomain</span><span class="Other">:</span> <span class="Identifier">string</span> <span class="Other">=</span> <span class="StringLit">&quot;localhost&quot;</span><span class="Other">;</span>
@@ -272,20 +367,45 @@
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">TimeEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Resolve MX records for <tt class="docutils literal"><span class="pre"><span class="Identifier">domain</span></span></tt> using powpow's native async DNS resolver.
+    Legacy wrapper: usable hosts, or empty when the domain has no usable mail exchanger (NXDOMAIN, null MX) or resolution failed transiently. Genuine no-MX answers keep the RFC 5321 fallback to the domain itself.
+    
+  </dd>
+</div>
+
+</div>
+<div id="resolveMxOutcome-procs-all">
+  <div id="resolveMxOutcome,string,int,int">
+  <dt><pre><span class="Keyword">proc</span> <a href="#resolveMxOutcome%2Cstring%2Cint%2Cint"><span class="Identifier">resolveMxOutcome</span></a><span class="Other">(</span><span class="Identifier">domain</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">maxHosts</span> <span class="Other">=</span> <span class="DecNumber">5</span><span class="Other">;</span> <span class="Identifier">dnsTimeoutMs</span> <span class="Other">=</span> <span class="DecNumber">8000</span><span class="Other">)</span><span class="Other">:</span> <a href="#MxResolveResult"><span class="Identifier">MxResolveResult</span></a> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">gcsafe</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">TimeEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Resolve MX records for <tt class="docutils literal"><span class="pre"><span class="Identifier">domain</span></span></tt> with a bounded wait. Unlike the legacy wrapper below, NXDOMAIN and null MX are reported distinctly from transient failures so callers can fail fast instead of attempting delivery to a host that does not exist. On genuine NOERROR-with-no-MX the result keeps the RFC 5321 section 5.1 fallback (the domain itself) with status <tt class="docutils literal"><span class="pre"><span class="Identifier">mrsNoData</span></span></tt>.
     
   </dd>
 </div>
 
 </div>
 <div id="resolveTxtRecords-procs-all">
-  <div id="resolveTxtRecords,string">
-  <dt><pre><span class="Keyword">proc</span> <a href="#resolveTxtRecords%2Cstring"><span class="Identifier">resolveTxtRecords</span></a><span class="Other">(</span><span class="Identifier">hostname</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">gcsafe</span><span class="Other">,</span>
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
+  <div id="resolveTxtRecords,string,int">
+  <dt><pre><span class="Keyword">proc</span> <a href="#resolveTxtRecords%2Cstring%2Cint"><span class="Identifier">resolveTxtRecords</span></a><span class="Other">(</span><span class="Identifier">hostname</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">dnsTimeoutMs</span> <span class="Other">=</span> <span class="DecNumber">8000</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span> {.
+    <span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">gcsafe</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">OSError</span><span class="Other">,</span> <span class="Identifier">Exception</span><span class="Other">]</span><span class="Other">,</span>
     <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">TimeEffect</span><span class="Other">,</span> <span class="Identifier">RootEffect</span><span class="Other">,</span> <span class="Identifier">ReadDirEffect</span><span class="Other">,</span> <span class="Identifier">ReadIOEffect</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
   <dd>
     
-    Resolve TXT records for <tt class="docutils literal"><span class="pre"><span class="Identifier">hostname</span></span></tt> using powpow's native async DNS resolver. Returns the raw TXT data strings (one per record). Empty seq on NODATA.
+    Resolve TXT records for <tt class="docutils literal"><span class="pre"><span class="Identifier">hostname</span></span></tt> using powpow's native async DNS resolver. Returns the raw TXT data strings (one per record). Empty seq on NODATA. The watchdog bounds the throwaway loop so a wedged resolver cannot stall the caller past <tt class="docutils literal"><span class="pre"><span class="Identifier">dnsTimeoutMs</span></span></tt>.
+    
+  </dd>
+</div>
+
+</div>
+<div id="tlsHostSkipped-procs-all">
+  <div id="tlsHostSkipped,seq[string],string">
+  <dt><pre><span class="Keyword">func</span> <a href="#tlsHostSkipped%2Cseq%5Bstring%5D%2Cstring"><span class="Identifier">tlsHostSkipped</span></a><span class="Other">(</span><span class="Identifier">skipDomains</span><span class="Other">:</span> <span class="Identifier">seq</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span><span class="Other">;</span> <span class="Identifier">host</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">bool</span> {.<span><span class="Other pragmadots">...</span></span><span class="pragmawrap"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span>
+    <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">forbids</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span>.}</pre></dt>
+  <dd>
+    
+    Pure matcher for <tt class="docutils literal"><span class="pre"><span class="Identifier">tlsSkipDomains</span></span></tt>: case-insensitive, trailing dots ignored on both sides. Unit-testable without network I/O.
     
   </dd>
 </div>
@@ -301,7 +421,7 @@
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2026-09-10 13:11:36 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2026-09-10 14:14:13 UTC</small>
       </div>
     </div>
   </div>
