@@ -107,9 +107,13 @@ type
     enableMxDelivery*: bool = true
       ## Whether to enable direct MX delivery of incoming messages.
     enablePort587*: bool = true
-      ## Whether to listen for SMTP submission on port 587
+      ## Whether to listen for SMTP submission on the submission port
+    port587*: int = 587
+      ## Submission listener port (STARTTLS).
     enablePort465*: bool = true
-      ## Whether to listen for SMTPS on port 465
+      ## Whether to listen for SMTPS on the smtps port
+    port465*: int = 465
+      ## SMTPS listener port (implicit TLS).
     enablePort25*: bool = true
       ## Whether to listen for standard SMTP on port 25
     mxConfig*: MXProviderConfig
@@ -809,12 +813,21 @@ proc handleSmtpLine(conn: Connection, server: SMTPServer, line: string) =
         if not mb.hasValidSyntax():
           smtpReply(conn, 501, "Invalid recipient address: " & mb.error)
           return
-        # Optional: reject recipients whose domain has no usable mail exchanger
+        # Optional: reject recipients whose domain has no usable mail exchanger.
+        # NXDOMAIN and null MX are permanent (550); transient DNS trouble
+        # defers (451); genuine no-MX answers pass for RFC 5321 A fallback.
         if server.settings.checkRcptDomain and mb.kind == mkStandard:
           let dom = extractRcptDomain(parsed.addrPart)
-          if dom.len > 0 and resolveMxHosts(dom, 5).len == 0:
-            smtpReply(conn, 550, "<" & dom & "> has no mail exchanger")
-            return
+          if dom.len > 0:
+            let mxr = resolveMxOutcome(dom, 5)
+            case mxr.status
+            of mrsNxDomain, mrsNullMx:
+              smtpReply(conn, 550, "<" & dom & "> has no mail exchanger")
+              return
+            of mrsTempError:
+              smtpReply(conn, 451, "<" & dom & "> cannot be resolved right now")
+              return
+            else: discard
       # No RCPT parameters are supported (RFC 6152 DSN would go here)
       if parsed.params.len > 0:
         smtpReply(conn, 555, "Unsupported parameter: " & parsed.params[0].k)
@@ -1143,11 +1156,11 @@ proc newSMTPServer*(settings: SMTPSettings): SMTPServer =
       result.logger.info("[smtp] TLS disabled: setupTlsCtx failed (cert/key load error?)")
 
   if settings.enablePort587:
-    result.bindListener587(Port(587))
+    result.bindListener587(Port(settings.port587))
 
   if settings.enablePort465:
     if enabledTls:
-      result.bindListener465(Port(465))
+      result.bindListener465(Port(settings.port465))
     else:
       result.logger.info("[smtp] Skipping port 465: TLS setup failed")
 

@@ -53,9 +53,26 @@ type
       ## the provider will only attempt delivery to MX hosts that advertise
       ## STARTTLS in their EHLO response and will upgrade the connection to
       ## TLS before sending mail.
+    startTlsOpportunistic*: bool = true
+      ## Offer STARTTLS whenever the peer advertises it, even when
+      ## `requireStartTls` is false. The upgrade is verified (chain against
+      ## the system CA store plus hostname check); if it fails, delivery
+      ## falls back to plaintext once rather than losing the message.
+      ## This protects against passive observers only. Active downgrade
+      ## protection needs MTA-STS or DANE (future work).
+    tlsSkipDomains*: seq[string] = @[]
+      ## MX hostnames that never get a STARTTLS upgrade, in either mode.
+      ## Explicit admin exception for broken peers. Matched case-insensitively
+      ## with trailing dots ignored.
     maxMxHostsPerDomain*: int = 5
       ## The maximum number of MX hosts to consider for each
       ## recipient domain.
+    dnsTimeoutMs*: int = 8000
+      ## Upper bound in milliseconds for the blocking DNS wrappers
+      ## (`resolveMxOutcome`, `resolveTxtRecords`). Powpow resolves
+      ## asynchronously on a throwaway loop; the watchdog stops the loop
+      ## so unresolvable domains fail fast instead of stalling the
+      ## delivery thread.
     debug*: bool = false
       ## Whether to enable debug logging for the MX provider.
 
@@ -77,7 +94,10 @@ proc initMXProviderConfig*(
   connectTimeoutMs: int = 7000,
   commandTimeoutMs: int = 10000,
   requireStartTls: bool = false,
+  startTlsOpportunistic: bool = true,
+  tlsSkipDomains: seq[string] = @[],
   maxMxHostsPerDomain: int = 5,
+  dnsTimeoutMs: int = 8000,
   debug: bool = false,
   enforceSpf: bool = false,
   spfServer: pointer = nil,
@@ -93,7 +113,10 @@ proc initMXProviderConfig*(
     connectTimeoutMs: connectTimeoutMs,
     commandTimeoutMs: commandTimeoutMs,
     requireStartTls: requireStartTls,
+    startTlsOpportunistic: startTlsOpportunistic,
+    tlsSkipDomains: tlsSkipDomains,
     maxMxHostsPerDomain: maxMxHostsPerDomain,
+    dnsTimeoutMs: dnsTimeoutMs,
     debug: debug,
     enforceSpf: enforceSpf,
     spfServer: spfServer,
@@ -132,39 +155,92 @@ proc extractRcptDomain(rcpt: string): string =
   if atPos < 0 or atPos == v.high: return
   result = v[atPos + 1 .. ^1].strip().toLowerAscii()
 
-proc resolveMxHosts*(domain: string, maxHosts = 5): seq[MXHost] {.gcsafe.} =
-  ## Resolve MX records for `domain` using powpow's native async DNS resolver.
-  if domain.len == 0: return
+type
+  MxResolveStatus* = enum
+    mrsOk        ## Usable MX hosts found.
+    mrsNoData    ## Name exists but publishes no MX (RFC 5321 section 5.1
+                 ## address fallback applies).
+    mrsNxDomain  ## Name does not exist: permanent failure, no fallback.
+    mrsNullMx    ## Null MX (RFC 7505): the domain accepts no mail, permanent.
+    mrsTempError ## DNS failure or timeout: defer, retry later.
+
+  MxResolveResult* = object
+    status*: MxResolveStatus
+    hosts*: seq[MXHost]
+
+func classifyMxAnswer*(err: string, hosts: seq[MXHost]): MxResolveStatus =
+  ## Pure mapping from a powpow MX answer to a delivery-grade status.
+  ## NXDOMAIN arrives as `"DNS: host not found: ..."` (rcode 3, including
+  ## negative-cache hits); every other non-empty `err` (SERVFAIL, timeout,
+  ## truncation, resolver failure) is transient. A lone `.` exchange is a
+  ## null MX per RFC 7505. Unit-testable without network I/O.
+  if err.len > 0:
+    if "host not found:" in err: mrsNxDomain
+    else: mrsTempError
+  elif hosts.len == 0: mrsNoData
+  elif hosts.len == 1 and hosts[0].host.strip() in [".", ""]: mrsNullMx
+  else: mrsOk
+
+proc resolveMxOutcome*(domain: string, maxHosts = 5,
+                       dnsTimeoutMs = 8000): MxResolveResult {.gcsafe.} =
+  ## Resolve MX records for `domain` with a bounded wait. Unlike the legacy
+  ## wrapper below, NXDOMAIN and null MX are reported distinctly from transient
+  ## failures so callers can fail fast instead of attempting delivery to a host
+  ## that does not exist. On genuine NOERROR-with-no-MX the result keeps the
+  ## RFC 5321 section 5.1 fallback (the domain itself) with status `mrsNoData`.
+  if domain.len == 0:
+    return MxResolveResult(status: mrsTempError)
   {.cast(gcsafe).}:
     let loop = newLoop()
     var done = false
-    var results: seq[MXHost]
+    var timedOut = false
+    var found: seq[MXHost]
+    var answerErr = ""
     loop.resolveMxAsync(domain) do (records: seq[MxRecord]; err: string):
       if err.len == 0:
         for r in records:
-          results.add(MXHost(preference: r.pref, host: r.exchange))
+          found.add(MXHost(preference: r.pref, host: r.exchange))
+      else:
+        answerErr = err
       done = true
       loop.stop()
+    discard loop.addTimer(dnsTimeoutMs) do (tid: int):
+      if not done:
+        timedOut = true
+        done = true
+        loop.stop()
     if not done:
       loop.run()
     loop.close()
-    results.sort(proc(a, b: MXHost): int = cmp(a.preference, b.preference))
+    if timedOut:
+      return MxResolveResult(status: mrsTempError)
+    found.sort(proc(a, b: MXHost): int = cmp(a.preference, b.preference))
+    if found.len > maxHosts and maxHosts > 0:
+      found.setLen(maxHosts)
+    let status = classifyMxAnswer(answerErr, found)
+    if status == mrsNoData:
+      found = @[MXHost(preference: 0, host: domain.toLowerAscii())]
+    MxResolveResult(status: status, hosts: found)
 
-    # RFC behavior: if no MX, try the domain itself.
-    if results.len == 0 and domain.len > 0:
-      results.add(MXHost(preference: 0, host: domain.toLowerAscii()))
+proc resolveMxHosts*(domain: string, maxHosts = 5): seq[MXHost] {.gcsafe.} =
+  ## Legacy wrapper: usable hosts, or empty when the domain has no usable
+  ## mail exchanger (NXDOMAIN, null MX) or resolution failed transiently.
+  ## Genuine no-MX answers keep the RFC 5321 fallback to the domain itself.
+  let r = resolveMxOutcome(domain, maxHosts)
+  case r.status
+  of mrsOk, mrsNoData: r.hosts
+  else: @[]
 
-    if results.len > maxHosts and maxHosts > 0:
-      results.setLen(maxHosts)
-    results
-
-proc resolveTxtRecords*(hostname: string): seq[string] {.gcsafe.} =
+proc resolveTxtRecords*(hostname: string, dnsTimeoutMs = 8000): seq[string] {.gcsafe.} =
   ## Resolve TXT records for `hostname` using powpow's native async DNS resolver.
   ## Returns the raw TXT data strings (one per record). Empty seq on NODATA.
+  ## The watchdog bounds the throwaway loop so a wedged resolver cannot stall
+  ## the caller past `dnsTimeoutMs`.
   if hostname.len == 0: return
   {.cast(gcsafe).}:
     let loop = newLoop()
     var done = false
+    var timedOut = false
     var results: seq[string]
     loop.resolveTxtAsync(hostname) do (records: seq[TxtRecord]; err: string):
       if err.len == 0:
@@ -172,9 +248,15 @@ proc resolveTxtRecords*(hostname: string): seq[string] {.gcsafe.} =
           results.add(r.data)
       done = true
       loop.stop()
+    discard loop.addTimer(dnsTimeoutMs) do (tid: int):
+      if not done:
+        timedOut = true
+        done = true
+        loop.stop()
     if not done:
       loop.run()
     loop.close()
+    if timedOut: return @[]
     results
 
 proc defaultDkimLookup(domain, selector: string): string {.gcsafe.} =
@@ -224,6 +306,15 @@ proc runDmarcPreflight(req: DeliveryRequest, cfg: MXProviderConfig): DeliveryDec
   decideJointDmarc(fromDomain, rec, spf.domain, spf, dkim.domains,
                    dkim.tempError)
 
+func tlsHostSkipped*(skipDomains: seq[string], host: string): bool =
+  ## Pure matcher for `tlsSkipDomains`: case-insensitive, trailing dots
+  ## ignored on both sides. Unit-testable without network I/O.
+  let h = host.strip().strip(chars = {'.'}).toLowerAscii()
+  for s in skipDomains:
+    if h == s.strip().strip(chars = {'.'}).toLowerAscii():
+      return true
+  false
+
 type
   MxTxnState = enum
     msBanner, msEhlo, msHelo, msStartTls, msMailFrom,
@@ -235,7 +326,21 @@ type
     conn: Connection
       # The SMTP connection to the MX host.
     tlsCtx: SslContext
-      # Client-side TLS context, used when STARTTLS is required.
+      # Client-side TLS context, created on demand when an upgrade starts.
+    mxHost: string
+      # The MX hostname under delivery (SNI + hostname verification).
+    allowStartTls: bool
+      # False on the plaintext retry after a failed opportunistic upgrade.
+    opportunistic: bool
+      # This attempt may try STARTTLS but must fall back to plaintext
+      # instead of failing when the upgrade does not complete.
+    tlsUpgradePending: bool
+      # Upgrade started, no post-upgrade application data seen yet. A close
+      # in this window means the handshake failed.
+    downgraded: bool
+      # Opportunistic upgrade failed; the caller retries plaintext once.
+    tlsNote: string
+      # Per-host TLS outcome for debug logging.
     req: DeliveryRequest
       # The delivery request being processed.
     cfg: MXProviderConfig
@@ -269,6 +374,9 @@ type
       # Whether any recipients were temporarily rejected.
     sawPermRcpt: bool
       # Whether any recipients were permanently rejected.
+    cmdGen: int
+      # Generation counter for the per-stage idle timer. Each arm bumps it
+      # so stale timers no-op instead of needing cancellation.
 
 proc classifyReply(code: int): DeliveryDecision =
   if code >= 500 and code < 600: return ddPermFail
@@ -285,6 +393,20 @@ proc setDone(txn: MxTxn, d: DeliveryDecision): DeliveryDecision {.discardable.} 
   if txn.loop != nil:
     txn.loop.stop()
   txn.decision
+
+proc armReplyTimer(txn: MxTxn) =
+  ## (Re)arm the per-stage idle timer: if the peer sends nothing for
+  ## `commandTimeoutMs` the host attempt fails transiently and delivery moves
+  ## to the next MX instead of holding the delivery thread. Called when the
+  ## connection opens (banner wait) and on every inbound chunk, so any server
+  ## activity resets the deadline. Stale timers compare generations and no-op.
+  if txn.loop == nil: return
+  inc txn.cmdGen
+  let t = txn
+  let gen = t.cmdGen
+  discard t.loop.addTimer(t.cfg.commandTimeoutMs) do (id: int):
+    if not t.done and t.cmdGen == gen:
+      discard setDone(t, ddTempFail)
 
 proc smtpWriteLine(txn: MxTxn, line: string): bool =
   if txn.cfg.debug and logitGlobal != nil:
@@ -326,22 +448,36 @@ proc sendNextRcpt(txn: MxTxn): bool =
     txn.state = msRcpt
   ok
 
+proc downgradeOrTempFail(txn: MxTxn) =
+  ## An upgrade that never completed. Opportunistic attempts signal a
+  ## plaintext retry; strict attempts fail the host transiently.
+  if txn.opportunistic:
+    txn.tlsNote = "upgrade failed, downgraded to plaintext"
+    txn.downgraded = true
+  discard setDone(txn, ddTempFail)
+
 proc startTlsUpgrade(txn: MxTxn) =
-  # Upgrade the connection to TLS (STARTTLS). The queued EHLO is flushed once
-  # the handshake completes, then the transaction resumes from the msEhlo
-  # state with tlsEstablished set.
+  # Upgrade the connection to TLS (STARTTLS). The context verifies the chain
+  # against the system CA store; passing the MX hostname adds SNI plus the
+  # hostname check. The queued EHLO is flushed once the handshake completes,
+  # then the transaction resumes from the msEhlo state with tlsEstablished
+  # set. Plaintext written meanwhile is buffered by powpow, never sent raw.
   if txn.tlsCtx == nil:
-    setDone(txn, ddTempFail)
-    return
+    try:
+      txn.tlsCtx = newClientTlsContext()
+    except SslError:
+      downgradeOrTempFail(txn)
+      return
   txn.tlsEstablished = true
+  txn.tlsUpgradePending = true
   try:
-    txn.conn.wrapTls(txn.tlsCtx)
+    txn.conn.wrapTls(txn.tlsCtx, txn.mxHost)
   except SslError:
-    setDone(txn, ddTempFail)
+    downgradeOrTempFail(txn)
     return
   let helo = (if txn.cfg.heloName.len > 0: txn.cfg.heloName else: "localhost")
   if not smtpWriteLine(txn, "EHLO " & helo):
-    setDone(txn, ddTempFail)
+    downgradeOrTempFail(txn)
     return
   txn.state = msEhlo
 
@@ -359,16 +495,26 @@ proc handleReply(txn: MxTxn, code: int): DeliveryDecision {.discardable.} =
   of msEhlo:
     if code div 100 == 2:
       updateStartTlsCapability(txn)
-      if txn.cfg.requireStartTls and not txn.tlsEstablished:
-        if not txn.sawStartTlsCap:
-          return setDone(txn, ddPermFail)
-        if not smtpWriteLine(txn, "STARTTLS"):
-          return setDone(txn, ddTempFail)
-        txn.state = msStartTls
-      else:
-        if not smtpWriteLine(txn, "MAIL FROM:" & envelopePath(txn.req.mailFrom)):
-          return setDone(txn, ddTempFail)
-        txn.state = msMailFrom
+      if not txn.tlsEstablished and txn.allowStartTls and
+         not tlsHostSkipped(txn.cfg.tlsSkipDomains, txn.mxHost):
+        if txn.cfg.requireStartTls or
+           (txn.cfg.startTlsOpportunistic and txn.sawStartTlsCap):
+          if not txn.sawStartTlsCap:
+            # Reachable in required mode only: opportunistic never offers
+            # without the capability.
+            txn.tlsNote = "peer does not advertise STARTTLS"
+            return setDone(txn, ddPermFail)
+          if not smtpWriteLine(txn, "STARTTLS"):
+            return setDone(txn, ddTempFail)
+          txn.state = msStartTls
+          return
+        elif txn.sawStartTlsCap:
+          txn.tlsNote = "STARTTLS offered but policy is plaintext"
+      elif tlsHostSkipped(txn.cfg.tlsSkipDomains, txn.mxHost):
+        txn.tlsNote = "host in tls_skip_domains"
+      if not smtpWriteLine(txn, "MAIL FROM:" & envelopePath(txn.req.mailFrom)):
+        return setDone(txn, ddTempFail)
+      txn.state = msMailFrom
     elif not txn.usedHeloFallback:
       txn.usedHeloFallback = true
       let helo = (if txn.cfg.heloName.len > 0: txn.cfg.heloName else: "localhost")
@@ -476,6 +622,13 @@ proc onMxData(conn: Connection, data: openArray[byte]) =
   let txn = cast[MxTxn](conn.data)
   if txn == nil or txn.done: return
 
+  armReplyTimer(txn)
+  if txn.tlsUpgradePending:
+    # Application data after an upgrade means the handshake completed
+    # (powpow feeds handshake bytes to the handshake driver, never to
+    # onData), so the peer certificate verified against mxHost.
+    txn.tlsUpgradePending = false
+    txn.tlsNote = "verified"
   txn.inbuf.add(cast[string](@data))
 
   while true:
@@ -492,6 +645,11 @@ proc onMxData(conn: Connection, data: openArray[byte]) =
 proc onMxClose(conn: Connection) =
   let txn = cast[MxTxn](conn.data)
   if txn != nil and not txn.done:
+    if txn.tlsUpgradePending and txn.opportunistic:
+      # The handshake never completed: signal a plaintext retry instead of
+      # failing the host. Strict attempts keep the transient failure.
+      txn.tlsNote = "upgrade failed, downgraded to plaintext"
+      txn.downgraded = true
     setDone(txn, ddTempFail)
 
 proc mxLog(cfg: MXProviderConfig, msg: string) =
@@ -499,7 +657,8 @@ proc mxLog(cfg: MXProviderConfig, msg: string) =
     logitGlobal.debug("[mx] " & msg)
 
 proc deliverToMxHost(req: DeliveryRequest,
-        mxHost: MXHost, cfg: MXProviderConfig): DeliveryDecision {.gcsafe.} =
+        mxHost: MXHost, cfg: MXProviderConfig,
+        allowStartTls = true): DeliveryDecision {.gcsafe.} =
   # Delivers the email to a specific MX host by performing an SMTP
   # transaction using a dedicated powpow event loop.
   #
@@ -514,15 +673,13 @@ proc deliverToMxHost(req: DeliveryRequest,
       loop: loop,
       req: req,
       cfg: cfg,
+      mxHost: mxHost.host,
+      allowStartTls: allowStartTls,
+      opportunistic: allowStartTls and not cfg.requireStartTls and
+        cfg.startTlsOpportunistic and
+        not tlsHostSkipped(cfg.tlsSkipDomains, mxHost.host),
       decision: ddTempFail
     )
-
-    if cfg.requireStartTls:
-      try:
-        txn.tlsCtx = newClientTlsContext()
-      except SslError:
-        loop.close()
-        return ddTempFail
 
     # Total transaction timeout (connection + entire SMTP dialog) to ensure we
     # don't get stuck on slow/unresponsive hosts.
@@ -530,17 +687,25 @@ proc deliverToMxHost(req: DeliveryRequest,
       setDone(txn, ddTempFail)
 
     try:
-      loop.connect(mxHost.host, 25,
+      # Happy Eyeballs racing across the MX host's addresses; connect-level
+      # failures report via onError so dead hosts fail over fast instead of
+      # burning the total transaction timer.
+      loop.connectHe(mxHost.host, 25,
         onConnect = proc(conn: Connection) =
           txn.conn = conn
           conn.data = cast[pointer](txn)
           # The banner is sent by the server unprompted.
+          armReplyTimer(txn)
         ,
         onData = proc(conn: Connection, data: openArray[byte]) =
           onMxData(conn, data)
         ,
         onClose = proc(conn: Connection) =
           onMxClose(conn)
+        ,
+        onError = proc(err: string) =
+          mxLog(cfg, "connect failed host=" & mxHost.host & ": " & err)
+          discard setDone(txn, ddTempFail)
         ,
       )
     except NetError:
@@ -552,14 +717,41 @@ proc deliverToMxHost(req: DeliveryRequest,
     if not txn.done:
       txn.decision = ddTempFail
 
+    let tlsInfo =
+      if txn.downgraded: "tls=downgraded"
+      elif txn.tlsEstablished: "tls=verified"
+      elif tlsHostSkipped(cfg.tlsSkipDomains, mxHost.host): "tls=skipped"
+      else: "tls=plaintext" & (if txn.tlsNote.len > 0: " (" & txn.tlsNote & ")" else: "")
+    mxLog(cfg, "result host=" & mxHost.host & " " & tlsInfo &
+      " decision=" & $txn.decision)
+
+    # A failed opportunistic upgrade retries the same host in plaintext once.
+    # The retry is a fresh connection; allowStartTls=false blocks any further
+    # upgrade or downgrade signalling for it.
+    if txn.downgraded and allowStartTls:
+      mxLog(cfg, "retry plaintext host=" & mxHost.host)
+      loop.close()
+      return deliverToMxHost(req, mxHost, cfg, false)
+
     loop.close()
     result = txn.decision
 
 proc deliverToDomain(req: DeliveryRequest, domain: string,
                 cfg: MXProviderConfig): DeliveryDecision =
   # Delivers the email to a domain by resolving its MX hosts and attempting
-  # delivery to each until one succeeds or all fail.
-  let mxHosts = resolveMxHosts(domain, cfg.maxMxHostsPerDomain)
+  # delivery to each until one succeeds or all fail. NXDOMAIN and null MX
+  # fail permanently without any connect attempt; transient DNS trouble
+  # defers so the queue can retry.
+  let resolved = resolveMxOutcome(domain, cfg.maxMxHostsPerDomain,
+                                  cfg.dnsTimeoutMs)
+  case resolved.status
+  of mrsNxDomain, mrsNullMx:
+    return ddPermFail
+  of mrsTempError:
+    return ddTempFail
+  of mrsOk, mrsNoData:
+    discard
+  let mxHosts = resolved.hosts
   if mxHosts.len == 0:
     return ddTempFail
 

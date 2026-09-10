@@ -64,7 +64,10 @@ spool_directory = "/var/spool/meowmail"
 helo_name = "mail.example.com"
 connect_timeout_ms = 7000
 command_timeout_ms = 10000
+dns_timeout_ms = 8000
 require_starttls = false
+starttls_opportunistic = true
+tls_skip_domains = []
 max_mx_hosts_per_domain = 5
 debug = false
 

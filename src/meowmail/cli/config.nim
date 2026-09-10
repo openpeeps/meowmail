@@ -16,6 +16,8 @@ type
     hostname*: string
     listenPort*: int
     enablePort25*, enablePort587*, enablePort465*: bool
+    port587*: int
+    port465*: int
     certifications*: Option[(string, string)]
     requireTlsForAuth*: bool
     requireAuth*: bool
@@ -63,6 +65,11 @@ type
     logMaxFileSize*: int
     logMaxFiles*: int
 
+proc sanitizePort(port, fallback: int): int =
+  ## Out-of-range listener ports fall back to the default instead of
+  ## failing bind with a confusing error.
+  if port >= 1 and port <= 65535: port else: fallback
+
 proc loadConfig*(path: string): MeowMailConfig =
   ## Parse a `meowmail.config.toml` file.
   let doc = parseTOML(readFile(path))
@@ -84,7 +91,9 @@ proc loadConfig*(path: string): MeowMailConfig =
   result.listenPort = intOf("smtp.listen.port25.port", 25)
   result.enablePort25 = boolOf("smtp.listen.port25.enabled", true)
   result.enablePort587 = boolOf("smtp.listen.submission587.enabled", true)
+  result.port587 = sanitizePort(intOf("smtp.listen.submission587.port", 587), 587)
   result.enablePort465 = boolOf("smtp.listen.smtps465.enabled", false)
+  result.port465 = sanitizePort(intOf("smtp.listen.smtps465.port", 465), 465)
 
   if boolOf("smtp.tls.enabled", false):
     let cert = strOf("smtp.tls.cert_file")
@@ -112,7 +121,10 @@ proc loadConfig*(path: string): MeowMailConfig =
     connectTimeoutMs = intOf("smtp.delivery.mx.connect_timeout_ms", 7000),
     commandTimeoutMs = intOf("smtp.delivery.mx.command_timeout_ms", 10000),
     requireStartTls = boolOf("smtp.delivery.mx.require_starttls"),
+    startTlsOpportunistic = boolOf("smtp.delivery.mx.starttls_opportunistic", true),
+    tlsSkipDomains = arrOf("smtp.delivery.mx.tls_skip_domains"),
     maxMxHostsPerDomain = intOf("smtp.delivery.mx.max_mx_hosts_per_domain", 5),
+    dnsTimeoutMs = intOf("smtp.delivery.mx.dns_timeout_ms", 8000),
     debug = boolOf("smtp.delivery.mx.debug"),
     enforceSpf = boolOf("smtp.delivery.mx.preflight.spf.enabled"),
     spfClientIp = strOf("smtp.delivery.mx.preflight.spf.client_ip", "127.0.0.1"),
@@ -169,7 +181,9 @@ proc toSMTPSettings*(cfg: MeowMailConfig): SMTPSettings =
     sendPolicy: policy,
     enablePort25: cfg.enablePort25,
     enablePort587: cfg.enablePort587,
+    port587: cfg.port587,
     enablePort465: cfg.enablePort465,
+    port465: cfg.port465,
     certifications: cfg.certifications,
     spoolDirectory: (if cfg.spoolDirectory.len > 0: some(cfg.spoolDirectory) else: none(string)),
     enableMxDelivery: (cfg.deliveryMode == "mx"),

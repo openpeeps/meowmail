@@ -9,7 +9,7 @@ when defined(macosx):
   # passC flags in meowmail.nims are applied after the pkg/spf pragmas.
   {.passC: "-include arpa/nameser.h".}
 
-when isMainModule:
+when isMainModule and not defined(build_docs):
   import pkg/kapsis
   import ./meowmail/cli/commands
 

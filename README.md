@@ -22,8 +22,10 @@ It's designed for developers and sysadmins who want to host their own email, fro
 ## Key Features
 
 ### SMTP Server
-- Dual-stack IPv4/IPv6 listeners (ports 25, 587, 465)
+- Dual-stack IPv4/IPv6 listeners (ports 25, 587, 465; submission ports configurable)
 - STARTTLS + implicit TLS (port 465)
+- Verified outbound STARTTLS (chain + hostname) with opportunistic mode and per-host skip list
+- Fail-fast delivery on NXDOMAIN/null MX, bounded DNS, per-stage timeouts, Happy Eyeballs racing
 - AUTH PLAIN / LOGIN with local users or HTTP auth proxy
 - DKIM signing (RSA-SHA256) + cryptographic verification with DNS key lookup
 - SPF verification inbound and outbound (libspf2)
@@ -133,6 +135,15 @@ enabled = false
 [smtp.delivery.mx.preflight.dmarc]
 enabled = false
 
+[smtp.delivery.mx]
+helo_name = "mail.example.com"
+connect_timeout_ms = 7000
+command_timeout_ms = 10000
+dns_timeout_ms = 8000
+require_starttls = false
+starttls_opportunistic = true
+tls_skip_domains = []
+
 [maildir]
 base = "./maildir"
 local_domains = ["example.com"]
@@ -210,6 +221,7 @@ MeowMail uses TOML configuration. See `example/meowmail.config.toml` for all opt
 [smtp.auth.dmarc]   # Inbound DMARC mode (report | quarantine | reject)
 [smtp.tls]          # TLS certificate configuration
 [smtp.delivery]     # Delivery mode (mx or spool)
+[smtp.delivery.mx]  # Timeouts, STARTTLS policy, skip list
 [smtp.validation]   # Sender/recipient domain checks
 [smtp.limits]       # Per-IP and per-user quotas
 [maildir]           # Local Maildir storage
@@ -301,6 +313,9 @@ openssl rsa -in /etc/ssl/private/meowmail-dkim.key \
 - [x] IMAP4rev1 with Maildir++
 - [x] JMAP server (Core, Mailbox, Email, Submission)
 - [x] Persistent outbound queue with retry + background runner
+- [x] Fail-fast delivery on NXDOMAIN/null MX + bounded DNS + per-stage timeouts
+- [x] Outbound TLS: verified STARTTLS (chain + hostname), opportunistic mode with plaintext fallback, skip list
+- [x] Configurable submission/SMTPS ports
 - [x] Bounce/DSN generation
 - [x] Rate limiting + quotas + brute-force protection
 - [x] Queue management CLI
@@ -309,12 +324,10 @@ openssl rsa -in /etc/ssl/private/meowmail-dkim.key \
 
 ### In Progress
 - [ ] JMAP EmailSubmission delivery wiring (submissions are queued, SMTP handoff pending)
-- [ ] Fail-fast delivery on NXDOMAIN + per-stage timeouts (slow stalls observed on unresolvable domains)
-- [ ] Configurable submission/SMTPS ports (587/465 currently fixed)
 
 ### Planned
 - [ ] AUTH CRAM-MD5 / XOAUTH2
-- [ ] Outbound TLS certificate verification (CA bundle, per-domain skip)
+- [ ] Custom CA bundle path for outbound TLS verify (system store is used today)
 - [ ] ARC (Authenticated Received Chain)
 - [ ] MTA-STS (RFC 8461)
 - [ ] DANE/TLSA
