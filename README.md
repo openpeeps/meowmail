@@ -15,7 +15,7 @@
 
 ## What is MeowMail?
 
-MeowMail is a high-performance, all-in-one mail server written in Nim. It handles SMTP (inbound/outbound), IMAP4rev1, and JMAP for modern clients — all built on powpow's event-driven networking (kqueue/epoll).
+MeowMail is a high-performance, all-in-one mail server written in Nim. It handles SMTP (inbound/outbound), IMAP4rev1, and JMAP for modern clients, all built on powpow's event-driven networking (kqueue/epoll).
 
 It's designed for developers and sysadmins who want to host their own email, from development environments to production deployments.
 
@@ -25,13 +25,15 @@ It's designed for developers and sysadmins who want to host their own email, fro
 - Dual-stack IPv4/IPv6 listeners (ports 25, 587, 465)
 - STARTTLS + implicit TLS (port 465)
 - AUTH PLAIN / LOGIN with local users or HTTP auth proxy
-- DKIM signing (RSA-SHA256)
-- SPF verification (inbound + outbound)
-- DMARC/DKIM verification (inbound)
-- SIZE extension (50 MB)
-- Persistent outbound queue with exponential backoff retry
+- DKIM signing (RSA-SHA256) + cryptographic verification with DNS key lookup
+- SPF verification inbound and outbound (libspf2)
+- Native DMARC evaluation inbound (RFC 7489) with report/quarantine/reject modes
+- Joint SPF + DKIM alignment preflight on outbound delivery
+- Native DNS via powpow (A/AAAA/MX/TXT with TTL cache, no external processes)
+- SIZE extension with 50 MB streaming cap
+- Persistent outbound queue with exponential backoff retry + background runner
 - Bounce/DSN generation on delivery failure
-- Rate limiting (per-IP connections, auth lockout)
+- Rate limiting (per-IP connections, auth lockout, per-IP and per-user quotas)
 - Configurable send policies (default, local-only, internal-only, no-relay)
 
 ### IMAP Server
@@ -54,8 +56,8 @@ It's designed for developers and sysadmins who want to host their own email, fro
 - Session discovery (`/.well-known/jmap`, `/jmap/session`)
 
 ### Operations
-- Queue management CLI (`mailq`, `flush`, `retry`, `delete`, `purge`)
-- Admin HTTP API (health, queue stats, metrics)
+- Queue management CLI (`queue.list`, `queue.stats`, `queue.flush`, `queue.retry`, `queue.delete`, `queue.purge`)
+- Admin HTTP API (health, queue stats, JSON metrics; binds 127.0.0.1 by default, no auth yet)
 - Structured logging (text or JSON, rotation, level filtering)
 - TOML configuration
 
@@ -64,23 +66,22 @@ It's designed for developers and sysadmins who want to host their own email, fro
 - Nim >= 2.2.0
 - OpenSSL development libraries
 - libspf2 (SPF verification)
-- libopendmarc (DMARC verification)
 
 ### Install dependencies
 
 **macOS (Homebrew):**
 ```bash
-brew install openssl spf2 opendmarc
+brew install openssl spf2
 ```
 
 **Debian/Ubuntu:**
 ```bash
-apt-get install libssl-dev libspf2-dev libopendmarc-dev
+apt-get install libssl-dev libspf2-dev
 ```
 
 **Arch Linux:**
 ```bash
-pacman -S openssl spf2 opendmarc
+pacman -S openssl spf2
 ```
 
 ## Quick Start
@@ -119,6 +120,18 @@ required = true
 
 [smtp.auth.users]
 "alice@example.com" = "secret-password"
+
+[smtp.auth.dkim]
+verify = true
+
+[smtp.auth.dmarc]
+mode = "report" # report | quarantine | reject
+
+[smtp.delivery.mx.preflight.spf]
+enabled = false
+
+[smtp.delivery.mx.preflight.dmarc]
+enabled = false
 
 [maildir]
 base = "./maildir"
@@ -160,10 +173,10 @@ meowmail start meowmail.toml
 swaks --server 127.0.0.1 --port 587 \
   --tls \
   --auth LOGIN \
-  --auth-user alice@example.com \
-  --auth-password secret-password \
-  --from alice@example.com \
-  --to bob@example.com \
+  --auth-user relay-user@example.com \
+  --auth-password change-me \
+  --from relay-user@example.com \
+  --to bodoti2371@fidhost.com \
   --header "Subject: Hello from MeowMail" \
   --body "This is a test email."
 ```
@@ -174,12 +187,12 @@ swaks --server 127.0.0.1 --port 587 \
 |---------|-------------|
 | `meowmail init <path>` | Generate a default config file |
 | `meowmail start <config>` | Start the mail server |
-| `meowmail queue list <dir>` | List queued messages |
-| `meowmail queue stats <dir>` | Show queue statistics |
-| `meowmail queue flush <dir>` | Force delivery of pending messages |
-| `meowmail queue retry <dir> <id>` | Requeue a specific message |
-| `meowmail queue delete <dir> <id>` | Remove a message from the queue |
-| `meowmail queue purge <dir>` | Remove delivered/bounced/failed messages |
+| `meowmail queue.list <dir>` | List queued messages |
+| `meowmail queue.stats <dir>` | Show queue statistics |
+| `meowmail queue.flush <dir>` | Force delivery of pending messages |
+| `meowmail queue.retry <dir> <id>` | Requeue a specific message |
+| `meowmail queue.delete <dir> <id>` | Remove a message from the queue |
+| `meowmail queue.purge <dir>` | Remove delivered/bounced/failed messages |
 | `meowmail spf <ip4>` | Generate an SPF DNS record |
 | `meowmail dkim <keyfile>` | Generate a DKIM DNS record |
 | `meowmail dmarc <policyfile>` | Generate a DMARC DNS record |
@@ -193,8 +206,12 @@ MeowMail uses TOML configuration. See `example/meowmail.config.toml` for all opt
 ```toml
 [smtp]              # SMTP server settings
 [smtp.auth]         # Authentication (local users or HTTP provider)
+[smtp.auth.dkim]    # Inbound DKIM verification toggle
+[smtp.auth.dmarc]   # Inbound DMARC mode (report | quarantine | reject)
 [smtp.tls]          # TLS certificate configuration
 [smtp.delivery]     # Delivery mode (mx or spool)
+[smtp.validation]   # Sender/recipient domain checks
+[smtp.limits]       # Per-IP and per-user quotas
 [maildir]           # Local Maildir storage
 [imap]              # IMAP server settings
 [jmap]              # JMAP server settings
@@ -276,31 +293,33 @@ openssl rsa -in /etc/ssl/private/meowmail-dkim.key \
 
 ### Completed
 - [x] SMTP server with STARTTLS + implicit TLS
+- [x] AUTH PLAIN/LOGIN, send policies, require-TLS-for-auth
+- [x] DKIM signing + cryptographic verification (RSA-SHA256, DNS key lookup)
+- [x] SPF inbound + outbound (libspf2)
+- [x] Native DMARC evaluation inbound + joint alignment preflight outbound
+- [x] Native DNS via powpow (A/AAAA/MX/TXT); Happy Eyeballs connection racing
 - [x] IMAP4rev1 with Maildir++
 - [x] JMAP server (Core, Mailbox, Email, Submission)
-- [x] DKIM signing (RSA-SHA256)
-- [x] SPF/DKIM/DMARC verification
-- [x] Persistent outbound queue with retry
+- [x] Persistent outbound queue with retry + background runner
 - [x] Bounce/DSN generation
-- [x] Rate limiting + brute-force protection
+- [x] Rate limiting + quotas + brute-force protection
 - [x] Queue management CLI
-- [x] Admin API
+- [x] Admin API (health, queue, JSON metrics)
 - [x] Structured logging (JSON, rotation)
 
 ### In Progress
-- [ ] Queue runner integration (background thread)
-- [ ] spNoRelay enforcement
-- [ ] requireTlsForAuth enforcement
+- [ ] JMAP EmailSubmission delivery wiring (submissions are queued, SMTP handoff pending)
+- [ ] Fail-fast delivery on NXDOMAIN + per-stage timeouts (slow stalls observed on unresolvable domains)
+- [ ] Configurable submission/SMTPS ports (587/465 currently fixed)
 
 ### Planned
-- [ ] IPv6 outbound (Happy Eyeballs)
-- [ ] Native DNS resolver (replace dig)
+- [ ] AUTH CRAM-MD5 / XOAUTH2
+- [ ] Outbound TLS certificate verification (CA bundle, per-domain skip)
 - [ ] ARC (Authenticated Received Chain)
 - [ ] MTA-STS (RFC 8461)
 - [ ] DANE/TLSA
 - [ ] SMTPUTF8 (RFC 6531)
-- [ ] Admin web dashboard
-- [ ] Prometheus metrics
+- [ ] Prometheus-format metrics, admin web dashboard, admin auth
 
 ## Contributing
 
@@ -310,4 +329,4 @@ openssl rsa -in /etc/ssl/private/meowmail-dkim.key \
 ## License
 
 MIT license. [Made by Humans from OpenPeeps](https://github.com/openpeeps).<br>
-Copyright OpenPeeps & Contributors &mdash; All rights reserved.
+Copyright OpenPeeps and Contributors. All rights reserved.
